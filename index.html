@@ -3,79 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YGO Tournament</title>
+    <title>YGO App</title>
     <link rel="stylesheet" href="https://cloudflare.com">
     <style>
         :root { --dourado: #d4af37; --roxo: #4b0082; --preto: #050505; --card: #151515; }
-        body { background: var(--preto); color: white; font-family: sans-serif; margin: 0; padding-bottom: 80px; }
-        
-        /* Dashboard Épico */
-        .header-duel { background: linear-gradient(to bottom, var(--roxo), var(--preto)); padding: 30px 10px; text-align: center; border-bottom: 3px solid var(--dourado); }
-        .podium-box { display: flex; justify-content: center; align-items: flex-end; gap: 8px; padding: 20px 5px; }
-        .p-card { background: var(--card); border: 2px solid var(--dourado); border-radius: 8px; text-align: center; padding: 10px; flex: 1; position: relative; }
+        body { background: var(--preto); color: white; font-family: sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
+        .header-duel { background: linear-gradient(to bottom, var(--roxo), var(--preto)); padding: 20px 10px; text-align: center; border-bottom: 3px solid var(--dourado); }
+        .podium-box { display: flex; justify-content: center; align-items: flex-end; gap: 8px; min-height: 180px; padding: 10px; }
+        .p-card { background: var(--card); border: 2px solid var(--dourado); border-radius: 8px; text-align: center; padding: 10px; flex: 1; font-size: 13px; }
         .t1 { height: 160px; border-width: 4px; box-shadow: 0 0 20px rgba(212,175,55,0.4); order: 2; }
-        .t2 { height: 130px; order: 1; opacity: 0.9; }
-        .t3 { height: 110px; order: 3; opacity: 0.8; }
-        
-        /* Botões e Inputs */
+        .t2 { height: 130px; order: 1; } .t3 { height: 110px; order: 3; }
+        .card-stats { background: var(--card); border-left: 4px solid var(--dourado); margin: 10px; padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; }
         input { background: #222; border: 1px solid var(--dourado); color: white; padding: 12px; width: 85%; margin: 10px 0; border-radius: 5px; }
-        .btn-gold { background: var(--dourado); color: black; border: none; padding: 15px; width: 92%; font-weight: bold; border-radius: 5px; cursor: pointer; text-transform: uppercase; }
-        
-        /* Menu Inferior Estilizado */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #111; border-top: 2px solid var(--dourado); display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
+        .btn-gold { background: var(--dourado); color: black; border: none; padding: 15px; width: 92%; font-weight: bold; border-radius: 5px; cursor: pointer; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #111; border-top: 2px solid var(--dourado); display: flex; justify-content: space-around; padding: 12px 0; }
         .nav-link { color: var(--dourado); text-align: center; text-decoration: none; font-size: 20px; }
-        .nav-link span { display: block; font-size: 10px; margin-top: 4px; }
+        .nav-link span { display: block; font-size: 10px; }
     </style>
 </head>
 <body>
 
-<div class="header-duel">
-    <h2 style="color: var(--dourado); letter-spacing: 2px;">DASHBOARD</h2>
-    <div class="podium-box" id="podio"></div>
-</div>
-
-<div id="cont-dash" class="aba" style="padding: 15px;">
-    <div style="background: var(--card); padding: 15px; border-radius: 10px; border-left: 5px solid var(--roxo);">
-        <p><i class="fas fa-bullhorn" style="color:var(--dourado)"></i> MURAL: <span id="msg-mural">Carregando...</span></p>
+<div id="cont-dash" class="aba">
+    <div class="header-duel">
+        <h2 style="color: var(--dourado); margin:0;">ARENA LENDÁRIA</h2>
+        <div class="podium-box" id="podio"></div>
+    </div>
+    <div style="padding:15px">
+        <div class="card-stats"><span><i class="fas fa-star"></i> Total Estrelas</span> <b id="total-e">0</b></div>
+        <div class="card-stats"><span><i class="fas fa-bullhorn"></i> Mural</span> <span id="mural">---</span></div>
     </div>
 </div>
 
-<div id="cont-perfil" class="aba" style="display:none; padding: 20px; text-align: center;">
-    <h3 style="color: var(--dourado)">REGISTRO DE DUELISTA</h3>
-    <input type="text" id="nick" placeholder="Seu Nickname">
+<div id="cont-ranking" class="aba" style="display:none; padding:15px;">
+    <h3 style="color:var(--dourado); text-align:center;">CLASSIFICAÇÃO</h3>
+    <div id="lista-ranking"></div>
+</div>
+
+<div id="cont-perfil" class="aba" style="display:none; padding:20px; text-align:center;">
+    <h3 style="color:var(--dourado);">REGISTRO</h3>
+    <input type="text" id="nick" placeholder="Nickname">
     <input type="text" id="deck" placeholder="Seu Deck">
     <input type="password" id="senha" placeholder="Senha">
-    <button class="btn-gold" onclick="registrar()">INICIAR JORNADA</button>
+    <button class="btn-gold" onclick="registrar()">CRIAR CONTA</button>
 </div>
 
 <nav class="nav-bar">
-    <a href="#" class="nav-link" onclick="mudar('dash')"><i class="fas fa-th-large"></i><span>Home</span></a>
+    <a href="#" class="nav-link" onclick="mudar('dash')"><i class="fas fa-home"></i><span>Home</span></a>
+    <a href="#" class="nav-link" onclick="mudar('ranking')"><i class="fas fa-trophy"></i><span>Ranking</span></a>
     <a href="#" class="nav-link" onclick="mudar('perfil')"><i class="fas fa-user-plus"></i><span>Registrar</span></a>
 </nav>
 
 <script>
-    const URL_API = "https://script.google.com/macros/s/AKfycbyDvLfyGsCeoPEp2XZTKqrbDYR2brbs19diA7-dv5Lw43GigVjNtZHYV0Djeuckg-puhw/exec"; // <--- ATUALIZE AQUI!
+    const URL_API = "https://script.google.com/macros/s/AKfycbyDvLfyGsCeoPEp2XZTKqrbDYR2brbs19diA7-dv5Lw43GigVjNtZHYV0Djeuckg-puhw/exec";
 
     async function carregar() {
-        const res = await fetch(URL_API + "?acao=getDashboard", {redirect: "follow"});
-        const d = await res.json();
-        document.getElementById('msg-mural').innerText = d.mural || "Sem avisos.";
-        
-        // Pódio Simulado para o teste visual
-        document.getElementById('podio').innerHTML = `
-            <div class="p-card t2"><b>2º</b><br>---</div>
-            <div class="p-card t1"><i class="fas fa-crown"></i><br><b>TOP 1</b><br>---</div>
-            <div class="p-card t3"><b>3º</b><br>---</div>
+        const rRank = await fetch(URL_API + "?acao=getRanking", {redirect: "follow"});
+        const ranking = await rRank.json();
+        const rDash = await fetch(URL_API + "?acao=getDashboard", {redirect: "follow"});
+        const dash = await rDash.json();
+
+        document.getElementById('total-e').innerText = dash.totalEstrelas;
+        document.getElementById('mural').innerText = dash.mural;
+
+        // Pódio Dinâmico
+        const p = document.getElementById('podio');
+        p.innerHTML = `
+            <div class="p-card t2"><b>2º</b><br>${ranking[1]?.nick || '---'}<br><small>${ranking[1]?.estrelas || 0} ⭐</small></div>
+            <div class="p-card t1"><i class="fas fa-crown"></i><br><b>TOP 1</b><br>${ranking[0]?.nick || '---'}<br><small>${ranking[0]?.estrelas || 0} ⭐</small></div>
+            <div class="p-card t3"><b>3º</b><br>${ranking[2]?.nick || '---'}<br><small>${ranking[2]?.estrelas || 0} ⭐</small></div>
         `;
+
+        // Ranking
+        document.getElementById('lista-ranking').innerHTML = ranking.map((d,i) => `
+            <div class="card-stats"><span><b>${i+1}º</b> ${d.nick}</span> <b>${d.estrelas} ⭐</b></div>
+        `).join('');
     }
 
     async function registrar() {
-        const n = document.getElementById('nick').value;
-        const dk = document.getElementById('deck').value;
-        const s = document.getElementById('senha').value;
-        const res = await fetch(`${URL_API}?acao=registrar&nick=${n}&deck=${dk}&senha=${s}`, {redirect: "follow"});
+        const n = document.getElementById('nick').value, d = document.getElementById('deck').value, s = document.getElementById('senha').value;
+        const res = await fetch(`${URL_API}?acao=registrar&nick=${n}&deck=${d}&senha=${s}`, {redirect: "follow"});
         const r = await res.json();
-        if(r.sucesso) alert("Sucesso! Seu ID: " + r.id);
+        if(r.sucesso) { alert("Duelista Registrado! ID: " + r.id); carregar(); }
         else alert("Erro: " + r.erro);
     }
 
@@ -83,7 +91,6 @@
         document.querySelectorAll('.aba').forEach(a => a.style.display = 'none');
         document.getElementById('cont-' + aba).style.display = 'block';
     }
-    
     window.onload = carregar;
 </script>
 </body>
