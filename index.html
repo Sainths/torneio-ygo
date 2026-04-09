@@ -94,18 +94,18 @@ if (ranking && ranking.length > 0) {
     podio.innerHTML = "<p style='color:var(--dourado)'>Aguardando os primeiros duelistas...</p>";
 }
             
-            // Atualizar Ranking
-            const lista = document.getElementById('lista-ranking');
-            lista.innerHTML = ranking.map((d, i) => `
-                <div class="card-stats">
-                    <span><b>${i+1}º</b> ${d.nick}</span>
-                    <span class="v">${d.estrelas} ⭐</span>
-                </div>
-            `).join('');
-
-            document.getElementById('loading').style.display = 'none';
-        } catch (e) { console.error("Erro ao carregar", e); }
-    }
+            // Atualizar Ranking (Protegido contra lista vazia)
+const lista = document.getElementById('lista-ranking');
+if (ranking && Array.isArray(ranking) && ranking.length > 0) {
+    lista.innerHTML = ranking.map((d, i) => `
+        <div class="card-stats">
+            <span><b>${i+1}º</b> ${d.nick}</span>
+            <span class="v">${d.estrelas} ⭐</span>
+        </div>
+    `).join('');
+} else {
+    lista.innerHTML = "<p style='text-align:center; opacity:0.5;'>Nenhum duelista registrado no ranking.</p>";
+}
 
     function mostrarAba(nome) {
         document.querySelectorAll('.aba').forEach(a => a.style.display = 'none');
