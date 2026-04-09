@@ -80,16 +80,20 @@
             document.getElementById('shark-nome').innerText = dash.shark;
 
             // Atualizar Pódio
-            const podio = document.getElementById('podio');
-            podio.innerHTML = ranking.slice(0,3).map((d, i) => `
-                <div class="podium-item top${i+1}">
-                    <div style="font-size: 12px; color: var(--dourado)">TOP ${i+1}</div>
-                    <strong>${d.nick}</strong>
-                    <div style="font-size: 11px">${d.deck}</div>
-                    <div class="v"><i class="fas fa-star"></i> ${d.estrelas}</div>
-                </div>
-            `).join('');
-
+const podio = document.getElementById('podio');
+if (ranking && ranking.length > 0) {
+    podio.innerHTML = ranking.slice(0,3).map((d, i) => `
+        <div class="podium-item top${i+1}">
+            <div style="font-size: 12px; color: var(--dourado)">TOP ${i+1}</div>
+            <strong>${d.nick}</strong>
+            <div style="font-size: 11px">${d.deck}</div>
+            <div class="v"><i class="fas fa-star"></i> ${d.estrelas}</div>
+        </div>
+    `).join('');
+} else {
+    podio.innerHTML = "<p style='color:var(--dourado)'>Aguardando os primeiros duelistas...</p>";
+}
+            
             // Atualizar Ranking
             const lista = document.getElementById('lista-ranking');
             lista.innerHTML = ranking.map((d, i) => `
