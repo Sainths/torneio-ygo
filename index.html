@@ -69,42 +69,61 @@
     const URL_API = "https://script.google.com/macros/s/AKfycbyDvLfyGsCeoPEp2XZTKqrbDYR2brbs19diA7-dv5Lw43GigVjNtZHYV0Djeuckg-puhw/exec"; // COLE AQUI A URL QUE VOCÊ SALVOU!
 
     async function carregarDados() {
-        try {
-            const res = await fetch(`${URL_API}?acao=getRanking`, { redirect: "follow" });
-            const ranking = await res.json();
-            const resDash = await fetch(`${URL_API}?acao=getDashboard`);
-            const dash = await resDash.json();
+    try {
+        // Busca os dados do Ranking
+        const resRanking = await fetch(`${URL_API}?acao=getRanking`, { redirect: "follow" });
+        let ranking = await resRanking.json();
+        
+        // ESCUDO: Se o ranking não for uma lista, transforma em lista vazia para não quebrar
+        if (!Array.isArray(ranking)) {
+            console.warn("Ranking não é uma lista, ajustando...");
+            ranking = [];
+        }
 
-            // Atualizar Dashboard
-            document.getElementById('total-estrelas').innerText = dash.totalEstrelas;
-            document.getElementById('shark-nome').innerText = dash.shark;
+        const resDash = await fetch(`${URL_API}?acao=getDashboard`, { redirect: "follow" });
+        const dash = await resDash.json();
 
-            // Atualizar Pódio
-const podio = document.getElementById('podio');
-if (ranking && ranking.length > 0) {
-    podio.innerHTML = ranking.slice(0,3).map((d, i) => `
-        <div class="podium-item top${i+1}">
-            <div style="font-size: 12px; color: var(--dourado)">TOP ${i+1}</div>
-            <strong>${d.nick}</strong>
-            <div style="font-size: 11px">${d.deck}</div>
-            <div class="v"><i class="fas fa-star"></i> ${d.estrelas}</div>
-        </div>
-    `).join('');
-} else {
-    podio.innerHTML = "<p style='color:var(--dourado)'>Aguardando os primeiros duelistas...</p>";
-}
-            
-            // Atualizar Ranking (Protegido contra lista vazia)
-const lista = document.getElementById('lista-ranking');
-if (ranking && Array.isArray(ranking) && ranking.length > 0) {
-    lista.innerHTML = ranking.map((d, i) => `
-        <div class="card-stats">
-            <span><b>${i+1}º</b> ${d.nick}</span>
-            <span class="v">${d.estrelas} ⭐</span>
-        </div>
-    `).join('');
-} else {
-    lista.innerHTML = "<p style='text-align:center; opacity:0.5;'>Nenhum duelista registrado no ranking.</p>";
+        // 1. Atualizar Dashboard
+        document.getElementById('total-estrelas').innerText = dash.totalEstrelas || 0;
+        document.getElementById('shark-nome').innerText = dash.shark || "-";
+
+        // 2. Atualizar Pódio (Protegido)
+        const podio = document.getElementById('podio');
+        if (ranking.length > 0) {
+            podio.innerHTML = ranking.slice(0,3).map((d, i) => `
+                <div class="podium-item top${i+1}">
+                    <div style="font-size: 12px; color: var(--dourado)">TOP ${i+1}</div>
+                    <strong>${d.nick}</strong>
+                    <div style="font-size: 11px">${d.deck}</div>
+                    <div class="v"><i class="fas fa-star"></i> ${d.estrelas}</div>
+                </div>
+            `).join('');
+        } else {
+            podio.innerHTML = "<p style='color:var(--dourado); text-align:center;'>Aguardando duelistas...</p>";
+        }
+
+        // 3. Atualizar Lista de Ranking (Protegido)
+        const lista = document.getElementById('lista-ranking');
+        if (ranking.length > 0) {
+            lista.innerHTML = ranking.map((d, i) => `
+                <div class="card-stats">
+                    <span><b>${i+1}º</b> ${d.nick}</span>
+                    <span class="v">${d.estrelas} ⭐</span>
+                </div>
+            `).join('');
+        } else {
+            lista.innerHTML = "<p style='text-align:center; opacity:0.5;'>Nenhum duelista registrado.</p>";
+        }
+
+        // REMOVE O CARREGAMENTO
+        document.getElementById('loading').style.display = 'none';
+
+    } catch (e) { 
+        console.error("Erro ao carregar", e);
+        // Mesmo com erro, remove o loading para o usuário poder ir ao Perfil se registrar
+        document.getElementById('loading').style.display = 'none';
+        alert("Atenção: Erro ao sincronizar dados. Você ainda pode tentar se registrar no Perfil.");
+    }
 }
 
     function mostrarAba(nome) {
