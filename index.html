@@ -70,7 +70,7 @@
 
     async function carregarDados() {
         try {
-            const res = await fetch(`${URL_API}?acao=getRanking`);
+            const res = await fetch(`${URL_API}?acao=getRanking`, { redirect: "follow" });
             const ranking = await res.json();
             const resDash = await fetch(`${URL_API}?acao=getDashboard`);
             const dash = await resDash.json();
