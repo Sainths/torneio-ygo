@@ -7,91 +7,110 @@
     <link rel="stylesheet" href="https://cloudflare.com">
     <style>
         :root { --dourado: #d4af37; --roxo: #4b0082; --preto: #050505; --card: #121212; }
-        body { background: var(--preto); color: white; font-family: sans-serif; margin: 0; padding-bottom: 80px; }
+        body { background: var(--preto); color: white; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
         
-        /* Carregamento Lendário */
+        /* Carregamento Olho de Wdjat */
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--preto); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
-        .eye { font-size: 60px; color: var(--dourado); animation: blink 1.5s infinite; text-shadow: 0 0 20px var(--dourado); }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .eye { font-size: 60px; color: var(--dourado); animation: blink 1.5s infinite; text-shadow: 0 0 25px var(--dourado); }
+        @keyframes blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.9); } }
 
-        /* Pódio e Dash */
-        .header-duel { background: linear-gradient(to bottom, var(--roxo), var(--preto)); padding: 20px; text-align: center; border-bottom: 3px solid var(--dourado); }
-        .podium { display: flex; justify-content: center; align-items: flex-end; gap: 8px; min-height: 220px; }
-        .p-card { background: var(--card); border: 2px solid var(--dourado); border-radius: 8px; padding: 10px; flex: 1; text-align: center; position: relative; }
-        .t1 { height: 190px; border-width: 4px; box-shadow: 0 0 20px var(--dourado); order: 2; }
-        .t2 { height: 150px; order: 1; } .t3 { height: 130px; order: 3; }
-        
+        /* Pódio Centralizado Lendário */
+        .header-duel { background: linear-gradient(to bottom, var(--roxo), var(--preto)); padding: 30px 10px; text-align: center; border-bottom: 3px solid var(--dourado); }
+        .podium { display: flex; justify-content: center; align-items: flex-end; gap: 8px; min-height: 220px; padding: 10px; }
+        .p-card { background: var(--card); border: 2px solid var(--dourado); border-radius: 8px; text-align: center; padding: 10px; flex: 1; position: relative; }
+        .t1 { height: 190px; border-width: 4px; box-shadow: 0 0 25px var(--dourado); order: 2; z-index: 5; }
+        .t2 { height: 150px; order: 1; opacity: 0.9; }
+        .t3 { height: 130px; order: 3; opacity: 0.8; }
+        .crown { color: var(--dourado); font-size: 30px; position: absolute; top: -35px; left: 50%; transform: translateX(-50%); text-shadow: 0 0 10px var(--dourado); }
+
+        /* Dashboard e Cards */
         .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .stat-card { background: var(--card); border-left: 4px solid var(--dourado); padding: 12px; border-radius: 5px; text-align: center; font-size: 14px; }
-        
-        /* Itens do Ranking Detalhado */
-        .rank-item { background: var(--card); margin: 8px 15px; padding: 15px; border-radius: 8px; border-bottom: 1px solid #222; cursor: pointer; transition: 0.3s; }
-        .rank-item:active { background: #222; }
-        .v { color: #2ecc71; } .e { color: #f1c40f; } .d { color: #e74c3c; }
+        .stat-card { background: var(--card); border-left: 4px solid var(--dourado); padding: 15px; border-radius: 5px; text-align: center; }
+        .stat-card small { font-size: 10px; color: var(--dourado); text-transform: uppercase; }
+        .rank-item { background: var(--card); margin: 8px 15px; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; }
 
-        .nav { position: fixed; bottom: 0; width: 100%; background: #111; border-top: 2px solid var(--dourado); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; }
-        .nav-link { color: #555; text-decoration: none; text-align: center; font-size: 22px; }
-        .nav-link.active { color: var(--dourado); text-shadow: 0 0 10px var(--dourado); }
-        .btn-gold { background: var(--dourado); color: black; border: none; padding: 15px; width: 95%; font-weight: bold; border-radius: 5px; margin: 10px 0; cursor: pointer; text-transform: uppercase; }
-        input { background: #222; border: 1px solid var(--dourado); color: white; padding: 12px; width: 85%; margin: 5px 0; border-radius: 5px; }
+        /* Navegação */
+        .nav { position: fixed; bottom: 0; width: 100%; background: #0a0a0a; border-top: 2px solid var(--dourado); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; }
+        .nav-link { color: #555; text-decoration: none; text-align: center; font-size: 24px; transition: 0.3s; }
+        .nav-link.active { color: var(--dourado); text-shadow: 0 0 15px var(--dourado); }
+        .nav-link span { display: block; font-size: 10px; margin-top: 4px; font-weight: bold; }
+        
+        .btn-gold { background: linear-gradient(45deg, #d4af37, #f1c40f); color: black; border: none; padding: 15px; width: 95%; font-weight: bold; border-radius: 5px; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        input { background: #1a1a1a; border: 1px solid var(--dourado); color: white; padding: 12px; width: 90%; margin: 8px 0; border-radius: 5px; outline: none; }
     </style>
 </head>
 <body>
 
-<div id="loading"><i class="fas fa-eye eye"></i><p style="color:var(--dourado)">CARREGANDO RELÍQUIAS...</p></div>
+<div id="loading"><i class="fas fa-eye eye"></i><p style="color:var(--dourado); letter-spacing: 2px; margin-top:15px;">É HORA DO DUELO!</p></div>
 
 <!-- DASHBOARD -->
-<div id="cont-home" class="aba">
+<div id="aba-home" class="aba">
     <div class="header-duel">
-        <h3 style="color:var(--dourado); margin-bottom: 15px;">TOP 3 DUELISTAS</h3>
-        <div class="podium" id="podio"></div>
+        <h3 style="color:var(--dourado); margin: 0; letter-spacing: 2px;">PÓDIO LENDÁRIO</h3>
+        <div class="podium" id="podio">
+            <!-- Gerado via JS -->
+        </div>
     </div>
     <div class="dash-grid">
-        <div class="stat-card"><small>DUELOS TOTAIS</small><br><b id="d-totais">0</b></div>
-        <div class="stat-card"><small>ESTRELAS TOTAIS</small><br><b id="e-totais">0</b></div>
-        <div class="stat-card"><small>MAIOR APOSTA</small><br><b>10 ⭐</b></div>
-        <div class="stat-card"><small>O SHARK</small><br><b id="shark">---</b></div>
+        <div class="stat-card"><i class="fas fa-swords" style="color:var(--dourado)"></i><br><small>Duelos</small><br><b id="d-totais">0</b></div>
+        <div class="stat-card"><i class="fas fa-star" style="color:var(--dourado)"></i><br><small>Estrelas</small><br><b id="e-totais">0</b></div>
+        <div class="stat-card"><i class="fas fa-trophy" style="color:var(--dourado)"></i><br><small>Maior Aposta</small><br><b>10 ⭐</b></div>
+        <div class="stat-card"><i class="fas fa-shark" style="color:var(--dourado)"></i><br><small>O Shark</small><br><b id="shark">---</b></div>
     </div>
     <div style="background:var(--card); margin:15px; padding:15px; border:1px solid var(--roxo); border-radius:10px;">
         <small style="color:var(--dourado)">MURAL DO JUIZ:</small>
-        <p id="mural-txt" style="margin-top:5px; font-size:14px;">É hora do Duelo!</p>
+        <p id="mural-txt" style="margin-top:5px; font-size:14px; opacity:0.8;">Aguardando ordens...</p>
     </div>
 </div>
 
-<!-- RANKING COMPLETO -->
-<div id="cont-ranking" class="aba" style="display:none; padding:15px;">
+<!-- RANKING -->
+<div id="aba-ranking" class="aba" style="display:none; padding-top:20px;">
     <h3 style="color:var(--dourado); text-align:center;">CLASSIFICAÇÃO DETALHADA</h3>
     <div id="lista-rank"></div>
 </div>
 
-<!-- PERFIL / REGISTRO -->
-<div id="cont-perfil" class="aba" style="display:none; padding:20px; text-align:center;">
+<!-- ARENA -->
+<div id="aba-arena" class="aba" style="display:none; padding:20px; text-align:center;">
+    <h3 style="color:var(--dourado)">ARENA DE BATALHA</h3>
+    <div style="background:var(--card); padding:30px; border-radius:15px; border:1px solid var(--roxo);">
+        <p>Selecione sua aposta:</p>
+        <button class="btn-gold" onclick="alert('Buscando...')">NORMAL</button>
+        <button class="btn-gold" onclick="alert('Buscando...')">1 ⭐</button>
+        <button class="btn-gold" onclick="alert('Buscando...')">3 ⭐</button>
+        <button class="btn-gold" onclick="alert('Buscando...')">5 ⭐</button>
+        <button class="btn-gold" onclick="alert('Buscando...')">10 ⭐</button>
+    </div>
+</div>
+
+<!-- PERFIL -->
+<div id="aba-perfil" class="aba" style="display:none; padding:20px; text-align:center;">
     <div id="box-reg">
-        <h3 style="color:var(--dourado)">NOVO REGISTRO</h3>
+        <h3 style="color:var(--dourado)">REGISTRO</h3>
         <input type="text" id="nick" placeholder="Nickname">
-        <input type="text" id="deck" placeholder="Seu Deck Principal">
+        <input type="text" id="deck" placeholder="Seu Deck">
         <input type="password" id="pass" placeholder="Senha">
         <button class="btn-gold" onclick="registrar()">INICIAR JORNADA</button>
     </div>
-    <div id="box-log" style="display:none; background:var(--card); padding:20px; border-radius:15px; border:2px solid var(--dourado);">
+    <div id="box-log" style="display:none; background:var(--card); padding:25px; border-radius:15px; border:2px solid var(--dourado);">
+        <i class="fas fa-user-circle" style="font-size:50px; color:var(--dourado)"></i>
         <h2 id="m-nick" style="color:var(--dourado); margin-bottom:5px;"></h2>
         <p id="m-id" style="opacity:0.5; font-size:12px;"></p>
-        <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
+        <hr style="border:0; border-top:1px solid #333; margin:20px 0;">
         <p>Deck: <b id="m-deck"></b></p>
         <p>Estrelas: <b id="m-e" style="color:var(--dourado)">0</b></p>
-        <p>Duelos: <b id="m-dt">0</b> | Winrate: <b id="m-wr" class="v">0%</b></p>
-        <button class="btn-gold" onclick="logout()" style="background:#444;">SAIR DA CONTA</button>
+        <p>Winrate: <b id="m-wr" style="color:#2ecc71">0%</b></p>
+        <button class="btn-gold" onclick="logout()" style="background:#444; margin-top:20px;">ENCERRAR SESSÃO</button>
     </div>
 </div>
 
 <nav class="nav">
-    <a href="#" class="nav-link active" onclick="mudar(this, 'home')"><i class="fas fa-home"></i></a>
-    <a href="#" class="nav-link" onclick="mudar(this, 'ranking')"><i class="fas fa-trophy"></i></a>
-    <a href="#" class="nav-link" onclick="mudar(this, 'perfil')"><i class="fas fa-user-circle"></i></a>
+    <a href="javascript:void(0)" class="nav-link active" onclick="mudar(this, 'home')"><i class="fas fa-home"></i><span>Home</span></a>
+    <a href="javascript:void(0)" class="nav-link" onclick="mudar(this, 'ranking')"><i class="fas fa-trophy"></i><span>Ranking</span></a>
+    <a href="javascript:void(0)" class="nav-link" onclick="mudar(this, 'arena')"><i class="fas fa-khanda"></i><span>Arena</span></a>
+    <a href="javascript:void(0)" class="nav-link" onclick="mudar(this, 'perfil')"><i class="fas fa-user-circle"></i><span>Perfil</span></a>
 </nav>
-
 <script>
-    const URL = "https://script.google.com/macros/s/AKfycbyDvLfyGsCeoPEp2XZTKqrbDYR2brbs19diA7-dv5Lw43GigVjNtZHYV0Djeuckg-puhw/exec"; // <--- COLOQUE SUA URL DO GOOGLE SCRIPT
+    const URL = "https://script.google.com/macros/s/AKfycbyDvLfyGsCeoPEp2XZTKqrbDYR2brbs19diA7-dv5Lw43GigVjNtZHYV0Djeuckg-puhw/exec"; // <--- COLOQUE SUA URL DO GOOGLE AQUI!
 
     async function atualizar() {
         try {
@@ -104,54 +123,43 @@
             document.getElementById('e-totais').innerText = dash.totalEstrelas || 0;
             document.getElementById('d-totais').innerText = dash.totalDuelos || 0;
             document.getElementById('shark').innerText = dash.shark || "---";
-            document.getElementById('mural-txt').innerText = dash.mural || "Prepare seu Deck!";
+            document.getElementById('mural-txt').innerText = dash.mural || "É hora do Duelo!";
 
-            // Pódio
+            // Pódio Completo
             const p = document.getElementById('podio');
-            if(ranking.length > 0) {
+            if (ranking && ranking.length > 0) {
                 p.innerHTML = `
-                    <div class="p-card t2"><b>2º</b><br>${ranking[1]?.nick || '---'}<br><small>${ranking[1]?.deck || ''}</small></div>
-                    <div class="p-card t1"><i class="fas fa-crown" style="color:var(--dourado)"></i><br><b>${ranking[0]?.nick}</b><br><small>${ranking[0]?.deck}</small></div>
-                    <div class="p-card t3"><b>3º</b><br>${ranking[2]?.nick || '---'}<br><small>${ranking[2]?.deck || ''}</small></div>
+                    <div class="p-card t2"><b>2º</b><br>${ranking[1]?.nick || '---'}<br><small>${ranking[1]?.estrelas || 0} ⭐</small></div>
+                    <div class="p-card t1"><i class="fas fa-crown crown"></i><b>${ranking[0]?.nick || '---'}</b><br><small>${ranking[0]?.estrelas || 0} ⭐</small></div>
+                    <div class="p-card t3"><b>3º</b><br>${ranking[2]?.nick || '---'}<br><small>${ranking[2]?.estrelas || 0} ⭐</small></div>
                 `;
             }
 
             // Ranking Detalhado
-            document.getElementById('lista-rank').innerHTML = ranking.map((d,i) => `
-                <div class="rank-item" onclick="alert('Duelista: ${d.nick}\\nDeck: ${d.deck}\\nDuelos: ${d.totalDuelos}\\nWinrate: ${d.winrate}')">
-                    <div style="display:flex; align-items:center;">
-                        <b style="color:var(--dourado); margin-right:15px;">${i+1}º</b>
-                        <div>
-                            <b>${d.nick}</b><br>
-                            <small style="opacity:0.6">${d.deck}</small>
-                        </div>
-                    </div>
-                    <div style="text-align:right">
-                        <b style="color:var(--dourado)">${d.estrelas} ⭐</b><br>
-                        <small class="v">${d.winrate}</small>
-                    </div>
+            document.getElementById('lista-rank').innerHTML = ranking.map((d, i) => `
+                <div class="rank-item">
+                    <span><b style="color:var(--dourado)">${i+1}º</b> ${d.nick}<br><small style="opacity:0.5">${d.deck}</small></span>
+                    <div style="text-align:right"><b>${d.estrelas} ⭐</b><br><small style="color:#2ecc71">${d.winrate}</small></div>
                 </div>
             `).join('');
 
-            // Perfil Logado
-            const meuId = localStorage.getItem('y_id');
-            if(meuId) {
+            // Perfil
+            const id = localStorage.getItem('y_id');
+            if(id) {
                 const eu = ranking.find(r => r.nick === localStorage.getItem('y_n'));
                 if(eu) {
                     document.getElementById('m-e').innerText = eu.estrelas;
                     document.getElementById('m-wr').innerText = eu.winrate;
-                    document.getElementById('m-dt').innerText = eu.totalDuelos;
                     document.getElementById('m-deck').innerText = eu.deck;
                 }
             }
-
             document.getElementById('loading').style.display = 'none';
         } catch(e) { document.getElementById('loading').style.display = 'none'; }
     }
 
     async function registrar() {
         const n = document.getElementById('nick').value, d = document.getElementById('deck').value, p = document.getElementById('pass').value;
-        if(!n || !d || !p) return alert("Preencha todos os campos!");
+        if(!n || !d || !p) return alert("Preencha tudo!");
         const res = await fetch(`${URL}?acao=registrar&nick=${n}&deck=${d}&senha=${p}`, {redirect:"follow"});
         const r = await res.json();
         if(r.sucesso) { localStorage.setItem('y_id', r.id); localStorage.setItem('y_n', n); location.reload(); }
@@ -161,9 +169,9 @@
     function mudar(el, aba) {
         document.querySelectorAll('.aba').forEach(a => a.style.display = 'none');
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        document.getElementById('cont-' + aba).style.display = 'block';
+        document.getElementById('aba-' + aba).style.display = 'block';
         el.classList.add('active');
-        if(aba === 'home' || aba === 'ranking') atualizar();
+        if(aba === 'home') atualizar();
     }
 
     function verificar() {
