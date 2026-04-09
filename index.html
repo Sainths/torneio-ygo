@@ -6,136 +6,151 @@
     <title>YGO Arena</title>
     <link rel="stylesheet" href="https://cloudflare.com">
     <style>
-        :root { --ouro: #d4af37; --prata: #c0c0c0; --bronze: #cd7f32; --roxo: #4b0082; --preto: #050505; --card: #121212; }
-        body { background: var(--preto); color: white; font-family: sans-serif; margin: 0; padding-bottom: 80px; }
+        :root { --dourado: #d4af37; --roxo: #4b0082; --preto: #050505; --card: #151515; --v: #2ecc71; --e: #f1c40f; --d: #e74c3c; }
+        body { background: var(--preto); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
         
-        /* Carregamento */
         #loading { position: fixed; inset: 0; background: var(--preto); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
-        .eye { font-size: 60px; color: var(--ouro); animation: blink 1.5s infinite; }
+        .eye { font-size: 60px; color: var(--dourado); animation: blink 1.5s infinite; text-shadow: 0 0 20px var(--dourado); }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        /* Pódio Centralizado */
-        .header { background: linear-gradient(to bottom, var(--roxo), var(--preto)); padding: 20px; border-bottom: 3px solid var(--ouro); text-align: center; }
-        .podium { display: flex; justify-content: center; align-items: flex-end; gap: 8px; min-height: 220px; padding: 10px; }
-        .p-card { background: var(--card); border-radius: 8px; padding: 10px; flex: 1; text-align: center; font-size: 11px; border: 2px solid #333; }
-        .t1 { height: 190px; border-color: var(--ouro); box-shadow: 0 0 15px var(--ouro); order: 2; }
-        .t2 { height: 150px; border-color: var(--prata); order: 1; }
-        .t3 { height: 130px; border-color: var(--bronze); order: 3; }
-        .avatar-p { width: 40px; height: 40px; border-radius: 50%; border: 1px solid white; margin-bottom: 5px; }
+        .header { background: linear-gradient(to bottom, var(--roxo), var(--preto)); padding: 20px; border-bottom: 3px solid var(--dourado); text-align: center; }
+        .podium { display: flex; justify-content: center; align-items: flex-end; gap: 8px; min-height: 200px; padding: 10px; }
+        .p-card { background: var(--card); border: 2px solid var(--dourado); border-radius: 8px; padding: 10px; flex: 1; text-align: center; position: relative; }
+        .t1 { height: 180px; border-width: 4px; box-shadow: 0 0 20px var(--dourado); order: 2; }
+        .t2 { height: 140px; order: 1; } .t3 { height: 120px; order: 3; }
+        .crown { color: var(--dourado); position: absolute; top: -30px; left: 50%; transform: translateX(-50%); font-size: 25px; }
 
-        /* Dash Grid */
         .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .stat-card { background: var(--card); border-left: 4px solid var(--ouro); padding: 12px; border-radius: 5px; text-align: center; }
-        .stat-card i { color: var(--ouro); font-size: 18px; margin-bottom: 5px; }
+        .stat-card { background: var(--card); border-left: 4px solid var(--dourado); padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-card i { color: var(--dourado); font-size: 20px; margin-bottom: 8px; }
 
-        /* Ranking Organizado */
-        .rank-box { background: var(--card); margin: 8px 15px; border-radius: 8px; border: 1px solid #222; }
-        .rank-main { padding: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .rank-sub { padding: 8px 12px; display: flex; justify-content: space-between; font-size: 10px; background: #0a0a0a; border-top: 1px solid #222; color: #888; }
+        .rank-box { background: var(--card); margin: 10px 15px; border-radius: 8px; border: 1px solid #333; overflow: hidden; }
+        .rank-main { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        .rank-sub { padding: 8px 15px; display: flex; justify-content: space-between; font-size: 10px; background: #0d0d0d; color: #aaa; }
 
-        /* Seleção de Avatar */
-        .av-grid { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
-        .av-opt { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #333; cursor: pointer; }
-        .av-active { border-color: var(--ouro); transform: scale(1.1); }
+        .nav { position: fixed; bottom: 0; width: 100%; background: #0a0a0a; border-top: 2px solid var(--dourado); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; }
+        .nav-link { color: #444; text-decoration: none; text-align: center; font-size: 24px; transition: 0.3s; }
+        .nav-link.active { color: var(--dourado); text-shadow: 0 0 10px var(--dourado); }
+        .nav-link span { display: block; font-size: 10px; font-weight: bold; margin-top: 4px; }
 
-        .nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 2px solid var(--ouro); display: flex; justify-content: space-around; padding: 12px 0; }
-        .nav-link { color: #555; text-decoration: none; text-align: center; font-size: 22px; }
-        .nav-link.active { color: var(--ouro); }
-        .btn-gold { background: var(--ouro); color: black; border: none; padding: 14px; width: 95%; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-        input { background: #111; border: 1px solid var(--ouro); color: white; padding: 12px; width: 85%; margin: 5px 0; border-radius: 5px; }
+        .btn-gold { background: linear-gradient(45deg, #d4af37, #f1c40f); color: black; border: none; padding: 15px; width: 95%; font-weight: bold; border-radius: 5px; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        input { background: #1a1a1a; border: 1px solid var(--dourado); color: white; padding: 12px; width: 90%; margin: 8px 0; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<div id="loading"><i class="fas fa-eye eye"></i><p>É HORA DO DUELO!</p></div>
+<div id="loading"><i class="fas fa-eye eye"></i><p style="color:var(--dourado)">É HORA DO DUELO!</p></div>
 
 <!-- SEÇÕES -->
-<div id="aba-home" class="secao">
+<div id="aba-home" class="aba-conteudo">
     <div class="header">
-        <h3 style="color:var(--ouro); margin:0;">REINO DOS DUELISTAS</h3>
-        <div class="podium" id="render-podio"></div>
+        <h3 style="color:var(--dourado); margin:0;">DASHBOARD LENDÁRIO</h3>
+        <div class="podium" id="render-podio">
+            <div class="p-card t2"><b>2º</b><br>---</div>
+            <div class="p-card t1"><i class="fas fa-crown crown"></i><b>TOP 1</b><br>---</div>
+            <div class="p-card t3"><b>3º</b><br>---</div>
+        </div>
     </div>
     <div class="dash-grid">
         <div class="stat-card"><i class="fas fa-swords"></i><br><small>DUELOS</small><br><b id="d-totais">0</b></div>
         <div class="stat-card"><i class="fas fa-star"></i><br><small>ESTRELAS</small><br><b id="e-totais">0</b></div>
-        <div class="stat-card"><i class="fas fa-scroll"></i><br><small>REGRAS</small><br><b onclick="alert(regrasTorneio)" style="font-size:10px; cursor:pointer">VER REGRAS</b></div>
-        <div class="stat-card"><i class="fas fa-user-shield"></i><br><small>JUIZ</small><br><b onclick="loginJuiz()" style="font-size:10px; cursor:pointer">ACESSAR</b></div>
+        <div class="stat-card"><i class="fas fa-trophy"></i><br><small>MAIOR APOSTA</small><br><b>10 ⭐</b></div>
+        <div class="stat-card"><i class="fas fa-shark"></i><br><small>O SHARK</small><br><b id="shark">---</b></div>
     </div>
-    <div style="background:var(--card); margin:15px; padding:15px; border:1px solid var(--roxo); border-radius:8px;">
-        <small style="color:var(--ouro)">MURAL:</small>
-        <p id="mural-txt" style="margin:5px 0; font-size:13px;"></p>
+    <div style="background:var(--card); margin:15px; padding:15px; border-left:4px solid var(--roxo); border-radius:5px;">
+        <small style="color:var(--dourado)">MURAL:</small>
+        <p id="mural-txt" style="margin:5px 0; font-size:13px; opacity:0.8;">Buscando avisos...</p>
     </div>
 </div>
 
-<div id="aba-ranking" class="secao" style="display:none; padding-top:20px;">
-    <h3 style="color:var(--ouro); text-align:center;">RANKING DETALHADO</h3>
+<div id="aba-ranking" class="aba-conteudo" style="display:none; padding-top:20px;">
+    <h3 style="color:var(--dourado); text-align:center;">CLASSIFICAÇÃO COMPLETA</h3>
     <div id="render-ranking"></div>
 </div>
 
-<div id="aba-perfil" class="secao" style="display:none; padding:20px; text-align:center;">
+<div id="aba-arena" class="aba-conteudo" style="display:none; padding:20px; text-align:center;">
+    <h3 style="color:var(--dourado)">ARENA</h3>
+    <div style="background:var(--card); padding:20px; border-radius:15px; border:1px solid var(--roxo);">
+        <button class="btn-gold" onclick="alert('Busca Iniciada')">DUELO NORMAL</button>
+        <button class="btn-gold" onclick="alert('Busca 1⭐')">APOSTAR 1 ⭐</button>
+        <button class="btn-gold" onclick="alert('Busca 3⭐')">APOSTAR 3 ⭐</button>
+        <button class="btn-gold" onclick="alert('Busca 5⭐')">APOSTAR 5 ⭐</button>
+        <button class="btn-gold" onclick="alert('Busca 10⭐')">APOSTAR 10 ⭐</button>
+    </div>
+</div>
+
+<div id="aba-perfil" class="aba-conteudo" style="display:none; padding:20px; text-align:center;">
     <div id="box-reg">
-        <h3 style="color:var(--ouro)">REGISTRO</h3>
-        <div class="av-grid">
-            <img src="https://alphacoders.com" class="av-opt av-active" onclick="selAv(this, 'Yugi')">
-            <img src="https://alphacoders.com" class="av-opt" onclick="selAv(this, 'Kaiba')">
-            <img src="https://alphacoders.com" class="av-opt" onclick="selAv(this, 'Joey')">
+        <h3 style="color:var(--dourado)">REGISTRO</h3>
+        <p>Escolha seu Avatar:</p>
+        <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px;">
+            <i class="fas fa-user-circle av-opt active" onclick="selAv(this,'Yugi')" style="font-size:40px; cursor:pointer;"></i>
+            <i class="fas fa-user-shield av-opt" onclick="selAv(this,'Kaiba')" style="font-size:40px; cursor:pointer;"></i>
         </div>
         <input type="text" id="nick" placeholder="Nickname">
         <input type="text" id="deck" placeholder="Seu Deck">
         <input type="password" id="pass" placeholder="Senha">
-        <button class="btn-gold" onclick="registrar()">CRIAR CONTA</button>
+        <button class="btn-gold" onclick="registrar()">REGISTRAR</button>
     </div>
-    <div id="box-log" style="display:none;">
-        <h2 id="m-nick" style="color:var(--ouro)"></h2>
-        <p id="m-id" style="font-size:10px; opacity:0.5;"></p>
-        <button class="btn-gold" onclick="logout()" style="background:#333">SAIR</button>
+    <div id="box-log" style="display:none; background:var(--card); padding:25px; border-radius:15px; border:1px solid var(--dourado);">
+        <h2 id="meu-nick" style="color:var(--dourado)"></h2>
+        <p id="meu-id" style="font-size:10px; opacity:0.5;"></p>
+        <button class="btn-gold" onclick="logout()" style="background:#444">SAIR</button>
     </div>
 </div>
 
 <nav class="nav">
-    <a href="javascript:void(0)" class="nav-link active" onclick="mudarAba(this, 'home')"><i class="fas fa-home"></i></a>
-    <a href="javascript:void(0)" class="nav-link" onclick="mudarAba(this, 'ranking')"><i class="fas fa-trophy"></i></a>
-    <a href="javascript:void(0)" class="nav-link" onclick="mudarAba(this, 'perfil')"><i class="fas fa-user-circle"></i></a>
+    <a href="javascript:void(0)" class="nav-link active" onclick="mudar(this, 'home')"><i class="fas fa-home"></i><span>Dash</span></a>
+    <a href="javascript:void(0)" class="nav-link" onclick="mudar(this, 'ranking')"><i class="fas fa-trophy"></i><span>Rank</span></a>
+    <a href="javascript:void(0)" class="nav-link" onclick="mudar(this, 'arena')"><i class="fas fa-swords"></i><span>Arena</span></a>
+    <a href="javascript:void(0)" class="nav-link" onclick="mudar(this, 'perfil')"><i class="fas fa-user-circle"></i><span>Perfil</span></a>
 </nav>
 
 <script>
     const URL_API = "https://script.google.com/macros/s/AKfycbyDvLfyGsCeoPEp2XZTKqrbDYR2brbs19diA7-dv5Lw43GigVjNtZHYV0Djeuckg-puhw/exec"; 
     let avatarSel = "Yugi";
-    let regrasTorneio = "";
 
-    function selAv(el, nome) {
-        document.querySelectorAll('.av-opt').forEach(i => i.classList.remove('av-active'));
-        el.classList.add('av-active');
-        avatarSel = nome;
+    function selAv(el, n) {
+        document.querySelectorAll('.av-opt').forEach(i => i.style.color = 'white');
+        el.style.color = 'var(--dourado)';
+        avatarSel = n;
     }
 
-    async function carregar() {
+    async function atualizar() {
         try {
             const rR = await fetch(URL_API + "?acao=getRanking", {redirect:"follow"});
             const ranking = await rR.json();
             const rD = await fetch(URL_API + "?acao=getDashboard", {redirect:"follow"});
             const dash = await rD.json();
 
-            regrasTorneio = dash.regras;
-            document.getElementById('e-totais').innerText = dash.totalEstrelas;
-            document.getElementById('d-totais').innerText = dash.totalDuelos;
-            document.getElementById('mural-txt').innerText = dash.mural;
+            document.getElementById('e-totais').innerText = dash.totalEstrelas || 0;
+            document.getElementById('d-totais').innerText = dash.totalDuelos || 0;
+            document.getElementById('shark').innerText = dash.shark || "---";
+            document.getElementById('mural-txt').innerText = dash.mural || "É hora do Duelo!";
 
-            const p = document.getElementById('render-podio');
-            p.innerHTML = `
-                <div class="p-card t2"><b>TOP 2</b><br>${ranking[1]?.nick || '---'}<br><small>${ranking[1]?.estrelas || 0}⭐</small></div>
-                <div class="p-card t1"><i class="fas fa-crown" style="color:var(--ouro)"></i><br><b>TOP 1</b><br>${ranking[0]?.nick || '---'}<br><small>${ranking[0]?.deck || ''}</small></div>
-                <div class="p-card t3"><b>TOP 3</b><br>${ranking[2]?.nick || '---'}<br><small>${ranking[2]?.estrelas || 0}⭐</small></div>
-            `;
+            if(ranking.length > 0) {
+                document.getElementById('render-podio').innerHTML = `
+                    <div class="p-card t2"><b>2º</b><br>${ranking[1]?.nick || '---'}<br><small>${ranking[1]?.estrelas || 0}⭐</small></div>
+                    <div class="p-card t1"><i class="fas fa-crown crown"></i><b>${ranking[0]?.nick}</b><br><small>${ranking[0]?.deck}</small></div>
+                    <div class="p-card t3"><b>3º</b><br>${ranking[2]?.nick || '---'}<br><small>${ranking[2]?.estrelas || 0}⭐</small></div>
+                `;
 
-            document.getElementById('render-ranking').innerHTML = ranking.map((d,i) => `
-                <div class="rank-box">
-                    <div class="rank-main"><span><b>${i+1}º</b> ${d.nick}</span><b>${d.estrelas} ⭐</b></div>
-                    <div class="rank-sub"><span>Deck: ${d.deck}</span><span>V:${d.v} E:${d.e} D:${d.d} | <b>${d.winrate}</b></span></div>
-                </div>
-            `).join('');
-        } catch(e) { }
+                document.getElementById('render-ranking').innerHTML = ranking.map((d,i) => `
+                    <div class="rank-box">
+                        <div class="rank-main"><span><b style="color:var(--dourado)">${i+1}º</b> ${d.nick}</span><b>${d.estrelas} ⭐</b></div>
+                        <div class="rank-sub"><span>Deck: ${d.deck}</span><span>V:${d.v} E:${d.e} D:${d.d} | <b>WR: ${d.winrate}</b></span></div>
+                    </div>
+                `).join('');
+            }
+        } catch(e) { console.warn("Modo Offline"); }
         document.getElementById('loading').style.display = 'none';
+    }
+
+    function mudar(el, nome) {
+        document.querySelectorAll('.aba-conteudo').forEach(a => a.style.display = 'none');
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.getElementById('aba-' + nome).style.display = 'block';
+        el.classList.add('active');
     }
 
     async function registrar() {
@@ -148,27 +163,15 @@
         else { alert(r.erro); document.getElementById('loading').style.display = 'none'; }
     }
 
-    function mudarAba(el, nome) {
-        document.querySelectorAll('.secao').forEach(a => a.style.display = 'none');
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        document.getElementById('aba-' + nome).style.display = 'block';
-        el.classList.add('active');
-    }
-
-    function loginJuiz() {
-        const p = prompt("Senha do Juiz:");
-        if(p === "1234") alert("Acesso liberado na Planilha!"); 
-    }
-
     window.onload = () => {
         const id = localStorage.getItem('y_id');
         if(id) {
             document.getElementById('box-reg').style.display = 'none';
             document.getElementById('box-log').style.display = 'block';
-            document.getElementById('m-nick').innerText = localStorage.getItem('y_n');
-            document.getElementById('m-id').innerText = id;
+            document.getElementById('meu-nick').innerText = localStorage.getItem('y_n');
+            document.getElementById('meu-id').innerText = id;
         }
-        carregar();
+        atualizar();
     };
     function logout() { localStorage.clear(); location.reload(); }
 </script>
