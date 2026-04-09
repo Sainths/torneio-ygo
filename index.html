@@ -3,95 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YGO App</title>
+    <title>Yu-Gi-Oh! Tournament App</title>
+    <!-- Bibliotecas de Ícones e Fontes -->
     <link rel="stylesheet" href="https://cloudflare.com">
+    <link rel="manifest" href="manifest.json">
     <style>
-        :root { --dourado: #d4af37; --roxo: #4b0082; --preto: #050505; --card: #151515; }
-        body { background: var(--preto); color: white; font-family: sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
-        .header-duel { background: linear-gradient(to bottom, var(--roxo), var(--preto)); padding: 20px 10px; text-align: center; border-bottom: 3px solid var(--dourado); }
-        .podium-box { display: flex; justify-content: center; align-items: flex-end; gap: 8px; min-height: 180px; padding: 10px; }
-        .p-card { background: var(--card); border: 2px solid var(--dourado); border-radius: 8px; text-align: center; padding: 10px; flex: 1; font-size: 13px; }
-        .t1 { height: 160px; border-width: 4px; box-shadow: 0 0 20px rgba(212,175,55,0.4); order: 2; }
-        .t2 { height: 130px; order: 1; } .t3 { height: 110px; order: 3; }
-        .card-stats { background: var(--card); border-left: 4px solid var(--dourado); margin: 10px; padding: 15px; border-radius: 5px; display: flex; justify-content: space-between; }
-        input { background: #222; border: 1px solid var(--dourado); color: white; padding: 12px; width: 85%; margin: 10px 0; border-radius: 5px; }
-        .btn-gold { background: var(--dourado); color: black; border: none; padding: 15px; width: 92%; font-weight: bold; border-radius: 5px; cursor: pointer; }
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #111; border-top: 2px solid var(--dourado); display: flex; justify-content: space-around; padding: 12px 0; }
-        .nav-link { color: var(--dourado); text-align: center; text-decoration: none; font-size: 20px; }
-        .nav-link span { display: block; font-size: 10px; }
+        :root { --dourado: #d4af37; --roxo: #4b0082; --preto: #050505; --card: #121212; --sucesso: #2ecc71; --erro: #e74c3c; }
+        
+        body { background: var(--preto); color: white; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding-bottom: 90px; overflow-x: hidden; }
+
+        /* Animação do Olho de Wdjat (Carregamento) */
+        .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--preto); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        .eye-animation { font-size: 60px; color: var(--dourado); animation: blink 1.5s infinite; text-shadow: 0 0 20px var(--dourado); }
+        @keyframes blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.9); } }
+
+        /* Pódio Estilo Reino dos Duelistas */
+        .header-duel { background: linear-gradient(to bottom, var(--roxo), var(--preto)); padding: 30px 10px; text-align: center; border-bottom: 3px solid var(--dourado); box-shadow: 0 5px 20px rgba(0,0,0,0.8); }
+        .podium-box { display: flex; justify-content: center; align-items: flex-end; gap: 8px; min-height: 220px; padding: 10px; margin-top: 15px; }
+        .p-card { background: var(--card); border: 2px solid var(--dourado); border-radius: 8px; text-align: center; padding: 10px; flex: 1; position: relative; transition: 0.5s; }
+        .t1 { height: 190px; border-width: 4px; box-shadow: 0 0 25px rgba(212,175,55,0.4); order: 2; z-index: 5; }
+        .t2 { height: 150px; order: 1; opacity: 0.9; }
+        .t3 { height: 130px; order: 3; opacity: 0.8; }
+        .crown-icon { color: var(--dourado); font-size: 28px; position: absolute; top: -35px; left: 50%; transform: translateX(-50%); }
+        .avatar-img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--dourado); margin-bottom: 5px; background: #222; }
+
+        /* Grid do Dashboard (Estatísticas que você pediu) */
+        .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
+        .stat-card { background: var(--card); border: 1px solid #333; border-left: 5px solid var(--dourado); padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-card i { color: var(--dourado); font-size: 22px; margin-bottom: 10px; }
+        .stat-card b { display: block; font-size: 18px; color: var(--sucesso); }
+        .stat-card small { font-size: 10px; text-transform: uppercase; color: #aaa; letter-spacing: 1px; }
+
+        /* Mensagens do Juiz (Estilo Pergaminho) */
+        .mural-box { background: #1a1500; border: 1px solid var(--dourado); margin: 15px; padding: 15px; border-radius: 5px; position: relative; border-left: 10px solid var(--dourado); }
+        .mural-label { position: absolute; top: -10px; left: 15px; background: var(--dourado); color: black; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 3px; }
+
+        /* Botões e Inputs Profissionais */
+        .btn-gold { background: linear-gradient(45deg, #d4af37, #f1c40f); color: black; border: none; padding: 16px; width: 100%; font-weight: bold; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 0 #997a1d; transition: 0.2s; }
+        .btn-gold:active { transform: translateY(4px); box-shadow: none; }
+        input { background: #151515; border: 1px solid #333; color: white; padding: 14px; width: 90%; margin: 10px 0; border-radius: 5px; border-bottom: 2px solid var(--dourado); outline: none; }
+
+        /* Menu Inferior (Navegação) */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #080808; border-top: 2px solid var(--dourado); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.9); }
+        .nav-link { color: #555; text-align: center; text-decoration: none; flex: 1; transition: 0.3s; }
+        .nav-link.active { color: var(--dourado); text-shadow: 0 0 12px var(--dourado); }
+        .nav-link i { font-size: 24px; display: block; margin-bottom: 4px; }
+        .nav-link span { font-size: 10px; text-transform: uppercase; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="cont-dash" class="aba">
+<!-- TELA DE CARREGAMENTO (OLHO DE WDJAT) -->
+<div id="loading" class="loading-screen">
+    <i class="fas fa-eye eye-animation"></i>
+    <p style="color: var(--dourado); letter-spacing: 3px; margin-top: 20px;">É HORA DO DUELO!</p>
+</div>
+
+<!-- ABA DASHBOARD (HOME) -->
+<div id="aba-home" class="aba">
     <div class="header-duel">
-        <h2 style="color: var(--dourado); margin:0;">ARENA LENDÁRIA</h2>
-        <div class="podium-box" id="podio"></div>
+        <h3 style="color: var(--dourado); margin: 0; letter-spacing: 3px;">REINO DOS DUELISTAS</h3>
+        <div class="podium-box" id="podio-real">
+            <!-- Pódio Gerado Automaticamente -->
+        </div>
     </div>
-    <div style="padding:15px">
-        <div class="card-stats"><span><i class="fas fa-star"></i> Total Estrelas</span> <b id="total-e">0</b></div>
-        <div class="card-stats"><span><i class="fas fa-bullhorn"></i> Mural</span> <span id="mural">---</span></div>
+    
+    <div class="mural-box">
+        <span class="mural-label">AVISO DO JUIZ</span>
+        <p id="texto-mural" style="margin: 5px 0; font-size: 14px;">Carregando pergaminhos...</p>
+    </div>
+
+    <div class="dash-grid">
+        <div class="stat-card">
+            <i class="fas fa-chess-rook"></i>
+            <small>Duelos Totais</small>
+            <b id="total-duelos">0</b>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-star"></i>
+            <small>Estrelas Totais</small>
+            <b id="total-e">0</b>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-trophy"></i>
+            <small>Maior Aposta</small>
+            <b id="maior-aposta">0</b>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-shark"></i>
+            <small>O Shark</small>
+            <b id="shark-nome" style="font-size: 14px;">-</b>
+        </div>
     </div>
 </div>
 
-<div id="cont-ranking" class="aba" style="display:none; padding:15px;">
-    <h3 style="color:var(--dourado); text-align:center;">CLASSIFICAÇÃO</h3>
-    <div id="lista-ranking"></div>
+<!-- ABA RANKING COMPLETO -->
+<div id="aba-ranking" class="aba" style="display:none; padding: 15px;">
+    <h3 style="text-align:center; color: var(--dourado); letter-spacing: 2px;">CLASSIFICAÇÃO OFICIAL</h3>
+    <div id="lista-ranking">
+        <!-- Itens do Ranking com Winrate e Deck -->
+    </div>
 </div>
 
-<div id="cont-perfil" class="aba" style="display:none; padding:20px; text-align:center;">
-    <h3 style="color:var(--dourado);">REGISTRO</h3>
-    <input type="text" id="nick" placeholder="Nickname">
-    <input type="text" id="deck" placeholder="Seu Deck">
-    <input type="password" id="senha" placeholder="Senha">
-    <button class="btn-gold" onclick="registrar()">CRIAR CONTA</button>
+<!-- ABA ARENA (PAREAMENTO) -->
+<div id="aba-arena" class="aba" style="display:none; padding: 25px; text-align: center;">
+    <h3 style="color: var(--dourado); margin-bottom: 30px;">ARENA DE BATALHA</h3>
+    <div style="background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid var(--roxo); box-shadow: 0 0 20px rgba(75,0,130,0.3);">
+        <i class="fas fa-scroll" style="font-size: 50px; color: var(--dourado); margin-bottom: 20px;"></i>
+        <p style="font-size: 14px; opacity: 0.8;">Selecione o valor da sua aposta e busque um oponente online.</p>
+        <button class="btn-gold" style="margin-bottom: 10px;" onclick="buscar(1)">APOSTAR 1 ESTRELA</button>
+        <button class="btn-gold" onclick="buscar(3)">APOSTAR 3 ESTRELAS</button>
+    </div>
 </div>
 
+<!-- ABA PERFIL / REGISTRO -->
+<div id="aba-perfil" class="aba" style="display:none; padding: 20px;">
+    <div id="box-registro" style="text-align: center;">
+        <h3 style="color: var(--dourado);">REGISTRO DE DUELISTA</h3>
+        <p style="font-size: 12px; opacity: 0.6;">Escolha seu avatar e nickname para entrar no torneio.</p>
+        <input type="text" id="reg-nick" placeholder="Nickname">
+        <input type="text" id="reg-deck" placeholder="Seu Deck">
+        <input type="password" id="reg-senha" placeholder="Senha (4-6 dígitos)">
+        <button class="btn-gold" onclick="registrar()">CRIAR CONTA LENDÁRIA</button>
+    </div>
+
+    <div id="box-logado" style="display:none; text-align: center; background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--dourado);">
+        <div id="meu-avatar-img"></div>
+        <h2 id="meu-nick" style="color: var(--dourado); margin: 10px 0;"></h2>
+        <p id="meu-id" style="opacity: 0.5; font-family: monospace;"></p>
+        <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+        <div style="display: flex; justify-content: space-around;">
+            <div><small>ESTRELAS</small><br><b id="minhas-estrelas" style="color: var(--dourado);">0</b></div>
+            <div><small>WINRATE</small><br><b id="meu-winrate" style="color: var(--sucesso);">0%</b></div>
+        </div>
+        <button class="btn-gold" style="margin-top: 30px; background: #333; color: white;" onclick="logout()">ENCERRAR SESSÃO</button>
+    </div>
+</div>
+
+<!-- MENU DE NAVEGAÇÃO INFERIOR -->
 <nav class="nav-bar">
-    <a href="#" class="nav-link" onclick="mudar('dash')"><i class="fas fa-home"></i><span>Home</span></a>
-    <a href="#" class="nav-link" onclick="mudar('ranking')"><i class="fas fa-trophy"></i><span>Ranking</span></a>
-    <a href="#" class="nav-link" onclick="mudar('perfil')"><i class="fas fa-user-plus"></i><span>Registrar</span></a>
+    <a href="javascript:void(0)" class="nav-link active" onclick="mudar(this, 'home')">
+        <i class="fas fa-home"></i><span>Home</span>
+    </a>
+    <a href="javascript:void(0)" class="nav-link" onclick="mudar(this, 'ranking')">
+        <i class="fas fa-trophy"></i><span>Ranking</span>
+    </a>
+    <a href="javascript:void(0)" class="nav-link" onclick="mudar(this, 'arena')">
+        <i class="fas fa-khanda"></i><span>Arena</span>
+    </a>
+    <a href="javascript:void(0)" class="nav-link" onclick="mudar(this, 'perfil')">
+        <i class="fas fa-user-shield"></i><span>Perfil</span>
+    </a>
 </nav>
-
 <script>
-    const URL_API = "https://script.google.com/macros/s/AKfycbyDvLfyGsCeoPEp2XZTKqrbDYR2brbs19diA7-dv5Lw43GigVjNtZHYV0Djeuckg-puhw/exec";
+    // --- CONFIGURAÇÃO DA CHAVE MESTRA ---
+    const URL_API = "https://script.google.com/macros/s/AKfycbyDvLfyGsCeoPEp2XZTKqrbDYR2brbs19diA7-dv5Lw43GigVjNtZHYV0Djeuckg-puhw/exec"; // <--- COLOQUE SUA URL DO GOOGLE AQUI!
 
-    async function carregar() {
-        const rRank = await fetch(URL_API + "?acao=getRanking", {redirect: "follow"});
-        const ranking = await rRank.json();
-        const rDash = await fetch(URL_API + "?acao=getDashboard", {redirect: "follow"});
-        const dash = await rDash.json();
-
-        document.getElementById('total-e').innerText = dash.totalEstrelas;
-        document.getElementById('mural').innerText = dash.mural;
-
-        // Pódio Dinâmico
-        const p = document.getElementById('podio');
-        p.innerHTML = `
-            <div class="p-card t2"><b>2º</b><br>${ranking[1]?.nick || '---'}<br><small>${ranking[1]?.estrelas || 0} ⭐</small></div>
-            <div class="p-card t1"><i class="fas fa-crown"></i><br><b>TOP 1</b><br>${ranking[0]?.nick || '---'}<br><small>${ranking[0]?.estrelas || 0} ⭐</small></div>
-            <div class="p-card t3"><b>3º</b><br>${ranking[2]?.nick || '---'}<br><small>${ranking[2]?.estrelas || 0} ⭐</small></div>
-        `;
-
-        // Ranking
-        document.getElementById('lista-ranking').innerHTML = ranking.map((d,i) => `
-            <div class="card-stats"><span><b>${i+1}º</b> ${d.nick}</span> <b>${d.estrelas} ⭐</b></div>
-        `).join('');
+    // --- FUNÇÃO DE INICIALIZAÇÃO ---
+    async function inicializar() {
+        verificarSessao();
+        await atualizarDados();
+        document.getElementById('loading').style.display = 'none';
     }
 
+    // --- ATUALIZAR DASHBOARD E RANKING ---
+    async function atualizarDados() {
+        try {
+            const resRank = await fetch(`${URL_API}?acao=getRanking`, {redirect: "follow"});
+            const ranking = await resRank.json();
+            const resDash = await fetch(`${URL_API}?acao=getDashboard`, {redirect: "follow"});
+            const dash = await resDash.json();
+
+            // 1. Atualizar Cards do Dashboard
+            document.getElementById('total-e').innerText = dash.totalEstrelas || 0;
+            document.getElementById('texto-mural').innerText = dash.mural || "Bem-vindo ao Torneio!";
+            document.getElementById('shark-nome').innerText = dash.shark || "-";
+            document.getElementById('total-duelos').innerText = dash.totalDuelos || 0;
+            document.getElementById('maior-aposta').innerText = dash.maiorAposta || 0;
+
+            // 2. Montar Pódio do Top 3
+            const p = document.getElementById('podio-real');
+            if (ranking && ranking.length > 0) {
+                p.innerHTML = `
+                    <div class="p-card t2"><b>2º</b><br>${ranking[1]?.nick || '---'}<br><small style="color:var(--dourado)">${ranking[1]?.estrelas || 0} ⭐</small></div>
+                    <div class="p-card t1"><i class="fas fa-crown crown-icon"></i><b>TOP 1</b><br>${ranking[0]?.nick || '---'}<br><small style="color:var(--dourado)">${ranking[0]?.estrelas || 0} ⭐</small></div>
+                    <div class="p-card t3"><b>3º</b><br>${ranking[2]?.nick || '---'}<br><small style="color:var(--dourado)">${ranking[2]?.estrelas || 0} ⭐</small></div>
+                `;
+            } else {
+                p.innerHTML = "<p style='color:var(--dourado)'>Aguardando duelistas...</p>";
+            }
+
+            // 3. Montar Lista do Ranking Completo
+            const lista = document.getElementById('lista-ranking');
+            lista.innerHTML = ranking.map((d, i) => `
+                <div class="rank-item" style="border-left: 3px solid ${i < 3 ? 'var(--dourado)' : 'transparent'}">
+                    <span>
+                        <span class="rank-pos">${i+1}º</span> <b>${d.nick}</b><br>
+                        <small style="opacity:0.6">${d.deck}</small>
+                    </span>
+                    <div style="text-align:right">
+                        <b style="color:var(--dourado)">${d.estrelas} ⭐</b><br>
+                        <small style="font-size:9px; color:var(--sucesso)">WR: ${d.winrate || '0%'}</small>
+                    </div>
+                </div>
+            `).join('');
+
+        } catch (e) { console.error("Erro na sincronização lendária:", e); }
+    }
+
+    // --- SISTEMA DE REGISTRO ---
     async function registrar() {
-        const n = document.getElementById('nick').value, d = document.getElementById('deck').value, s = document.getElementById('senha').value;
+        const n = document.getElementById('reg-nick').value;
+        const d = document.getElementById('reg-deck').value;
+        const s = document.getElementById('reg-senha').value;
+        
+        if(!n || !d || !s) return alert("Preencha todos os campos do pergaminho!");
+
+        document.getElementById('loading').style.display = 'flex';
+        
         const res = await fetch(`${URL_API}?acao=registrar&nick=${n}&deck=${d}&senha=${s}`, {redirect: "follow"});
         const r = await res.json();
-        if(r.sucesso) { alert("Duelista Registrado! ID: " + r.id); carregar(); }
-        else alert("Erro: " + r.erro);
+
+        if(r.sucesso) {
+            localStorage.setItem('ygo_nick', n);
+            localStorage.setItem('ygo_id', r.id);
+            alert("REGISTRO CONCLUÍDO! Seu ID de Duelista é: " + r.id);
+            location.reload();
+        } else {
+            document.getElementById('loading').style.display = 'none';
+            alert("Erro: " + r.erro);
+        }
     }
 
-    function mudar(aba) {
+    // --- NAVEGAÇÃO E SESSÃO ---
+    function mudar(el, aba) {
         document.querySelectorAll('.aba').forEach(a => a.style.display = 'none');
-        document.getElementById('cont-' + aba).style.display = 'block';
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.getElementById('aba-' + aba).style.display = 'block';
+        el.classList.add('active');
+        if(aba === 'home' || aba === 'ranking') atualizarDados();
     }
-    window.onload = carregar;
+
+    function verificarSessao() {
+        const id = localStorage.getItem('ygo_id');
+        if(id) {
+            document.getElementById('box-registro').style.display = 'none';
+            document.getElementById('box-logado').style.display = 'block';
+            document.getElementById('meu-nick').innerText = localStorage.getItem('ygo_nick');
+            document.getElementById('meu-id').innerText = "DUELISTA ID: " + id;
+        }
+    }
+
+    function logout() {
+        if(confirm("Deseja realmente encerrar sua jornada?")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+
+    window.onload = inicializar;
 </script>
 </body>
 </html>
