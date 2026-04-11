@@ -453,34 +453,31 @@ async function executarRegistro() {
 }
 
 window.onload = () => {
-    // Busca os elementos
-    const auth = document.getElementById('auth-container');
-    const painel = document.getElementById('painel-principal');
-
-    if (!jogadorLogado) {
-        // Se não está logado, tenta mostrar a tela de login
-        if (auth) {
-            auth.style.display = 'flex';
-        }
-        if (painel) {
-            painel.style.display = 'none';
-        }
-    } else {
-        // Se está logado, chama a função para mostrar o app
+    // Busca os dados do jogador que acabamos de salvar no registro
+    const jogadorLogado = JSON.parse(localStorage.getItem('duelista_v1'));
+    
+    if (jogadorLogado) {
+        // Se o jogador existe, mostra o app e esconde o login
         mostrarApp(); 
+        if (typeof atualizarDashboard === "function") atualizarDashboard();
+    } else {
+        // Se não existe, garante que o login apareça
+        document.getElementById('auth-container').style.display = 'flex';
+        if (document.getElementById('painel-principal')) {
+            document.getElementById('painel-principal').style.display = 'none';
+        }
     }
 };
 
+// Função auxiliar para trocar as telas
 function mostrarApp() {
     const auth = document.getElementById('auth-container');
     const painel = document.getElementById('painel-principal');
     
     if (auth) auth.style.display = 'none';
     if (painel) painel.style.display = 'block';
-    
-    // Atualiza os dados se as funções existirem
-    if (typeof atualizarDashboard === "function") atualizarDashboard();
 }
+
 
 // --- SISTEMA DE ACESSO ---
 async function registrar(nick, deck, senha) {
