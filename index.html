@@ -1,52 +1,55 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="https://flaticon.com">
-<link rel="icon" href="icone.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reino dos Duelistas - App</title>
-    <!-- Link para ícones e fontes épicas -->
-<link rel="stylesheet" href="https://cloudflare.com">
-<link rel="stylesheet" href="https://googleapis.com">
+    <title>Reino dos Duelistas</title>
+    
+    <!-- Links limpos e sem espaços -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <link rel="stylesheet" href="https://googleapis.com">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icone.png">
 
     <style>
-        :root {
-            --roxo-profundo: #1a0033;
-            --roxo-magico: #4b0082;
-            --dourado-milenio: #d4af37;
-            --preto-caos: #0a0a0a;
-            --texto-claro: #e0e0e0;
-            --borda-glow: 0 0 15px rgba(212, 175, 55, 0.3);
+        :root { 
+            --roxo-profundo: #1a0033; 
+            --roxo-magico: #4b0082; 
+            --dourado-milenio: #d4af37; 
+            --preto-caos: #0a0a0a; 
+            --texto-claro: #e0e0e0; 
         }
+        
+        * { box-sizing: border-box; } /* Previne desalinhamento */
 
-        body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, var(--preto-caos), var(--roxo-profundo));
-            color: var(--texto-claro);
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background: var(--preto-caos); 
+            color: var(--texto-claro); 
             font-family: 'Roboto', sans-serif;
             overflow-x: hidden;
         }
 
-        h1, h2, .id-jogador { font-family: 'Orbitron', sans-serif; text-transform: uppercase; }
-
-        /* --- CONTAINER PRINCIPAL --- */
-        .app-container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
+        #auth-container { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
             min-height: 100vh;
+            width: 100%;
+            padding: 20px;
         }
-     #auth-container { 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        justify-content: center; 
-        text-align: center;
-}
-#loader { display: none; } /* Garante que ele comece escondido */
+
+        .app-container { 
+            max-width: 500px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            display: none; 
+        }
+    </style>
+</head>
+
 
 }
 #loader { display: none; } /* Garante que ele comece escondido */
