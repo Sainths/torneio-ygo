@@ -291,7 +291,9 @@ input:focus {
         <input type="text" id="reg-deck" placeholder="NOME DO SEU DECK" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--dourado-milenio); color: white; border-radius: 5px;">
         <input type="password" id="reg-senha" placeholder="SENHA" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--dourado-milenio); color: white; border-radius: 5px;">
         <button class="btn-acao" onclick="executarRegistro()" style="background: linear-gradient(45deg, #ffd700, #b8860b); color: #000;">CRIAR ID DE DUELISTA</button>
-        <button onclick="alternarAuth()" style="font-size: 12px; text-align: center; margin-top: 15px; color: var(--dourado-milenio); cursor: pointer;">Já possui ID? Faça Login.</button>
+        <button type="button" onclick="alternarAuth(true)" style="background:none; border:none; color:var(--dourado-milenio); cursor:pointer; text-decoration:underline; font-size:11px; width:100%; margin-top:15px; font-family:'Orbitron';">
+          NOVO DUELISTA? REGISTRE-SE
+        </button>
     </div>
 </div>
 <div id="painel-principal" class="app-container">
@@ -428,23 +430,20 @@ input:focus {
     // URL que você copiou ao publicar o Google Apps Script (PARTE 1)
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; 
 
-    // Teste de vida do script
-    console.log("Script carregado e pronto para o duelo!");
-    alert("Sistema de Duelo Iniciado!"); // Isso TEM que aparecer ao abrir a página
-
-    // Função para trocar entre Login e Registro (Ponto 3 e 1)
-function alternarAuth(mostrarRegistro) {
-    const login = document.getElementById('form-login');
-    const registro = document.getElementById('form-registro');
-    
-    if (mostrarRegistro) {
-        if (login) login.style.display = 'none';
-        if (registro) registro.style.display = 'block';
-    } else {
-        if (login) login.style.display = 'block';
-        if (registro) registro.style.display = 'none';
-    }
-}
+ // 2. FUNÇÃO DE TROCA (COLE LOGO ABAIXO DA URL)
+    window.alternarAuth = function(mostrarRegistro) {
+        console.log("Comando recebido: Mostrar registro =", mostrarRegistro);
+        const login = document.getElementById('form-login');
+        const registro = document.getElementById('form-registro');
+        
+        if (mostrarRegistro) {
+            if(login) login.style.display = 'none';
+            if(registro) registro.style.display = 'block';
+        } else {
+            if(login) login.style.display = 'block';
+            if(registro) registro.style.display = 'none';
+        }
+    };
     
     // Armazenamento Local (Manter logado - Ponto 2 e 3)
     let jogadorLogado = JSON.parse(localStorage.getItem('duelista_v1')) || null;
