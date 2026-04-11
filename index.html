@@ -12,6 +12,13 @@
     <link rel="icon" href="icone.png">
 
     <style>
+        html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Remove rolagem lateral */
+    height: 100%;
+}
+        
         :root { 
             --roxo-profundo: #1a0033; 
             --roxo-magico: #4b0082; 
@@ -31,24 +38,28 @@
             overflow-x: hidden;
         }
 
-        #auth-container { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; /* Centraliza verticalmente */
-            min-height: 100vh; /* Ocupa a altura exata da tela */
-            width: 100%;
-            margin: 0;
-            padding: 20px;
-           box-sizing: border-box;
+/* Garante que elementos escondidos NÃO ocupem espaço */
+#painel-principal, #loader, #aba-juiz { 
+    display: none !important; 
+}
+
+/* Força o container de login a ignorar qualquer margem externa */
+#auth-container { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center;
+    height: 100vh; /* Altura exata da tela */
+    position: absolute; /* Evita que outros itens empurrem ele */
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 
 /* Garante que o título não empurre tudo para baixo */
 #auth-container h2 {
     margin-top: 0;
     margin-bottom: 20px;
-}
-
 
         .app-container { 
             max-width: 500px; 
@@ -261,7 +272,7 @@
                 <div style="font-size: 12px;">Top 2</div>
                 <div id="top2-nome" style="font-weight: bold;">--</div>
                 <div style="color: var(--dourado-milenio); font-size: 14px;"><i class="fas fa-star estrela-ygo"></i> <span id="top2-estrelas">0</span></div>
-    </div>
+        </div>
 
 <!-- No Bloco de Notas, dentro do body -->
 <div id="aba-juiz" style="display:none; background: #222; border: 2px solid gold;">
