@@ -490,311 +490,31 @@ async function registrar(nick, deck, senha) {
     }
 }
 
-// 2. FUNÇÃO LOGIN (CORRIGIDA COM CATCH)
+// --- FINAL DO SCRIPT SEM ERROS ---
+
 async function login(nick, senha) {
-    exibirLoader(true, "Verificando Credenciais...");
+    exibirLoader(true, "Verificando...");
     try {
         const response = await fetch(WEB_APP_URL, {
             method: 'POST',
-            body: JSON.stringify({
-                action: 'login',
-                nickname: nick,
-                senha: senha
-            })
+            body: JSON.stringify({ action: 'login', nickname: nick, senha: senha })
         });
         const res = await response.json();
-        
         if (res.status === "sucesso") {
             localStorage.setItem('duelista_v1', JSON.stringify(res));
             location.reload();
         } else {
-            alert("Nickname ou Senha incorretos!");
+            alert("Dados incorretos!");
         }
     } catch (e) {
-        console.error("Erro no login:", e);
-        alert("Falha ao acessar o servidor de duelos.");
+        console.error(e);
+        alert("Falha no servidor.");
     } finally {
         exibirLoader(false);
     }
 }
 
-    // Função que o BOTÃO chama para pegar os dados da tela
-async function executarRegistro() {
-    const nick = document.getElementById('reg-usuario').value;
-    const deck = document.getElementById('reg-deck-name').value;
-    const senha = document.getElementById('reg-pass').value;
-
-    if (!nick || !deck || !senha) {
-        alert("Preencha todos os campos, Duelista!");
-        return;
-    }
-
-    // Chama a função que você já tem (a "registrar")
-    await registrar(nick, deck, senha);
-}
-
-    // 2. SISTEMA DE PAREAMENTO (Ponto 7, 8, 21 e 22)
-    function abrirArena() {
-        document.getElementById('loader').style.display = 'flex';
-        // Inicia busca no Sheets
-        buscarOponente();
-    }
-
-    async function buscarOponente() {
-        // Lógica que envia para o Apps Script que o jogador está "BUSCANDO"
-        // O Script devolve um oponente que também esteja "BUSCANDO"
-        // Se encontrar, fecha o loader e abre a tela de Duelo
-    }
-
-    function cancelarBusca() {
-        exibirLoader(false);
-        // Avisar ao servidor para parar de buscar
-    }
-
-    // 3. LÓGICA DE RESULTADOS (Ponto 9 e 13)
-    async function enviarResultado(meuResultado, idDuelo) {
-        // Envia se ganhei, perdi ou empatei
-        // O Servidor (Parte 1) vai comparar com o que o oponente enviou
-        // Se bater: Estrelas são calculadas (Vitória 3, Empate 1, Derrota 0)
-        // Se não bater: Ativa o aviso de conflito para o Juiz
-    }
-
-    // 4. ATUALIZAÇÃO DO DASHBOARD (Ponto 14, 15 e 16)
-    async function atualizarDashboard() {
-        const response = await fetch(WEB_APP_URL + "?action=getDashboard");
-        const dados = await response.json();
-        
-        // Atualiza o Top 1 (Rei dos Jogos)
-        document.getElementById('top1-nome').innerText = dados.ranking[1][1]; // Nickname
-        document.getElementById('top1-estrelas').innerText = dados.ranking[1][4]; // Estrelas
-        
-        // Preenche os outros cards de stats
-        document.getElementById('total-estrelas').innerText = dados.totalEstrelas;
-        // ... lógica para preencher o resto
-    }
-
-    // 5. NOTIFICAÇÕES (Ponto 20)
-    function verificarNotificacoes() {
-        setInterval(async () => {
-            // Pergunta ao Sheets: "Alguém me desafiou?"
-            // Se sim, mostra o pop-up Estilo Mobile
-        }, 5000); // Checa a cada 5 segundos
-    }
-
-async function entrarSala(valor) {
-    // Ponto 6: Só aposta o que tem
-    if (jogadorLogado.estrelas < valor) {
-        alert("Você não tem estrelas suficientes para este desafio!");
-        return;
-    }
-
-    exibirLoader(true, `Buscando duelo de ${valor} estrelas...`);
-    
-    // Envia para o Sheets que estamos na fila de uma sala específica
-    try {
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'entrarFilaAposta',
-                jogadorId: jogadorLogado.id,
-                valorAposta: valor
-            })
-        });
-        const res = await response.json();
-        
-        if(res.oponenteEncontrado) {
-            iniciarDuelo(res.dueloId, res.oponenteNome, valor);
-        }
-    } catch (e) {
-        console.error("Erro ao entrar na sala");
-    }
-}
-
-function iniciarDuelo(idDuelo, oponente, valor) {
-    exibirLoader(false);
-    alert(`DUELO ENCONTRADO! \nOponente: ${oponente} \nAposta: ${valor} Estrelas`);
-    // Aqui você abriria a tela de marcar resultado (Vitória/Derrota)
-}
-
-    // Funções de Utilidade
-    function exibirLoader(show, msg = "") {
-        const loader = document.getElementById('loader');
-        if(msg) loader.querySelector('p').innerText = msg;
-        loader.style.display = show ? 'flex' : 'none';
-    }
-
-    function abrirMenuDesafio(id, nick) {
-    console.log("Abrindo menu para desafiar: " + nick);
-    // Lógica do Ponto 18 virá aqui depois
-}
-
-// Envia o desafio para a planilha
-async function enviarDesafio(idOponente, tipo, valor = 0) {
-    if (idOponente === jogadorLogado.id) return alert("Você não pode se autodesafiar!");
-    
-    exibirLoader(true, "Enviando intimação...");
-    await fetch(WEB_APP_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-            action: 'enviarDesafio',
-            deId: jogadorLogado.id,
-            deNick: jogadorLogado.nickname,
-            paraId: idOponente,
-            tipo: tipo, // 'normal' ou 'aposta'
-            valor: valor
-        })
-    });
-    exibirLoader(false);
-    alert("Desafio enviado! Aguarde o oponente aceitar.");
-}
-
-// O Loop de Notificações (Ponto 20)
-setInterval(async () => {
-    if (!jogadorLogado) return;
-    
-    const response = await fetch(`${WEB_APP_URL}?action=checarDesafios&meuId=${jogadorLogado.id}`);
-    const desafio = await response.json();
-    
-    if (desafio.novo) {
-        exibirNotificacaoDesafio(desafio);
-    }
-}, 7000); // Checa a cada 7 segundos para não sobrecarregar
-
-function exibirNotificacaoDesafio(d) {
-    const msg = d.tipo === 'aposta' ? 
-        `${d.deNick} te desafiou para um duelo de ${d.valor} estrelas!` : 
-        `${d.deNick} te desafiou para um duelo normal!`;
-
-    if (confirm(msg + "\nAceitar duelo?")) {
-        // Lógica para aceitar e abrir a arena
-        aceitarDesafio(d.idDuelo);
-    }
-}
-
-    function logout() {
-        localStorage.removeItem('duelista_v1');
-        location.reload();
-    }
-
-async function abrirPerfil() {
-    exibirLoader(true, "Lendo sua alma de duelista...");
-    
-    // Busca dados atualizados da planilha
-    const response = await fetch(`${WEB_APP_URL}?action=getPerfil&id=${jogadorLogado.id}`);
-    const d = await response.json();
-    
-    // Cálculos Essenciais (Ponto 14)
-    const totalDuelos = d.vitorias + d.empates + d.derrotas;
-    const winrate = totalDuelos > 0 ? ((d.vitorias / totalDuelos) * 100).toFixed(1) : 0;
-
-    // Preenche o Modal
-    document.getElementById('perfil-nick').innerText = d.nickname;
-    document.getElementById('perfil-id').innerText = d.id;
-    document.getElementById('perfil-deck').innerText = d.deck;
-    document.getElementById('perfil-estrelas').innerText = d.estrelas;
-    document.getElementById('perfil-vitorias').innerText = d.vitorias;
-    document.getElementById('perfil-winrate').innerText = winrate + "%";
-    document.getElementById('perfil-sequencia').innerText = d.sequencia;
-    document.getElementById('perfil-shark').innerText = d.estrelasApostas;
-
-    exibirLoader(false);
-    document.getElementById('modal-perfil').style.display = 'block';
-}
-
-function fecharPerfil() {
-    document.getElementById('modal-perfil').style.display = 'none';
-}
-
-function logout() {
-    if(confirm("Deseja realmente sair do Reino dos Duelistas?")) {
-        localStorage.removeItem('duelista_v1');
-        location.reload(); // Volta para a tela de login
-    }
-}
-
-// No Bloco de Notas
-function acessarPainelJuiz() {
-    const senha = prompt("Digite a Senha do Organizador:");
-    if (senha === "1234") { // Mude para sua senha
-        // Mostra a aba do juiz que estava escondida
-        document.getElementById('aba-juiz').style.display = 'block'; 
-        alert("Acesso concedido, Mestre dos Duelos!");
-    } else {
-        alert("Senha incorreta!");
-    }
-}
-
-async function carregarConflitos() {
-    const response = await fetch(WEB_APP_URL + "?action=getConflitos");
-    const conflitos = await response.json();
-    const container = document.getElementById('container-conflitos');
-    container.innerHTML = "";
-
-    conflitos.forEach(c => {
-        container.innerHTML += `
-            <div style="background: rgba(255,0,0,0.1); padding: 10px; margin-bottom: 5px; border-radius: 5px; font-size: 11px;">
-                ID: ${c.idDuelo} | ${c.playerA} vs ${c.playerB} <br>
-                <button onclick="decidirDuelo('${c.idDuelo}', '${c.playerA}')" style="background:green; color:white; border:none; padding:3px 7px; margin-top:5px;">Vitoria A</button>
-                <button onclick="decidirDuelo('${c.idDuelo}', '${c.playerB}')" style="background:green; color:white; border:none; padding:3px 7px;">Vitoria B</button>
-            </div>
-        `;
-    });
-}
-
-async function decidirDuelo(idDuelo, idVencedor) {
-    if(confirm("Confirmar vitória de " + idVencedor + "?")) {
-        exibirLoader(true, "Aplicando veredito...");
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'resolverConflito',
-                idDuelo: idDuelo,
-                idVencedor: idVencedor
-            })
-        });
-        alert("O Juiz decidiu o vencedor!");
-        carregarConflitos(); // Atualiza a lista
-        exibirLoader(false);
-    }
-}
-
-async function verRegras() {
-    document.getElementById('modal-regras').style.display = 'block';
-    const response = await fetch(WEB_APP_URL + "?action=getRegras");
-    const texto = await response.text();
-    document.getElementById('texto-regras').innerText = texto;
-}
-
-function fecharRegras() {
-    document.getElementById('modal-regras').style.display = 'none';
-}
-
-async function publicarRegras() {
-    const novoTexto = document.getElementById('edit-regras-input').value;
-    if(!novoTexto) return;
-    
-    exibirLoader(true, "Atualizando pergaminhos...");
-    await fetch(WEB_APP_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'salvarRegra', texto: novoTexto })
-    });
-    exibirLoader(false);
-    alert("Regras publicadas para todos os duelistas!");
-}
-
-async function resetarTorneio() {
-    if (confirm("TEM CERTEZA? Isso apagará todos os duelos e estrelas!")) {
-        exibirLoader(true, "Limpando a Arena...");
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'resetar' }) // Você deve adicionar essa condicional no seu doPost
-        });
-        alert("O Reino dos Duelistas foi restaurado!");
-        location.reload();
-    }
-}
-
-} // Fecha a última função que estiver aberta
+// 1. FECHAMENTO DO SCRIPT (Sem chaves sobrando)
 </script>
 </body>
 </html>
