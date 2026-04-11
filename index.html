@@ -48,11 +48,15 @@
     flex-direction: column; 
     align-items: center; 
     justify-content: center;
-    min-height: 100vh; /* Ocupa a tela toda */
-    width: 100%;
-    position: relative; /* Mudamos de absolute para relative */
+    position: fixed; /* Isso trava o login na tela e ignora lixo no fundo */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     padding: 20px;
-    gap: 20px; /* Cria um espaço fixo entre o título e o login */
+    box-sizing: border-box;
+    z-index: 100;
+    background: linear-gradient(135deg, #0a0a0a, #1a0033);
 }
 
 #auth-container h2 {
@@ -223,27 +227,32 @@
     </div>
 
     <!-- CONTAINER DE LOGIN CENTRALIZADO -->
-    <div id="auth-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; width: 100%; box-sizing: border-box; padding: 20px;">
-        <h2 style="color: var(--dourado-milenio); font-family: 'Orbitron'; text-align: center; margin-bottom: 30px;">REINO DOS DUELISTAS</h2>
-        
-        <div id="form-login" style="width: 100%; max-width: 320px;">
-             <!-- Seus campos de login aqui -->
-        </div>
+    <div id="auth-container">
+    <div style="margin-bottom: 20px;">
+        <h2 style="color: var(--dourado-milenio); font-family: 'Orbitron'; margin: 0;">REINO DOS DUELISTAS</h2>
     </div>
-
+    
+    <div id="form-login" style="width: 90%; max-width: 320px;">
+        <input type="text" id="login-nick" placeholder="NICKNAME">
+        <input type="password" id="login-senha" placeholder="SENHA">
+        <button class="btn-acao" onclick="executarLogin()">ENTRAR NO DUELO</button>
+    </div>
+</div>
 
 <!-- TELA DE LOGIN / REGISTRO -->
-<div id="auth-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center;">
-    <img src="https://flaticon.com" width="80" style="margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--dourado-milenio));">
-    <h2 style="color: var(--dourado-milenio); margin-bottom: 30px;">Acesso ao Reino</h2>
+<div id="auth-container">
+    <!-- Usando o seu arquivo icone.png que está na pasta -->
+    <img src="icone.png" width="80" height="80" style="margin-bottom: 10px; filter: drop-shadow(0 0 10px var(--dourado-milenio)); object-fit: contain;">
     
-    <div id="form-login" style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; border: 1px solid var(--roxo-magico); width: 100%; max-width: 350px;">
-        <input type="text" id="login-nick" placeholder="NICKNAME" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--dourado-milenio); color: white; border-radius: 5px;">
-        <input type="password" id="login-senha" placeholder="SENHA" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--dourado-milenio); color: white; border-radius: 5px;">
+    <h2 style="color: var(--dourado-milenio); font-family: 'Orbitron'; margin: 0 0 20px 0; font-size: 22px;">REINO DOS DUELISTAS</h2>
+
+    <div id="form-login" style="width: 100%; max-width: 320px;">
+        <input type="text" id="login-nick" placeholder="NICKNAME">
+        <input type="password" id="login-senha" placeholder="SENHA">
         <button class="btn-acao" onclick="executarLogin()">ENTRAR NO DUELO</button>
-        <p onclick="alternarAuth()" style="font-size: 12px; text-align: center; margin-top: 15px; color: var(--dourado-milenio); cursor: pointer;">Não tem conta? Registre-se aqui.</p>
+        <p onclick="alternarAuth(true)" style="cursor:pointer; font-size:12px; color:var(--dourado-milenio); margin-top:15px;">Novo Duelista? Registre-se</p>
     </div>
- </div>
+</div>
     
     <div id="form-registro" style="display: none; background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; border: 1px solid var(--roxo-magico); width: 100%; max-width: 350px;">
         <input type="text" id="reg-nick" placeholder="NICKNAME" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--dourado-milenio); color: white; border-radius: 5px;">
