@@ -484,6 +484,20 @@ function mostrarApp() {
         }
         exibirLoader(false);
     }
+    
+// Função para trocar entre Login e Registro (Ponto 3 e 1)
+function alternarAuth(mostrarRegistro) {
+    const login = document.getElementById('form-login');
+    const registro = document.getElementById('form-registro');
+    
+    if (mostrarRegistro) {
+        if (login) login.style.display = 'none';
+        if (registro) registro.style.display = 'block';
+    } else {
+        if (login) login.style.display = 'block';
+        if (registro) registro.style.display = 'none';
+    }
+}
 
     // Função que o BOTÃO chama para pegar os dados da tela
 async function executarRegistro() {
