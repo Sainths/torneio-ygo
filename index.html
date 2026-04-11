@@ -456,28 +456,66 @@ function mostrarApp() {
 }
 
     // 1. REGISTRO E LOGIN (Ponto 1, 2 e 3)
-    async function registrar(nick, deck, senha) {
-        exibirLoader(true, "Invocando ID do Destino...");
-        try {
-            const response = await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'registrar',
-                    nickname: nick,
-                    deck: deck,
-                    senha: senha
-                })
-            });
-            const res = await response.json();
-     if(res.status === "sucesso") {
-    alert("Registro concluído! Seu ID é: " + res.id);
-    // Salva os dados no navegador para não precisar logar agora
-    localStorage.setItem('duelista_v1', JSON.stringify({
-        id: res.id, 
-        nickname: nick, 
-        estrelas: 10
-    }));
-    location.reload(); // Recarrega para já entrar no Dashboard
+ // 1. FUNÇÃO REGISTRAR (CORRIGIDA)
+async function registrar(nick, deck, senha) {
+    exibirLoader(true, "Invocando ID do Destino...");
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'registrar',
+                nickname: nick,
+                deck: deck,
+                senha: senha
+            })
+        });
+        const res = await response.json();
+        
+        if (res.status === "sucesso") {
+            alert("Registro concluído! Seu ID é: " + res.id);
+            localStorage.setItem('duelista_v1', JSON.stringify({
+                id: res.id, 
+                nickname: nick, 
+                estrelas: 10
+            }));
+            location.reload(); 
+        } else {
+            alert("Erro: " + res.message);
+        }
+    } catch (e) {
+        console.error("Erro no registro:", e);
+        alert("Erro de conexão com o Reino dos Duelistas.");
+    } finally {
+        exibirLoader(false);
+    }
+}
+
+// 2. FUNÇÃO LOGIN (CORRIGIDA COM CATCH)
+async function login(nick, senha) {
+    exibirLoader(true, "Verificando Credenciais...");
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'login',
+                nickname: nick,
+                senha: senha
+            })
+        });
+        const res = await response.json();
+        
+        if (res.status === "sucesso") {
+            localStorage.setItem('duelista_v1', JSON.stringify(res));
+            location.reload();
+        } else {
+            alert("Nickname ou Senha incorretos!");
+        }
+    } catch (e) {
+        console.error("Erro no login:", e);
+        alert("Falha ao acessar o servidor de duelos.");
+    } finally {
+        exibirLoader(false);
+    }
 }
 
     // Função que o BOTÃO chama para pegar os dados da tela
@@ -493,24 +531,6 @@ async function executarRegistro() {
 
     // Chama a função que você já tem (a "registrar")
     await registrar(nick, deck, senha);
-}
-
-// Aproveite e adicione a do Login também para o outro botão funcionar:
-async function executarLogin() {
-    const nick = document.getElementById('login-usuario').value;
-    const senha = document.getElementById('login-pass').value;
-
-    if (!nick || !senha) {
-        alert("Informe Nick e Senha!");
-        return;
-    }
-
-    // Chama a função de login (certifique-se de que o nome da sua função de login é 'login')
-    if (typeof login === "function") {
-        await login(nick, senha);
-    } else {
-        alert("Sistema de login em manutenção.");
-    }
 }
 
     // 2. SISTEMA DE PAREAMENTO (Ponto 7, 8, 21 e 22)
