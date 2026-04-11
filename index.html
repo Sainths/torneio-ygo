@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icone.png">
 
-    <style>
+<style>
 input {
     width: 100%;
     padding: 12px;
@@ -64,14 +64,14 @@ input:focus {
     flex-direction: column; 
     align-items: center; 
     justify-content: center;
-    position: fixed; /* Isso trava o login na tela e ignora lixo no fundo */
+    position: relative; /* Isso trava o login na tela e ignora lixo no fundo */
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
     padding: 20px;
     box-sizing: border-box;
-    z-index: 100;
+    z-index: 10;
     background: linear-gradient(135deg, #0a0a0a, #1a0033);
 }
 
@@ -87,7 +87,7 @@ input:focus {
             padding: 20px; 
             display: none; 
         }
-    </style>
+</style>
 </head>
 
 <style>
@@ -291,8 +291,8 @@ input:focus {
         <input type="text" id="reg-deck" placeholder="NOME DO SEU DECK" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--dourado-milenio); color: white; border-radius: 5px;">
         <input type="password" id="reg-senha" placeholder="SENHA" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--dourado-milenio); color: white; border-radius: 5px;">
         <button class="btn-acao" onclick="executarRegistro()" style="background: linear-gradient(45deg, #ffd700, #b8860b); color: #000;">CRIAR ID DE DUELISTA</button>
-        <button type="button" onclick="alternarAuth(true)" style="background:none; border:none; color:var(--dourado-milenio); cursor:pointer; text-decoration:underline; font-size:11px; width:100%; margin-top:15px; font-family:'Orbitron';">
-          NOVO DUELISTA? REGISTRE-SE
+        <button type="button" onclick="console.log('Botão clicado'); alternarAuth(true)" style="position: relative; z-index: 100; padding: 10px; cursor: pointer;">
+            NOVO DUELISTA? REGISTRE-SE
         </button>
     </div>
 </div>
