@@ -12,6 +12,22 @@
     <link rel="icon" href="icone.png">
 
     <style>
+input {
+    width: 100%;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--roxo-magico);
+    color: white;
+    border-radius: 8px;
+    transition: 0.3s;
+    outline: none;
+}
+
+input:focus {
+    border-color: var(--dourado-milenio);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
         html, body {
     margin: 0;
     padding: 0;
@@ -228,14 +244,28 @@
 
     <!-- CONTAINER DE LOGIN CENTRALIZADO -->
     <div id="auth-container">
-    <div style="margin-bottom: 20px;">
-        <h2 style="color: var(--dourado-milenio); font-family: 'Orbitron'; margin: 0;">REINO DOS DUELISTAS</h2>
-    </div>
-    
-    <div id="form-login" style="width: 90%; max-width: 320px;">
-        <input type="text" id="login-nick" placeholder="NICKNAME">
-        <input type="password" id="login-senha" placeholder="SENHA">
+    <!-- Ícone e Título acima do Card -->
+    <img src="icone.png" width="80" style="margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--dourado-milenio));">
+    <h2 style="color: var(--dourado-milenio); font-family: 'Orbitron'; font-size: 20px; margin-bottom: 25px;">REINO DOS DUELISTAS</h2>
+
+    <!-- O Card de Login -->
+    <div id="form-login" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; border: 1px solid var(--roxo-magico); box-shadow: var(--borda-glow); width: 100%; max-width: 340px; box-sizing: border-box;">
+        
+        <div style="position: relative; margin-bottom: 15px;">
+            <i class="fas fa-user" style="position: absolute; left: 12px; top: 14px; color: var(--dourado-milenio);"></i>
+            <input type="text" id="login-nick" placeholder="NICKNAME" style="padding-left: 40px; margin-bottom: 0;">
+        </div>
+
+        <div style="position: relative; margin-bottom: 20px;">
+            <i class="fas fa-lock" style="position: absolute; left: 12px; top: 14px; color: var(--dourado-milenio);"></i>
+            <input type="password" id="login-senha" placeholder="SENHA" style="padding-left: 40px; margin-bottom: 0;">
+        </div>
+
         <button class="btn-acao" onclick="executarLogin()">ENTRAR NO DUELO</button>
+        
+        <p onclick="alternarAuth(true)" style="cursor:pointer; font-size: 11px; color: var(--dourado-milenio); margin-top: 20px; text-align: center; text-transform: uppercase; letter-spacing: 1px;">
+            Novo Duelista? <span style="text-decoration: underline;">Registre-se</span>
+        </p>
     </div>
 </div>
 
