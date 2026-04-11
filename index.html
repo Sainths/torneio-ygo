@@ -455,6 +455,33 @@ function mostrarApp() {
     if (typeof atualizarDashboard === "function") atualizarDashboard();
 }
 
+// Função que o botão "ENTRAR" chama
+async function executarLogin() {
+    const nick = document.getElementById('login-usuario').value;
+    const senha = document.getElementById('login-pass').value;
+
+    if (!nick || !senha) {
+        alert("Informe Nickname e Senha!");
+        return;
+    }
+    // Chama a função logística que já temos
+    await login(nick, senha);
+}
+
+// Função que o botão "CRIAR ID" chama
+async function executarRegistro() {
+    const nick = document.getElementById('reg-usuario').value;
+    const deck = document.getElementById('reg-deck-name').value;
+    const senha = document.getElementById('reg-pass').value;
+
+    if (!nick || !deck || !senha) {
+        alert("Preencha todos os campos, Duelista!");
+        return;
+    }
+    // Chama a função logística que já temos
+    await registrar(nick, deck, senha);
+}
+
 // --- SISTEMA DE ACESSO ---
 async function registrar(nick, deck, senha) {
     if (typeof exibirLoader === "function") exibirLoader(true, "Invocando ID do Destino...");
