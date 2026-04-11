@@ -201,12 +201,22 @@
 </style>
 </head>
 <body>
-
-    <div id="loader">
+    
+    <!-- LOADER CORRIGIDO (Começa escondido para não travar no meio da tela) -->
+    <div id="loader" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); flex-direction: column; justify-content: center; align-items: center; z-index: 9999;">
         <div class="spinner"></div>
-        <p style="margin-top:20px; font-family:'Orbitron'">Buscando Duelista Digno...</p>
-        <button onclick="cancelarBusca()" class="btn-acao" style="width: auto; background: #555;">CANCELAR</button>
+        <p id="loader-msg" style="margin-top:20px; font-family:'Orbitron'; color: gold;">Invocando...</p>
     </div>
+
+    <!-- CONTAINER DE LOGIN CENTRALIZADO -->
+    <div id="auth-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; width: 100%; box-sizing: border-box; padding: 20px;">
+        <h2 style="color: var(--dourado-milenio); font-family: 'Orbitron'; text-align: center; margin-bottom: 30px;">REINO DOS DUELISTAS</h2>
+        
+        <div id="form-login" style="width: 100%; max-width: 320px;">
+             <!-- Seus campos de login aqui -->
+        </div>
+    </div>
+
 
 <!-- TELA DE LOGIN / REGISTRO -->
 <div id="auth-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center;">
