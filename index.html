@@ -244,28 +244,30 @@ input:focus {
 
     <!-- CONTAINER DE LOGIN CENTRALIZADO -->
     <div id="auth-container">
-    <!-- Ícone e Título acima do Card -->
-    <img src="icone.png" width="80" style="margin-bottom: 15px; filter: drop-shadow(0 0 10px var(--dourado-milenio));">
-    <h2 style="color: var(--dourado-milenio); font-family: 'Orbitron'; font-size: 20px; margin-bottom: 25px;">REINO DOS DUELISTAS</h2>
+    <!-- ÍCONE E TÍTULO -->
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="icone.png" width="70" style="filter: drop-shadow(0 0 8px var(--dourado-milenio));">
+        <h2 style="color: var(--dourado-milenio); font-family: 'Orbitron'; font-size: 18px; margin: 10px 0 0 0;">REINO DOS DUELISTAS</h2>
+    </div>
 
-    <!-- O Card de Login -->
-    <div id="form-login" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; border: 1px solid var(--roxo-magico); box-shadow: var(--borda-glow); width: 100%; max-width: 340px; box-sizing: border-box;">
-        
-        <div style="position: relative; margin-bottom: 15px;">
-            <i class="fas fa-user" style="position: absolute; left: 12px; top: 14px; color: var(--dourado-milenio);"></i>
-            <input type="text" id="login-nick" placeholder="NICKNAME" style="padding-left: 40px; margin-bottom: 0;">
+    <!-- CARD DE LOGIN -->
+    <div id="form-login" style="background: rgba(30, 0, 60, 0.6); backdrop-filter: blur(15px); padding: 25px; border-radius: 20px; border: 1px solid var(--dourado-milenio); box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 100%; max-width: 320px;">
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="login-usuario" placeholder="NICKNAME" style="margin-bottom: 10px;">
+            <input type="password" id="login-pass" placeholder="SENHA">
         </div>
-
-        <div style="position: relative; margin-bottom: 20px;">
-            <i class="fas fa-lock" style="position: absolute; left: 12px; top: 14px; color: var(--dourado-milenio);"></i>
-            <input type="password" id="login-senha" placeholder="SENHA" style="padding-left: 40px; margin-bottom: 0;">
-        </div>
-
         <button class="btn-acao" onclick="executarLogin()">ENTRAR NO DUELO</button>
-        
-        <p onclick="alternarAuth(true)" style="cursor:pointer; font-size: 11px; color: var(--dourado-milenio); margin-top: 20px; text-align: center; text-transform: uppercase; letter-spacing: 1px;">
-            Novo Duelista? <span style="text-decoration: underline;">Registre-se</span>
-        </p>
+        <p onclick="alternarAuth(true)" style="cursor:pointer; font-size: 11px; color: var(--dourado-milenio); text-align: center; margin-top: 15px;">NOVO DUELISTA? REGISTRE-SE</p>
+    </div>
+
+    <!-- CARD DE REGISTRO (Escondido por padrão) -->
+    <div id="form-registro" style="display: none; background: rgba(30, 0, 60, 0.6); backdrop-filter: blur(15px); padding: 25px; border-radius: 20px; border: 1px solid var(--roxo-magico); box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 100%; max-width: 320px;">
+        <h3 style="color: #fff; font-size: 14px; text-align: center; margin-top: 0;">NOVO CADASTRO</h3>
+        <input type="text" id="reg-usuario" placeholder="NICKNAME">
+        <input type="text" id="reg-deck-name" placeholder="NOME DO DECK">
+        <input type="password" id="reg-pass" placeholder="SENHA">
+        <button class="btn-acao" onclick="executarRegistro()" style="background: linear-gradient(45deg, #ffd700, #b8860b); color: #000;">CRIAR ID</button>
+        <p onclick="alternarAuth(false)" style="cursor:pointer; font-size: 11px; color: var(--dourado-milenio); text-align: center; margin-top: 15px;">JÁ TEM ID? FAÇA LOGIN</p>
     </div>
 </div>
 
@@ -459,7 +461,6 @@ function mostrarApp() {
     if (typeof atualizarDashboard === "function") atualizarDashboard();
 }
 
-
     // 1. REGISTRO E LOGIN (Ponto 1, 2 e 3)
     async function registrar(nick, deck, senha) {
         exibirLoader(true, "Invocando ID do Destino...");
@@ -483,6 +484,39 @@ function mostrarApp() {
         }
         exibirLoader(false);
     }
+
+    // Função que o BOTÃO chama para pegar os dados da tela
+async function executarRegistro() {
+    const nick = document.getElementById('reg-usuario').value;
+    const deck = document.getElementById('reg-deck-name').value;
+    const senha = document.getElementById('reg-pass').value;
+
+    if (!nick || !deck || !senha) {
+        alert("Preencha todos os campos, Duelista!");
+        return;
+    }
+
+    // Chama a função que você já tem (a "registrar")
+    await registrar(nick, deck, senha);
+}
+
+// Aproveite e adicione a do Login também para o outro botão funcionar:
+async function executarLogin() {
+    const nick = document.getElementById('login-usuario').value;
+    const senha = document.getElementById('login-pass').value;
+
+    if (!nick || !senha) {
+        alert("Informe Nick e Senha!");
+        return;
+    }
+
+    // Chama a função de login (certifique-se de que o nome da sua função de login é 'login')
+    if (typeof login === "function") {
+        await login(nick, senha);
+    } else {
+        alert("Sistema de login em manutenção.");
+    }
+}
 
     // 2. SISTEMA DE PAREAMENTO (Ponto 7, 8, 21 e 22)
     function abrirArena() {
