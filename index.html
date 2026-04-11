@@ -455,10 +455,9 @@ function mostrarApp() {
     if (typeof atualizarDashboard === "function") atualizarDashboard();
 }
 
-    // 1. REGISTRO E LOGIN (Ponto 1, 2 e 3)
- // 1. FUNÇÃO REGISTRAR (CORRIGIDA)
+// --- SISTEMA DE ACESSO ---
 async function registrar(nick, deck, senha) {
-    exibirLoader(true, "Invocando ID do Destino...");
+    if (typeof exibirLoader === "function") exibirLoader(true, "Invocando ID do Destino...");
     try {
         const response = await fetch(WEB_APP_URL, {
             method: 'POST',
@@ -480,20 +479,18 @@ async function registrar(nick, deck, senha) {
             }));
             location.reload(); 
         } else {
-            alert("Erro: " + res.message);
+            alert("Erro: " + (res.message || "Falha no registro"));
         }
     } catch (e) {
         console.error("Erro no registro:", e);
         alert("Erro de conexão com o Reino dos Duelistas.");
     } finally {
-        exibirLoader(false);
+        if (typeof exibirLoader === "function") exibirLoader(false);
     }
 }
 
-// --- FINAL DO SCRIPT SEM ERROS ---
-
 async function login(nick, senha) {
-    exibirLoader(true, "Verificando...");
+    if (typeof exibirLoader === "function") exibirLoader(true, "Verificando...");
     try {
         const response = await fetch(WEB_APP_URL, {
             method: 'POST',
@@ -510,11 +507,10 @@ async function login(nick, senha) {
         console.error(e);
         alert("Falha no servidor.");
     } finally {
-        exibirLoader(false);
+        if (typeof exibirLoader === "function") exibirLoader(false);
     }
 }
 
-// 1. FECHAMENTO DO SCRIPT (Sem chaves sobrando)
 </script>
 </body>
 </html>
