@@ -1,9 +1,0 @@
-{
-  "name": "Yu-Gi-Oh Tournament",
-  "short_name": "YGO App",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#d4af37",
-  "icons": [{ "src": "icon.png", "sizes": "512x512", "type": "image/png" }]
-}
