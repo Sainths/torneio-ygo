@@ -43,23 +43,23 @@
     display: none !important; 
 }
 
-/* Força o container de login a ignorar qualquer margem externa */
 #auth-container { 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
     justify-content: center;
-    height: 100vh; /* Altura exata da tela */
-    position: absolute; /* Evita que outros itens empurrem ele */
-    top: 0;
-    left: 0;
+    min-height: 100vh; /* Ocupa a tela toda */
     width: 100%;
+    position: relative; /* Mudamos de absolute para relative */
+    padding: 20px;
+    gap: 20px; /* Cria um espaço fixo entre o título e o login */
 }
 
-/* Garante que o título não empurre tudo para baixo */
 #auth-container h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
+    margin: 0; /* Remove margens que causam sobreposição */
+    text-align: center;
+    z-index: 2;
+}
 
         .app-container { 
             max-width: 500px; 
@@ -217,7 +217,7 @@
 <body>
     
     <!-- LOADER CORRIGIDO (Começa escondido para não travar no meio da tela) -->
-    <div id="loader" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); flex-direction: column; justify-content: center; align-items: center; z-index: 9999;">
+    <div id="loader" style="display: none !important; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); flex-direction: column; justify-content: center; align-items: center; z-index: 9999;">
         <div class="spinner"></div>
         <p id="loader-msg" style="margin-top:20px; font-family:'Orbitron'; color: gold;">Invocando...</p>
     </div>
@@ -275,7 +275,7 @@
         </div>
 
 <!-- No Bloco de Notas, dentro do body -->
-<div id="aba-juiz" style="display:none; background: #222; border: 2px solid gold;">
+<div id="aba-juiz" style="display:none !important; background: #222; border: 2px solid gold;">
    <h3>Painel de Controle do Juiz</h3>
    <button onclick="resetarPlanilha()">RESETAR TORNEIO</button>
     <div
@@ -295,7 +295,9 @@
                 <div id="top1-nome" style="font-size: 18px; font-weight: bold; color: var(--dourado-milenio);">--</div>
                 <div id="top1-deck" style="font-size: 10px; margin-bottom: 5px;">Deck --</div>
                 <div style="font-size: 20px;"><i class="fas fa-star estrela-ygo"></i> <span id="top1-estrelas">0</span></div>
+                </div>
             </div>
+        
 
             <div class="card-top top-3">
                 <i class="fas fa-medal medal-icon"></i>
