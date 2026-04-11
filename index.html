@@ -428,6 +428,20 @@ input:focus {
     // URL que você copiou ao publicar o Google Apps Script (PARTE 1)
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; 
 
+    // Função para trocar entre Login e Registro (Ponto 3 e 1)
+function alternarAuth(mostrarRegistro) {
+    const login = document.getElementById('form-login');
+    const registro = document.getElementById('form-registro');
+    
+    if (mostrarRegistro) {
+        if (login) login.style.display = 'none';
+        if (registro) registro.style.display = 'block';
+    } else {
+        if (login) login.style.display = 'block';
+        if (registro) registro.style.display = 'none';
+    }
+}
+    
     // Armazenamento Local (Manter logado - Ponto 2 e 3)
     let jogadorLogado = JSON.parse(localStorage.getItem('duelista_v1')) || null;
 
@@ -484,20 +498,6 @@ function mostrarApp() {
         }
         exibirLoader(false);
     }
-    
-// Função para trocar entre Login e Registro (Ponto 3 e 1)
-function alternarAuth(mostrarRegistro) {
-    const login = document.getElementById('form-login');
-    const registro = document.getElementById('form-registro');
-    
-    if (mostrarRegistro) {
-        if (login) login.style.display = 'none';
-        if (registro) registro.style.display = 'block';
-    } else {
-        if (login) login.style.display = 'block';
-        if (registro) registro.style.display = 'none';
-    }
-}
 
     // Função que o BOTÃO chama para pegar os dados da tela
 async function executarRegistro() {
