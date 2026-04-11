@@ -1,186 +1,635 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+<link rel="manifest" href="manifest.json">
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YGO Arena</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reino dos Duelistas - App</title>
+    <!-- Link para ícones e fontes épicas -->
     <link rel="stylesheet" href="https://cloudflare.com">
+    <link href="https://googleapis.com" rel="stylesheet">
+    
     <style>
-        :root { --ouro: #d4af37; --prata: #c0c0c0; --bronze: #cd7f32; --roxo: #4b0082; --preto: #050505; --card: #151515; }
-        body { background: var(--preto); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
-        
-        #loading { position: fixed; inset: 0; background: var(--preto); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; }
-        .pulse-text { color: var(--ouro); font-weight: bold; letter-spacing: 3px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        :root {
+            --roxo-profundo: #1a0033;
+            --roxo-magico: #4b0082;
+            --dourado-milenio: #d4af37;
+            --preto-caos: #0a0a0a;
+            --texto-claro: #e0e0e0;
+            --borda-glow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
 
-        /* Pódio Lendário */
-        .header { background: linear-gradient(to bottom, var(--roxo), var(--preto)); padding: 20px 10px; border-bottom: 3px solid var(--ouro); text-align: center; }
-        .podium { display: flex; justify-content: center; align-items: flex-end; gap: 8px; min-height: 210px; margin: 15px 0; }
-        .p-card { background: var(--card); border-radius: 8px; padding: 10px; flex: 1; text-align: center; border: 2px solid #333; font-size: 11px; }
-        .t1 { height: 180px; border-color: var(--ouro); box-shadow: 0 0 20px var(--ouro); order: 2; position: relative; }
-        .t2 { height: 140px; border-color: var(--prata); order: 1; }
-        .t3 { height: 110px; border-color: var(--bronze); order: 3; }
-        .crown { color: var(--ouro); position: absolute; top: -30px; left: 50%; transform: translateX(-50%); font-size: 25px; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--preto-caos), var(--roxo-profundo));
+            color: var(--texto-claro);
+            font-family: 'Roboto', sans-serif;
+            overflow-x: hidden;
+        }
 
-        /* Status Cards */
-        .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 15px; }
-        .stat-card { background: var(--card); border-left: 4px solid var(--ouro); padding: 12px; border-radius: 5px; text-align: center; }
-        .stat-card i { color: var(--ouro); font-size: 18px; margin-bottom: 5px; }
+        h1, h2, .id-jogador { font-family: 'Orbitron', sans-serif; text-transform: uppercase; }
 
-        /* Ranking Detalhado */
-        .rank-box { background: var(--card); margin: 10px 15px; border-radius: 8px; border: 1px solid #333; overflow: hidden; }
-        .rank-main { padding: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        .rank-sub { padding: 8px 12px; display: flex; justify-content: space-between; font-size: 10px; background: #0d0d0d; color: #888; }
-        .v { color: #2ecc71; } .e { color: #f1c40f; } .d { color: #e74c3c; }
+        /* --- CONTAINER PRINCIPAL --- */
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
 
-        /* Navegação */
-        .nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 2px solid var(--ouro); display: flex; justify-content: space-around; padding: 12px 0; z-index: 9999; }
-        .nav-link { color: #444; text-decoration: none; text-align: center; font-size: 22px; }
-        .nav-link.active { color: var(--ouro); text-shadow: 0 0 10px var(--ouro); }
-        .nav-link span { display: block; font-size: 9px; font-weight: bold; margin-top: 4px; }
+        /* --- DASHBOARD TOP 3 --- */
+        .top3-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 10px;
+            margin-top: 30px;
+            height: 220px;
+        }
 
-        .secao { display: none; }
-        .ativa { display: block; }
-        .btn-gold { background: linear-gradient(45deg, #d4af37, #f1c40f); color: black; border: none; padding: 15px; width: 95%; font-weight: bold; border-radius: 5px; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
-        input { background: #111; border: 1px solid var(--ouro); color: white; padding: 12px; width: 85%; margin: 8px 0; border-radius: 5px; }
-    </style>
+        .card-top {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--dourado-milenio);
+            border-radius: 15px 15px 5px 5px;
+            text-align: center;
+            padding: 10px;
+            width: 30%;
+            position: relative;
+            box-shadow: var(--borda-glow);
+        }
+
+        /* Destaque Rei dos Jogos (Centro) */
+        .rei-dos-jogos { 
+            height: 100%; 
+            order: 2; 
+            border-width: 3px;
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
+        }
+        .top-2 { height: 85%; order: 1; border-color: #c0c0c0; } /* Prata */
+        .top-3 { height: 75%; order: 3; border-color: #cd7f32; } /* Bronze */
+
+        .coroa { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 24px; color: var(--dourado-milenio); }
+
+        .medal-icon { font-size: 20px; margin-bottom: 5px; }
+
+        /* --- CARDS DE ESTATÍSTICAS --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .stat-card {
+            background: rgba(75, 0, 130, 0.2);
+            border-left: 4px solid var(--dourado-milenio);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-card i { font-size: 22px; color: var(--dourado-milenio); margin-bottom: 8px; }
+        .stat-value { font-size: 18px; font-weight: bold; color: #fff; }
+        .stat-label { font-size: 11px; color: #aaa; text-transform: uppercase; }
+
+<!-- ARENA DE APOSTAS -->
+<div id="arena-apostas" style="margin-top: 20px;">
+    <h3 style="font-family:'Orbitron'; color:var(--dourado-milenio); text-align:center;">Salas de Apostas</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button class="btn-sala" onclick="entrarSala(1)">1 <i class="fas fa-star estrela-ygo"></i></button>
+        <button class="btn-sala" onclick="entrarSala(3)">3 <i class="fas fa-star estrela-ygo"></i></button>
+        <button class="btn-sala" onclick="entrarSala(5)">5 <i class="fas fa-star estrela-ygo"></i></button>
+        <button class="btn-sala" onclick="entrarSala(10)">10 <i class="fas fa-star estrela-ygo"></i></button>
+    </div>
+</div>
+
+<style>
+    .btn-sala {
+        background: rgba(75, 0, 130, 0.4);
+        border: 1px solid var(--dourado-milenio);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        font-family: 'Orbitron';
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .btn-sala:hover { background: var(--roxo-magico); box-shadow: var(--borda-glow); }
+</style>
+
+        /* --- BOTÕES ESTILO MOBILE --- */
+        .btn-acao {
+            background: linear-gradient(45deg, var(--roxo-magico), #8a2be2);
+            border: none;
+            color: white;
+            padding: 15px;
+            width: 100%;
+            border-radius: 12px;
+            font-weight: bold;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-acao:active { transform: scale(0.95); }
+
+        /* --- OVERLAY DE CARREGAMENTO --- */
+        #loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 50px; height: 50px;
+            border: 5px solid var(--roxo-magico);
+            border-top: 5px solid var(--dourado-milenio);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- ESTRELA DE NIVEL --- */
+        .estrela-ygo { color: #ffcc00; text-shadow: 0 0 5px #ff0000; }
+
+<!-- Exemplo de como ficará o botão ao lado de cada jogador no Ranking -->
+<button class="btn-desafio" onclick="abrirMenuDesafio('ID_DO_OPONENTE', 'NICKNAME_OPONENTE')">
+    <i class="fas fa-crosshairs"></i>
+</button>
+
+<style>
+    .btn-desafio {
+        background: none;
+        border: 1px solid var(--dourado-milenio);
+        color: var(--dourado-milenio);
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .btn-desafio:hover { background: var(--dourado-milenio); color: #000; }
+</style>
 </head>
 <body>
 
-<div id="loading"><p class="pulse-text">É HORA DO DUELO!</p></div>
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top:20px; font-family:'Orbitron'">Buscando Duelista Digno...</p>
+        <button onclick="cancelarBusca()" class="btn-acao" style="width: auto; background: #555;">CANCELAR</button>
+    </div>
 
-<!-- DASHBOARD -->
-<div id="aba-home" class="secao ativa">
-    <div class="header">
-        <h3 style="color:var(--ouro); margin:0;">REINO DOS DUELISTAS</h3>
-        <div class="podium" id="render-podio"></div>
+<!-- TELA DE LOGIN / REGISTRO -->
+<div id="auth-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+    <img src="https://flaticon.com" width="80" style="margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--dourado-milenio));">
+    <h2 style="color: var(--dourado-milenio); margin-bottom: 30px;">Acesso ao Reino</h2>
+    
+    <div id="form-login" style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; border: 1px solid var(--roxo-magico); width: 100%; max-width: 350px;">
+        <input type="text" id="login-nick" placeholder="NICKNAME" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--dourado-milenio); color: white; border-radius: 5px;">
+        <input type="password" id="login-senha" placeholder="SENHA" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--dourado-milenio); color: white; border-radius: 5px;">
+        <button class="btn-acao" onclick="executarLogin()">ENTRAR NO DUELO</button>
+        <p onclick="alternarAuth()" style="font-size: 12px; text-align: center; margin-top: 15px; color: var(--dourado-milenio); cursor: pointer;">Não tem conta? Registre-se aqui.</p>
     </div>
-    <div class="dash-grid">
-        <div class="stat-card"><i class="fas fa-swords"></i><br><small>DUELOS</small><br><b id="d-totais">0</b></div>
-        <div class="stat-card"><i class="fas fa-star"></i><br><small>ESTRELAS</small><br><b id="e-totais">0</b></div>
-        <div class="stat-card"><i class="fas fa-shark"></i><br><small>O SHARK</small><br><b id="shark-n">---</b></div>
-        <div class="stat-card"><i class="fas fa-trophy"></i><br><small>MAIOR APOSTA</small><br><b>10 ⭐</b></div>
-    </div>
-    <div style="background:var(--card); margin:15px; padding:15px; border-left:4px solid var(--roxo); border-radius:5px;">
-        <small style="color:var(--ouro)">MURAL DO JUIZ:</small>
-        <p id="mural-txt" style="margin-top:5px; font-size:13px; opacity:0.8;">Carregando avisos...</p>
+
+    <div id="form-registro" style="display: none; background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; border: 1px solid var(--roxo-magico); width: 100%; max-width: 350px;">
+        <input type="text" id="reg-nick" placeholder="NICKNAME" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--dourado-milenio); color: white; border-radius: 5px;">
+        <input type="text" id="reg-deck" placeholder="NOME DO SEU DECK" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--dourado-milenio); color: white; border-radius: 5px;">
+        <input type="password" id="reg-senha" placeholder="SENHA" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--dourado-milenio); color: white; border-radius: 5px;">
+        <button class="btn-acao" onclick="executarRegistro()" style="background: linear-gradient(45deg, #ffd700, #b8860b); color: #000;">CRIAR ID DE DUELISTA</button>
+        <p onclick="alternarAuth()" style="font-size: 12px; text-align: center; margin-top: 15px; color: var(--dourado-milenio); cursor: pointer;">Já possui ID? Faça Login.</p>
     </div>
 </div>
 
-<!-- RANKING -->
-<div id="aba-ranking" class="secao" style="padding-top:20px;">
-    <h3 style="color:var(--ouro); text-align:center;">RANKING DETALHADO</h3>
-    <div id="render-ranking"></div>
-</div>
+    <div class="app-container">
+        <!-- Dashboard Top 3 -->
+        <div class="top3-container">
+            <div class="card-top top-2">
+                <i class="fas fa-medal medal-icon"></i>
+                <div style="font-size: 12px;">Top 2</div>
+                <div id="top2-nome" style="font-weight: bold;">--</div>
+                <div style="color: var(--dourado-milenio); font-size: 14px;"><i class="fas fa-star estrela-ygo"></i> <span id="top2-estrelas">0</span></div>
+    </div>
 
-<!-- ARENA -->
-<div id="aba-arena" class="secao" style="padding:20px; text-align:center;">
-    <h3 style="color:var(--ouro)">ARENA DE DUELO</h3>
-    <div style="background:var(--card); padding:20px; border-radius:15px; border:1px solid var(--roxo);">
-        <p>Escolha o desafio:</p>
-        <button class="btn-gold" onclick="alert('Duelo Normal: 3 estrelas para o vencedor!')">DUELO NORMAL</button>
-        <button class="btn-gold" onclick="alert('Buscando Oponente 1 ⭐')">APOSTAR 1 ⭐</button>
-        <button class="btn-gold" onclick="alert('Buscando Oponente 3 ⭐')">APOSTAR 3 ⭐</button>
-        <button class="btn-gold" onclick="alert('Buscando Oponente 5 ⭐')">APOSTAR 5 ⭐</button>
-        <button class="btn-gold" onclick="alert('Buscando Oponente 10 ⭐')">APOSTAR 10 ⭐</button>
+<!-- No Bloco de Notas, dentro do body -->
+<div id="aba-juiz" style="display:none; background: #222; border: 2px solid gold;">
+   <h3>Painel de Controle do Juiz</h3>
+   <button onclick="resetarPlanilha()">RESETAR TORNEIO</button>
+    <div
+<!-- Dentro da div id="aba-juiz" que criamos antes -->
+<div id="lista-conflitos" style="margin-top: 15px; border-top: 1px solid #444; padding-top: 10px;">
+    <h4 style="color: #ff4444; font-size: 12px; text-align: center;">CONFLITOS DETECTADOS</h4>
+    <div id="container-conflitos">
+        <!-- O JS vai preencher isso aqui com duelos em erro -->
+        <p style="font-size: 10px; text-align: center; color: #888;">Nenhum conflito no momento.</p>
     </div>
 </div>
 
-<!-- PERFIL -->
-<div id="aba-perfil" class="secao" style="padding:20px; text-align:center;">
-    <div id="box-reg">
-        <h3 style="color:var(--ouro)">NOVO DUELISTA</h3>
-        <input type="text" id="nick" placeholder="Nickname">
-        <input type="text" id="deck" placeholder="Seu Deck">
-        <input type="password" id="pass" placeholder="Senha">
-        <button class="btn-gold" onclick="registrar()">INICIAR JORNADA</button>
-    </div>
-    <div id="box-log" style="display:none; background:var(--card); padding:25px; border-radius:15px; border:2px solid var(--ouro);">
-        <h2 id="meu-nick-txt" style="color:var(--ouro); margin:0;"></h2>
-        <div style="display:flex; justify-content:space-around; margin:15px 0;">
-            <div><small>ESTRELAS</small><br><b id="meu-e-txt" style="color:var(--ouro)">0</b></div>
-            <div><small>STREAK</small><br><b id="meu-st-txt" class="v">0 🔥</b></div>
+            <div class="card-top rei-dos-jogos">
+                <i class="fas fa-crown coroa"></i>
+                <i class="fas fa-eye medal-icon" style="color: var(--dourado-milenio)"></i>
+                <div style="font-size: 12px;">Rei dos Jogos</div>
+                <div id="top1-nome" style="font-size: 18px; font-weight: bold; color: var(--dourado-milenio);">--</div>
+                <div id="top1-deck" style="font-size: 10px; margin-bottom: 5px;">Deck --</div>
+                <div style="font-size: 20px;"><i class="fas fa-star estrela-ygo"></i> <span id="top1-estrelas">0</span></div>
+            </div>
+
+            <div class="card-top top-3">
+                <i class="fas fa-medal medal-icon"></i>
+                <div style="font-size: 12px;">Top 3</div>
+                <div id="top3-nome" style="font-weight: bold;">--</div>
+                <div style="color: var(--dourado-milenio); font-size: 14px;"><i class="fas fa-star estrela-ygo"></i> <span id="top3-estrelas">0</span></div>
+            </div>
         </div>
-        <button class="btn-gold" style="background:#555; color:white;" onclick="loginJuiz()">PAINEL DO JUIZ</button>
-        <button class="btn-gold" style="background:#222; margin-top:10px;" onclick="logout()">SAIR</button>
+
+        <!-- Cards de Estatísticas Gerais -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-layer-group"></i>
+                <span class="stat-value" id="total-estrelas">0</span>
+                <span class="stat-label">Estrelas Totais</span>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-fist-raised"></i>
+                <span class="stat-value" id="total-duelos">0</span>
+                <span class="stat-label">Duelos Gerais</span>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-shark"></i>
+                <span class="stat-value" id="shark-player">--</span>
+                <span class="stat-label">Shark (Apostas)</span>
+            </div>
+            <div class="stat-card" onclick="verRegras()">
+                <i class="fas fa-scroll"></i>
+                <span class="stat-value">REGRAS</span>
+                <span class="stat-label">Torneio</span>
+            </div>
+        </div>
+
+        <!-- Ações Principais -->
+        <button class="btn-acao" onclick="abrirArena()">
+            <i class="fas fa-swords"></i> ARENA DE DUELOS
+        </button>
+
+        <button class="btn-acao" style="background: #333;" onclick="abrirPerfil()">
+            <i class="fas fa-user-circle"></i> MEU PERFIL / RANKING
+        </button>
+
+        <div id="notificacao-aviso" style="margin-top: 20px; padding: 15px; background: rgba(255,0,0,0.1); border-radius: 10px; border: 1px solid red; display:none;">
+            <i class="fas fa-exclamation-triangle"></i> Conflito de resultado! O Juiz foi avisado.
+        </div>
+
+<!-- MODAL DE REGRAS -->
+<div id="modal-regras" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; padding:20px; box-sizing:border-box;">
+    <div style="background:var(--roxo-profundo); border:2px solid var(--dourado-milenio); padding:20px; border-radius:15px; max-height:80%; overflow-y:auto;">
+        <h2 style="font-family:'Orbitron'; color:var(--dourado-milenio); text-align:center;">DIRETRIZES DO REINO</h2>
+        <p id="texto-regras" style="white-space: pre-wrap; line-height:1.6; font-size:14px; color:#ccc;">Carregando pergaminhos...</p>
+        <button class="btn-acao" onclick="fecharRegras()">FECHAR</button>
     </div>
 </div>
 
-<nav class="nav">
-    <a href="javascript:void(0)" class="nav-link active" onclick="mudarAba(this, 'home')"><i class="fas fa-home"></i><span>Home</span></a>
-    <a href="javascript:void(0)" class="nav-link" onclick="mudarAba(this, 'ranking')"><i class="fas fa-trophy"></i><span>Rank</span></a>
-    <a href="javascript:void(0)" class="nav-link" onclick="mudarAba(this, 'arena')"><i class="fas fa-swords"></i><span>Arena</span></a>
-    <a href="javascript:void(0)" class="nav-link" onclick="mudarAba(this, 'perfil')"><i class="fas fa-user-circle"></i><span>Perfil</span></a>
-</nav>
+<!-- MODAL DE PERFIL DETALHADO -->
+<div id="modal-perfil" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2500; padding:20px; box-sizing:border-box;">
+    <div style="background:linear-gradient(180deg, var(--roxo-profundo), #000); border:2px solid var(--dourado-milenio); padding:20px; border-radius:20px; text-align:center; position:relative;">
+        
+        <div style="font-family:'Orbitron'; color:var(--dourado-milenio); font-size:22px; margin-bottom:5px;" id="perfil-nick">Duelista</div>
+        <div style="font-size:12px; color:#888; margin-bottom:20px;" id="perfil-id">YG-000</div>
 
+        <div style="background:rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+            <div><span style="display:block; font-size:10px; color:var(--dourado-milenio);">DECK</span><strong id="perfil-deck">--</strong></div>
+            <div><span style="display:block; font-size:10px; color:var(--dourado-milenio);">ESTRELAS</span><strong id="perfil-estrelas">0</strong></div>
+            <div><span style="display:block; font-size:10px; color:var(--dourado-milenio);">VITÓRIAS</span><strong id="perfil-vitorias">0</strong></div>
+            <div><span style="display:block; font-size:10px; color:var(--dourado-milenio);">WINRATE</span><strong id="perfil-winrate">0%</strong></div>
+            <div><span style="display:block; font-size:10px; color:var(--dourado-milenio);">SEQUÊNCIA</span><strong id="perfil-sequencia">0</strong></div>
+            <div><span style="display:block; font-size:10px; color:var(--dourado-milenio);">SHARK</span><strong id="perfil-shark">0</strong></div>
+        </div>
+
+        <button class="btn-acao" onclick="fecharPerfil()">VOLTAR AO REINO</button>
+        <button class="btn-acao" style="background:#500; margin-top:10px;" onclick="logout()">LOGOUT (SAIR)</button>
+    </div>
+</div>
+
+<!-- CAMPO DE EDIÇÃO NA ABA DO JUIZ -->
+<!-- Adicione isso dentro da div id="aba-juiz" -->
+<div style="margin-top:15px; border-top:1px solid #444;">
+    <h4 style="color:var(--dourado-milenio); font-size:12px;">EDITAR REGRAS DO TORNEIO</h4>
+    <textarea id="edit-regras-input" style="width:100%; height:80px; background:#111; color:white; border:1px solid #444; border-radius:5px;"></textarea>
+    <button class="btn-acao" style="padding:5px;" onclick="publicarRegras()">PUBLICAR REGRAS</button>
+</div>
+
+    </div>
 <script>
-    const URL_API = "https://script.google.com/macros/s/AKfycbyDvLfyGsCeoPEp2XZTKqrbDYR2brbs19diA7-dv5Lw43GigVjNtZHYV0Djeuckg-puhw/exec"; 
-    let sJuiz = "";
+    // URL que você copiou ao publicar o Google Apps Script (PARTE 1)
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; 
 
-    function mudarAba(el, nome) {
-        document.querySelectorAll('.secao').forEach(a => a.style.display = 'none');
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        document.getElementById('aba-' + nome).style.display = 'block';
-        el.classList.add('active');
-        if(nome === 'home' || nome === 'ranking') carregarDados();
+    // Armazenamento Local (Manter logado - Ponto 2 e 3)
+    let jogadorLogado = JSON.parse(localStorage.getItem('duelista_v1')) || null;
+
+window.onload = () => {
+    // Se não houver jogador salvo, garante que a tela de auth apareça
+    if (!jogadorLogado) {
+        document.getElementById('auth-container').style.display = 'flex';
+        document.getElementById('painel-principal').style.display = 'none';
+    } else {
+        mostrarApp();
+        atualizarDashboard();
+        verificarNotificacoes();
     }
+};
 
-    async function carregarDados() {
+    // 1. REGISTRO E LOGIN (Ponto 1, 2 e 3)
+    async function registrar(nick, deck, senha) {
+        exibirLoader(true, "Invocando ID do Destino...");
         try {
-            const rRank = await fetch(URL_API + "?acao=getRanking", {redirect:"follow"});
-            const ranking = await rRank.json();
-            const rDash = await fetch(URL_API + "?acao=getDashboard", {redirect:"follow"});
-            const dash = await rDash.json();
-
-            sJuiz = dash.senhaAdmin;
-            document.getElementById('mural-txt').innerText = dash.mural || "Duelos liberados!";
-            document.getElementById('e-totais').innerText = ranking.reduce((a,b) => a + b.estrelas, 0);
-            document.getElementById('d-totais').innerText = Math.floor(ranking.reduce((a,b) => a + b.total, 0) / 2);
-            
-            if(ranking.length > 0) {
-                document.getElementById('shark-n').innerText = ranking[0].nick;
-                document.getElementById('render-podio').innerHTML = `
-                    <div class="p-card t2"><b>TOP 2</b><br>${ranking[1]?.nick || '---'}<br><small>${ranking[1]?.estrelas || 0}⭐</small></div>
-                    <div class="p-card t1"><i class="fas fa-crown crown"></i><b>TOP 1</b><br>${ranking[0].nick}<br><small>${ranking[0].deck}</small></div>
-                    <div class="p-card t3"><b>TOP 3</b><br>${ranking[2]?.nick || '---'}<br><small>${ranking[2]?.estrelas || 0}⭐</small></div>
-                `;
-                document.getElementById('render-ranking').innerHTML = ranking.map((d,i) => `
-                    <div class="rank-box">
-                        <div class="rank-main"><span><b style="color:var(--ouro)">${i+1}º</b> ${d.nick}</span><b>${d.estrelas} ⭐</b></div>
-                        <div class="rank-sub"><span>Deck: ${d.deck} | 🔥 ${d.streak}</span><span>V:${d.v} E:${d.e} D:${d.d} | <b>${d.winrate}</b></span></div>
-                    </div>
-                `).join('');
+            const response = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'registrar',
+                    nickname: nick,
+                    deck: deck,
+                    senha: senha
+                })
+            });
+            const res = await response.json();
+            if(res.status === "sucesso") {
+                alert("Registro concluído! Seu ID é: " + res.id);
+                login(nick, senha);
             }
-        } catch(e) { console.warn("Sync..."); }
-        document.getElementById('loading').style.display = 'none';
-    }
-
-    async function registrar() {
-        const n = document.getElementById('nick').value, d = document.getElementById('deck').value, p = document.getElementById('pass').value;
-        if(!n || !d || !p) return alert("Preencha tudo!");
-        document.getElementById('loading').style.display = 'flex';
-        const res = await fetch(`${URL_API}?acao=registrar&nick=${n}&deck=${d}&senha=${p}`, {redirect:"follow"});
-        const r = await res.json();
-        if(r.sucesso) { localStorage.setItem('y_id', r.id); localStorage.setItem('y_n', n); location.reload(); }
-        else { alert(r.erro); document.getElementById('loading').style.display = 'none'; }
-    }
-
-    function loginJuiz() {
-        const p = prompt("Senha do Juiz:");
-        if(p === sJuiz) alert("Acesso liberado diretamente na planilha de Configurações!");
-        else alert("Senha Incorreta!");
-    }
-
-    window.onload = () => {
-        const id = localStorage.getItem('y_id');
-        if(id && document.getElementById('box-log')) {
-            document.getElementById('box-reg').style.display = 'none';
-            document.getElementById('box-log').style.display = 'block';
-            document.getElementById('meu-nick-txt').innerText = localStorage.getItem('y_n');
+        } catch (e) {
+            alert("Erro na conexão com o Reino dos Duelistas.");
         }
-        carregarDados();
-    };
-    function logout() { localStorage.clear(); location.reload(); }
+        exibirLoader(false);
+    }
+
+    // 2. SISTEMA DE PAREAMENTO (Ponto 7, 8, 21 e 22)
+    function abrirArena() {
+        document.getElementById('loader').style.display = 'flex';
+        // Inicia busca no Sheets
+        buscarOponente();
+    }
+
+    async function buscarOponente() {
+        // Lógica que envia para o Apps Script que o jogador está "BUSCANDO"
+        // O Script devolve um oponente que também esteja "BUSCANDO"
+        // Se encontrar, fecha o loader e abre a tela de Duelo
+    }
+
+    function cancelarBusca() {
+        exibirLoader(false);
+        // Avisar ao servidor para parar de buscar
+    }
+
+    // 3. LÓGICA DE RESULTADOS (Ponto 9 e 13)
+    async function enviarResultado(meuResultado, idDuelo) {
+        // Envia se ganhei, perdi ou empatei
+        // O Servidor (Parte 1) vai comparar com o que o oponente enviou
+        // Se bater: Estrelas são calculadas (Vitória 3, Empate 1, Derrota 0)
+        // Se não bater: Ativa o aviso de conflito para o Juiz
+    }
+
+    // 4. ATUALIZAÇÃO DO DASHBOARD (Ponto 14, 15 e 16)
+    async function atualizarDashboard() {
+        const response = await fetch(WEB_APP_URL + "?action=getDashboard");
+        const dados = await response.json();
+        
+        // Atualiza o Top 1 (Rei dos Jogos)
+        document.getElementById('top1-nome').innerText = dados.ranking[1][1]; // Nickname
+        document.getElementById('top1-estrelas').innerText = dados.ranking[1][4]; // Estrelas
+        
+        // Preenche os outros cards de stats
+        document.getElementById('total-estrelas').innerText = dados.totalEstrelas;
+        // ... lógica para preencher o resto
+    }
+
+    // 5. NOTIFICAÇÕES (Ponto 20)
+    function verificarNotificacoes() {
+        setInterval(async () => {
+            // Pergunta ao Sheets: "Alguém me desafiou?"
+            // Se sim, mostra o pop-up Estilo Mobile
+        }, 5000); // Checa a cada 5 segundos
+    }
+
+async function entrarSala(valor) {
+    // Ponto 6: Só aposta o que tem
+    if (jogadorLogado.estrelas < valor) {
+        alert("Você não tem estrelas suficientes para este desafio!");
+        return;
+    }
+
+    exibirLoader(true, `Buscando duelo de ${valor} estrelas...`);
+    
+    // Envia para o Sheets que estamos na fila de uma sala específica
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'entrarFilaAposta',
+                jogadorId: jogadorLogado.id,
+                valorAposta: valor
+            })
+        });
+        const res = await response.json();
+        
+        if(res.oponenteEncontrado) {
+            iniciarDuelo(res.dueloId, res.oponenteNome, valor);
+        }
+    } catch (e) {
+        console.error("Erro ao entrar na sala");
+    }
+}
+
+function iniciarDuelo(idDuelo, oponente, valor) {
+    exibirLoader(false);
+    alert(`DUELO ENCONTRADO! \nOponente: ${oponente} \nAposta: ${valor} Estrelas`);
+    // Aqui você abriria a tela de marcar resultado (Vitória/Derrota)
+}
+
+    // Funções de Utilidade
+    function exibirLoader(show, msg = "") {
+        const loader = document.getElementById('loader');
+        if(msg) loader.querySelector('p').innerText = msg;
+        loader.style.display = show ? 'flex' : 'none';
+    }
+
+// Envia o desafio para a planilha
+async function enviarDesafio(idOponente, tipo, valor = 0) {
+    if (idOponente === jogadorLogado.id) return alert("Você não pode se autodesafiar!");
+    
+    exibirLoader(true, "Enviando intimação...");
+    await fetch(WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+            action: 'enviarDesafio',
+            deId: jogadorLogado.id,
+            deNick: jogadorLogado.nickname,
+            paraId: idOponente,
+            tipo: tipo, // 'normal' ou 'aposta'
+            valor: valor
+        })
+    });
+    exibirLoader(false);
+    alert("Desafio enviado! Aguarde o oponente aceitar.");
+}
+
+// O Loop de Notificações (Ponto 20)
+setInterval(async () => {
+    if (!jogadorLogado) return;
+    
+    const response = await fetch(`${WEB_APP_URL}?action=checarDesafios&meuId=${jogadorLogado.id}`);
+    const desafio = await response.json();
+    
+    if (desafio.novo) {
+        exibirNotificacaoDesafio(desafio);
+    }
+}, 7000); // Checa a cada 7 segundos para não sobrecarregar
+
+function exibirNotificacaoDesafio(d) {
+    const msg = d.tipo === 'aposta' ? 
+        `${d.deNick} te desafiou para um duelo de ${d.valor} estrelas!` : 
+        `${d.deNick} te desafiou para um duelo normal!`;
+
+    if (confirm(msg + "\nAceitar duelo?")) {
+        // Lógica para aceitar e abrir a arena
+        aceitarDesafio(d.idDuelo);
+    }
+}
+
+    function logout() {
+        localStorage.removeItem('duelista_v1');
+        location.reload();
+    }
+
+async function abrirPerfil() {
+    exibirLoader(true, "Lendo sua alma de duelista...");
+    
+    // Busca dados atualizados da planilha
+    const response = await fetch(`${WEB_APP_URL}?action=getPerfil&id=${jogadorLogado.id}`);
+    const d = await response.json();
+    
+    // Cálculos Essenciais (Ponto 14)
+    const totalDuelos = d.vitorias + d.empates + d.derrotas;
+    const winrate = totalDuelos > 0 ? ((d.vitorias / totalDuelos) * 100).toFixed(1) : 0;
+
+    // Preenche o Modal
+    document.getElementById('perfil-nick').innerText = d.nickname;
+    document.getElementById('perfil-id').innerText = d.id;
+    document.getElementById('perfil-deck').innerText = d.deck;
+    document.getElementById('perfil-estrelas').innerText = d.estrelas;
+    document.getElementById('perfil-vitorias').innerText = d.vitorias;
+    document.getElementById('perfil-winrate').innerText = winrate + "%";
+    document.getElementById('perfil-sequencia').innerText = d.sequencia;
+    document.getElementById('perfil-shark').innerText = d.estrelasApostas;
+
+    exibirLoader(false);
+    document.getElementById('modal-perfil').style.display = 'block';
+}
+
+function fecharPerfil() {
+    document.getElementById('modal-perfil').style.display = 'none';
+}
+
+function logout() {
+    if(confirm("Deseja realmente sair do Reino dos Duelistas?")) {
+        localStorage.removeItem('duelista_v1');
+        location.reload(); // Volta para a tela de login
+    }
+}
+
+// No Bloco de Notas
+function acessarPainelJuiz() {
+    const senha = prompt("Digite a Senha do Organizador:");
+    if (senha === "1234") { // Mude para sua senha
+        // Mostra a aba do juiz que estava escondida
+        document.getElementById('aba-juiz').style.display = 'block'; 
+        alert("Acesso concedido, Mestre dos Duelos!");
+    } else {
+        alert("Senha incorreta!");
+    }
+}
+
+async function carregarConflitos() {
+    const response = await fetch(WEB_APP_URL + "?action=getConflitos");
+    const conflitos = await response.json();
+    const container = document.getElementById('container-conflitos');
+    container.innerHTML = "";
+
+    conflitos.forEach(c => {
+        container.innerHTML += `
+            <div style="background: rgba(255,0,0,0.1); padding: 10px; margin-bottom: 5px; border-radius: 5px; font-size: 11px;">
+                ID: ${c.idDuelo} | ${c.playerA} vs ${c.playerB} <br>
+                <button onclick="decidirDuelo('${c.idDuelo}', '${c.playerA}')" style="background:green; color:white; border:none; padding:3px 7px; margin-top:5px;">Vitoria A</button>
+                <button onclick="decidirDuelo('${c.idDuelo}', '${c.playerB}')" style="background:green; color:white; border:none; padding:3px 7px;">Vitoria B</button>
+            </div>
+        `;
+    });
+}
+
+async function decidirDuelo(idDuelo, idVencedor) {
+    if(confirm("Confirmar vitória de " + idVencedor + "?")) {
+        exibirLoader(true, "Aplicando veredito...");
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'resolverConflito',
+                idDuelo: idDuelo,
+                idVencedor: idVencedor
+            })
+        });
+        alert("O Juiz decidiu o vencedor!");
+        carregarConflitos(); // Atualiza a lista
+        exibirLoader(false);
+    }
+}
+
+async function verRegras() {
+    document.getElementById('modal-regras').style.display = 'block';
+    const response = await fetch(WEB_APP_URL + "?action=getRegras");
+    const texto = await response.text();
+    document.getElementById('texto-regras').innerText = texto;
+}
+
+function fecharRegras() {
+    document.getElementById('modal-regras').style.display = 'none';
+}
+
+async function publicarRegras() {
+    const novoTexto = document.getElementById('edit-regras-input').value;
+    if(!novoTexto) return;
+    
+    exibirLoader(true, "Atualizando pergaminhos...");
+    await fetch(WEB_APP_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'salvarRegra', texto: novoTexto })
+    });
+    exibirLoader(false);
+    alert("Regras publicadas para todos os duelistas!");
+}
+
+async function resetarTorneio() {
+    if (confirm("TEM CERTEZA? Isso apagará todos os duelos e estrelas!")) {
+        exibirLoader(true, "Limpando a Arena...");
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'resetar' }) // Você deve adicionar essa condicional no seu doPost
+        });
+        alert("O Reino dos Duelistas foi restaurado!");
+        location.reload();
+    }
+}
+
 </script>
 </body>
 </html>
