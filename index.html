@@ -492,15 +492,16 @@ function mostrarApp() {
                 })
             });
             const res = await response.json();
-            if(res.status === "sucesso") {
-                alert("Registro concluído! Seu ID é: " + res.id);
-                login(nick, senha);
-            }
-        } catch (e) {
-            alert("Erro na conexão com o Reino dos Duelistas.");
-        }
-        exibirLoader(false);
-    }
+     if(res.status === "sucesso") {
+    alert("Registro concluído! Seu ID é: " + res.id);
+    // Salva os dados no navegador para não precisar logar agora
+    localStorage.setItem('duelista_v1', JSON.stringify({
+        id: res.id, 
+        nickname: nick, 
+        estrelas: 10
+    }));
+    location.reload(); // Recarrega para já entrar no Dashboard
+}
 
     // Função que o BOTÃO chama para pegar os dados da tela
 async function executarRegistro() {
@@ -624,6 +625,11 @@ function iniciarDuelo(idDuelo, oponente, valor) {
         if(msg) loader.querySelector('p').innerText = msg;
         loader.style.display = show ? 'flex' : 'none';
     }
+
+    function abrirMenuDesafio(id, nick) {
+    console.log("Abrindo menu para desafiar: " + nick);
+    // Lógica do Ponto 18 virá aqui depois
+}
 
 // Envia o desafio para a planilha
 async function enviarDesafio(idOponente, tipo, valor = 0) {
