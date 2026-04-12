@@ -12,223 +12,42 @@
     <link rel="icon" href="icone.png">
 
 <style>
-input {
-    width: 100%;
-    padding: 12px;
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid var(--roxo-magico);
-    color: white;
-    border-radius: 8px;
-    transition: 0.3s;
-    outline: none;
-}
-
-input:focus {
-    border-color: var(--dourado-milenio);
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
-}
-
-        html, body {
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden; /* Remove rolagem lateral */
-    height: 100%;
-}
-        
-        :root { 
-            --roxo-profundo: #1a0033; 
-            --roxo-magico: #4b0082; 
-            --dourado-milenio: #d4af37; 
-            --preto-caos: #0a0a0a; 
-            --texto-claro: #e0e0e0; 
-        }
-        
-        * { box-sizing: border-box; } /* Previne desalinhamento */
-
-        body { 
-            margin: 0; 
-            padding: 0; 
-            background: var(--preto-caos); 
-            color: var(--texto-claro); 
-            font-family: 'Roboto', sans-serif;
-            overflow-x: hidden;
-        }
-
-/* Garante que elementos escondidos NÃO ocupem espaço */
-#painel-principal, #loader, #aba-juiz { 
-    display: none; 
-}
-
-#auth-container { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center;
-    position: relative; /* Isso trava o login na tela e ignora lixo no fundo */
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    padding: 20px;
-    box-sizing: border-box;
-    z-index: 999;
-    background: linear-gradient(135deg, #0a0a0a, #1a0033);
-}
-
-#auth-container h2 {
-    margin: 0; /* Remove margens que causam sobreposição */
-    text-align: center;
-    z-index: 2;
-}
-
-    .app-container { 
-      display: none; /* Começa escondido, mas o JS vai mudar isso */
-      width: 100%;
-      max-width: 500px;
-      margin: 0 auto;
-}
-
-</style>
-</head>
-
-<style>
-}
-#loader { display: none; } /* Garante que ele comece escondido */
-#painel-principal { 
-    display: none; 
-}
-
-        /* --- DASHBOARD TOP 3 --- */
-        .top3-container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            gap: 10px;
-            margin-top: 30px;
-            height: 220px;
-        }
-
-        .card-top {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--dourado-milenio);
-            border-radius: 15px 15px 5px 5px;
-            text-align: center;
-            padding: 10px;
-            width: 30%;
-            position: relative;
-            box-shadow: var(--borda-glow);
-        }
-
-        /* Destaque Rei dos Jogos (Centro) */
-        .rei-dos-jogos { 
-            height: 100%; 
-            order: 2; 
-            border-width: 3px;
-            box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
-        }
-        .top-2 { height: 85%; order: 1; border-color: #c0c0c0; } /* Prata */
-        .top-3 { height: 75%; order: 3; border-color: #cd7f32; } /* Bronze */
-
-        .coroa { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 24px; color: var(--dourado-milenio); }
-
-        .medal-icon { font-size: 20px; margin-bottom: 5px; }
-
-        /* --- CARDS DE ESTATÍSTICAS --- */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .stat-card {
-            background: rgba(75, 0, 130, 0.2);
-            border-left: 4px solid var(--dourado-milenio);
-            padding: 15px;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .stat-card i { font-size: 22px; color: var(--dourado-milenio); margin-bottom: 8px; }
-        .stat-value { font-size: 18px; font-weight: bold; color: #fff; }
-        .stat-label { font-size: 11px; color: #aaa; text-transform: uppercase; }
-</style>
-    
-<style>
-    .btn-sala {
-    background: rgba(75, 0, 130, 0.4);
-    border: 1px solid var(--dourado-milenio);
-    color: white;
-    padding: 20px 10px;
-    border-radius: 12px;
-    font-family: 'Orbitron';
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.3s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-sala:active { transform: scale(0.95); background: var(--roxo-magico); }
-
-.btn-acao {
-    width: 100%;
-    padding: 15px;
-    border-radius: 10px;
-    border: none;
-    color: white;
-    font-weight: bold;
-    font-family: 'Orbitron';
-    cursor: pointer;
-}
-
-
-        /* --- OVERLAY DE CARREGAMENTO --- */
-        #loader {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10, 10, 10, 0.95);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .spinner {
-            width: 50px; height: 50px;
-            border: 5px solid var(--roxo-magico);
-            border-top: 5px solid var(--dourado-milenio);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* --- ESTRELA DE NIVEL --- */
-        .estrela-ygo { color: #ffcc00; text-shadow: 0 0 5px #ff0000; }
-</style> 
-    
-<!-- Exemplo de como ficará o botão ao lado de cada jogador no Ranking -->
-<button class="btn-desafio" onclick="abrirMenuDesafio('ID_DO_OPONENTE', 'NICKNAME_OPONENTE')">
-    <i class="fas fa-crosshairs"></i>
-</button>
-    
-<style>
-    .btn-desafio {
-        background: none;
-        border: 1px solid var(--dourado-milenio);
-        color: var(--dourado-milenio);
-        padding: 5px 10px;
-        border-radius: 5px;
-        cursor: pointer;
+    /* 1. VARIÁVEIS E RESET */
+    :root { 
+        --roxo-profundo: #1a0033; --roxo-magico: #4b0082; --dourado-milenio: #d4af37; 
+        --preto-caos: #0a0a0a; --texto-claro: #e0e0e0; --borda-glow: 0 0 15px rgba(212, 175, 55, 0.4);
     }
-    .btn-desafio:hover { background: var(--dourado-milenio); color: #000; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--preto-caos); color: var(--texto-claro); font-family: 'Roboto', sans-serif; overflow-x: hidden; height: 100%; }
+
+    /* 2. LOGIN (CARD CENTRALIZADO) */
+    #auth-container { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 999; background: linear-gradient(135deg, #0a0a0a, #1a0033); }
+    input { width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.6); border: 1px solid var(--roxo-magico); color: white; border-radius: 8px; margin-bottom: 15px; outline: none; }
+    input:focus { border-color: var(--dourado-milenio); box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+
+    /* 3. PAINEL PRINCIPAL (GRID E COLUNA) */
+    #painel-principal { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 500px; margin: 0 auto; padding: 20px; gap: 25px; }
+
+    /* 4. TOP 3 (ESTILO TAG FORCE) */
+    .top3-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; height: 180px; width: 100%; margin-top: 20px; }
+    .card-top { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 2px solid var(--dourado-milenio); border-radius: 12px 12px 0 0; text-align: center; padding: 10px; width: 32%; box-shadow: var(--borda-glow); position: relative; }
+    .rei-dos-jogos { height: 100%; border-color: gold; box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); }
+    .top-2 { height: 85%; border-color: #c0c0c0; }
+    .top-3 { height: 75%; border-color: #cd7f32; }
+    .coroa { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 20px; color: gold; }
+
+    /* 5. BOTÕES E CARDS */
+    .btn-sala { background: rgba(75, 0, 130, 0.4); border: 1px solid var(--dourado-milenio); color: white; padding: 15px; border-radius: 10px; font-family: 'Orbitron'; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; }
+    .btn-acao { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid var(--dourado-milenio); background: linear-gradient(45deg, var(--roxo-magico), #4b0082); color: white; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+    .stat-card { background: rgba(75, 0, 130, 0.2); border-left: 4px solid var(--dourado-milenio); padding: 15px; border-radius: 8px; text-align: center; }
+
+    /* 6. UTILITÁRIOS */
+    #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 10, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
+    .spinner { width: 50px; height: 50px; border: 5px solid var(--roxo-magico); border-top: 5px solid var(--dourado-milenio); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    .estrela-ygo { color: #ffcc00; text-shadow: 0 0 5px #ff0000; }
+    
 </style>
 </head>
 <body>
