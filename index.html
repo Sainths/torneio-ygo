@@ -280,32 +280,30 @@ async function atualizarDashboard() {
     try {
         const response = await fetch(`${WEB_APP_URL}?action=getDashboard`);
         const d = await response.json();
+        console.log("Dados que chegaram:", d); // Isso vai nos mostrar o que o Google mandou
 
         const preencher = (id, valor) => {
             const el = document.getElementById(id);
-            if (el) el.innerText = valor || "--";
+            if (el) el.innerText = valor || "Vago";
         };
 
-        // TRAVA DE SEGURANÇA CONTRA UNDEFINED
-        const p1 = d.top1 || { nickname: "Vago", deck: "--", estrelas: 0 };
-        const p2 = d.top2 || { nickname: "Vago", deck: "--", estrelas: 0 };
-        const p3 = d.top3 || { nickname: "Vago", deck: "--", estrelas: 0 };
+        // Se d.top1 existe, ele preenche. Se não, fica "Vago"
+        preencher('top1-nome', d.top1 ? d.top1.nickname : "Vago");
+        preencher('top1-deck', d.top1 ? "Deck: " + d.top1.deck : "--");
+        preencher('top1-estrelas', d.top1 ? d.top1.estrelas : 0);
 
-        preencher('top1-nome', p1.nickname);
-        preencher('top1-deck', "Deck: " + p1.deck);
-        preencher('top1-estrelas', p1.estrelas);
+        preencher('top2-nome', d.top2 ? d.top2.nickname : "Vago");
+        preencher('top2-deck', d.top2 ? "Deck: " + d.top2.deck : "--");
+        preencher('top2-estrelas', d.top2 ? d.top2.estrelas : 0);
 
-        preencher('top2-nome', p2.nickname);
-        preencher('top2-deck', "Deck: " + p2.deck);
-        preencher('top2-estrelas', p2.estrelas);
+        // O Top 3 deve ficar "Vago" se você só tem 2 registros
+        preencher('top3-nome', d.top3 ? d.top3.nickname : "Vago");
+        preencher('top3-deck', d.top3 ? "Deck: " + d.top3.deck : "--");
+        preencher('top3-estrelas', d.top3 ? d.top3.estrelas : 0);
 
-        preencher('top3-nome', p3.nickname);
-        preencher('top3-deck', "Deck: " + p3.deck);
-        preencher('top3-estrelas', p3.estrelas);
-
-        preencher('total-estrelas', d.totalEstrelas);
-        preencher('total-duelos', d.totalDuelos);
-    } catch (e) { console.log("Dashboard aguardando dados..."); }
+    } catch (e) {
+        console.error("Erro no fetch:", e);
+    }
 }
     
 </script>
