@@ -313,43 +313,45 @@ async function atualizarDashboard() {
     try {
         const response = await fetch(`${WEB_APP_URL}?action=getDashboard`);
         const d = await response.json();
+        console.log("Dados recebidos do Reino:", d);
 
-        // Função de segurança extrema
-        const preencher = (id, valor) => {
+        // Função para limpar os campos antes de preencher
+        const limparEColocar = (id, valor) => {
             const el = document.getElementById(id);
             if (el) el.innerText = valor || "--";
         };
 
-        // Top 1
-        if (d.top1) {
-            preencher('top1-nome', d.top1.nickname);
-            preencher('top1-deck', "Deck: " + d.top1.deck);
-            preencher('top1-estrelas', d.top1.estrelas);
+        // TOP 1
+        if (d && d.top1) {
+            limparEColocar('top1-nome', d.top1.nickname);
+            limparEColocar('top1-deck', "Deck: " + d.top1.deck);
+            limparEColocar('top1-estrelas', d.top1.estrelas);
         }
 
-        // Top 2
-        if (d.top2) {
-            preencher('top2-nome', d.top2.nickname);
-            preencher('top2-deck', "Deck: " + d.top2.deck);
-            preencher('top2-estrelas', d.top2.estrelas);
+        // TOP 2
+        if (d && d.top2) {
+            limparEColocar('top2-nome', d.top2.nickname);
+            limparEColocar('top2-deck', "Deck: " + d.top2.deck);
+            limparEColocar('top2-estrelas', d.top2.estrelas);
         }
 
-        // Top 3
-        if (d.top3) {
-            preencher('top3-nome', d.top3.nickname);
-            preencher('top3-deck', "Deck: " + d.top3.deck);
-            preencher('top3-estrelas', d.top3.estrelas);
+        // TOP 3 (Onde o erro morava)
+        if (d && d.top3 && d.top3.nickname) {
+            limparEColocar('top3-nome', d.top3.nickname);
+            limparEColocar('top3-deck', "Deck: " + d.top3.deck);
+            limparEColocar('top3-estrelas', d.top3.estrelas);
         } else {
-            preencher('top3-nome', "Vazio");
-            preencher('top3-deck', "Aguardando...");
+            limparEColocar('top3-nome', "Vago");
+            limparEColocar('top3-deck', "Aguardando...");
+            limparEColocar('top3-estrelas', "0");
         }
 
-        // Stats Gerais
-        preencher('total-estrelas', d.totalEstrelas);
-        preencher('total-duelos', d.totalDuelos);
+        // STATS GERAIS
+        limparEColocar('total-estrelas', d.totalEstrelas);
+        limparEColocar('total-duelos', d.totalDuelos);
 
     } catch (e) {
-        console.error("Erro ao carregar dados:", e);
+        console.error("Erro Crítico no Dashboard:", e);
     }
 }
 
