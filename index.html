@@ -314,23 +314,32 @@ async function atualizarDashboard() {
         const response = await fetch(`${WEB_APP_URL}?action=getDashboard`);
         const d = await response.json();
 
-        // Função interna para preencher com segurança
-        const preencherCard = (idNome, idDeck, idEstrelas, dados) => {
-            const elNome = document.getElementById(idNome);
-            const elDeck = document.getElementById(idDeck);
-            const elEstrelas = document.getElementById(idEstrelas);
+        // Função de segurança: se não houver duelista, coloca "--" em vez de dar erro
+        const seguro = (obj, prop) => obj ? obj[prop] : "--";
 
-            if (dados) {
-                if (elNome) elNome.innerText = dados.nickname || "--";
-                if (elDeck) elDeck.innerText = "Deck: " + (dados.deck || "--");
-                if (elEstrelas) elEstrelas.innerText = dados.estrelas || 0;
-            } else {
-                // Se não houver duelista para essa posição (ex: falta o 3º lugar)
-                if (elNome) elNome.innerText = "Vazio";
-                if (elDeck) elDeck.innerText = "Aguardando Duelista";
-                if (elEstrelas) elEstrelas.innerText = "0";
-            }
-        };
+        // Preenche Rei dos Jogos
+        document.getElementById('top1-nome').innerText = seguro(d.top1, 'nickname');
+        document.getElementById('top1-deck').innerText = "Deck: " + seguro(d.top1, 'deck');
+        document.getElementById('top1-estrelas').innerText = d.top1 ? d.top1.estrelas : 0;
+
+        // Preenche Top 2
+        document.getElementById('top2-nome').innerText = seguro(d.top2, 'nickname');
+        document.getElementById('top2-deck').innerText = "Deck: " + seguro(d.top2, 'deck');
+        document.getElementById('top2-estrelas').innerText = d.top2 ? d.top2.estrelas : 0;
+
+        // Preenche Top 3 (Aqui é onde estava o erro!)
+        document.getElementById('top3-nome').innerText = seguro(d.top3, 'nickname');
+        document.getElementById('top3-deck').innerText = "Deck: " + seguro(d.top3, 'deck');
+        document.getElementById('top3-estrelas').innerText = d.top3 ? d.top3.estrelas : 0;
+
+        // Preenche Stats Gerais
+        document.getElementById('total-estrelas').innerText = d.totalEstrelas || 0;
+        document.getElementById('total-duelos').innerText = d.totalDuelos || 0;
+
+    } catch (e) {
+        console.error("Erro ao carregar Dashboard:", e);
+    }
+}
 
         // Preenche os 3 cards da elite
         preencherCard('top1-nome', 'top1-deck', 'top1-estrelas', d.top1);
