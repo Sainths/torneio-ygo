@@ -269,22 +269,55 @@ input:focus {
         <p onclick="alternarAuth(false)" style="cursor:pointer; font-size: 11px; color: var(--dourado-milenio); text-align: center; margin-top: 15px;">JÁ TEM ID? FAÇA LOGIN</p>
     </div>
 </div>
+
+<div id="painel-principal" class="app-container" style="display: none; flex-direction: column; gap: 20px;">
     
-<div id="painel-principal" style="display: none; width: 100%; max-width: 500px; margin: 0 auto; padding: 20px; box-sizing: border-box;">
-    
-    <!-- CABEÇALHO DO DUELISTA -->
-    <div style="text-align: center; margin-bottom: 25px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; border: 1px solid var(--roxo-magico);">
-        <div id="top1-nome" style="font-family: 'Orbitron'; color: var(--dourado-milenio); font-size: 18px;">DUELISTA</div>
+    <!-- 1. CABEÇALHO DO JOGADOR -->
+    <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; border: 1px solid var(--roxo-magico);">
+        <div id="minha-conta-nome" style="font-family: 'Orbitron'; color: var(--dourado-milenio); font-size: 18px;">DUELISTA</div>
         <div style="font-size: 24px; margin-top: 5px;">
             <i class="fas fa-star" style="color: gold; text-shadow: 0 0 10px red;"></i> 
-            <span id="minhas-estrelas" style="font-weight: bold;">10</span>
+            <span id="minhas-estrelas-painel" style="font-weight: bold;">10</span>
         </div>
     </div>
 
-    <!-- GRID DE ARENA (SALAS) -->
-    <div id="arena-apostas">
-        <h3 style="font-family:'Orbitron'; color:var(--dourado-milenio); text-align:center; font-size: 14px; margin-bottom: 15px;">SALAS DE APOSTAS</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+    <!-- 2. DASHBOARD TOP 3 -->
+    <div class="top3-container">
+        <div class="card-top top-2">
+            <i class="fas fa-medal"></i>
+            <div style="font-size: 10px;">Top 2</div>
+            <div id="top2-nome">--</div>
+            <div style="color: var(--dourado-milenio); font-size: 12px;"><i class="fas fa-star"></i> <span id="top2-estrelas">0</span></div>
+        </div>
+
+        <div class="card-top rei-dos-jogos">
+            <i class="fas fa-crown coroa"></i>
+            <i class="fas fa-eye medal-icon" style="color: var(--dourado-milenio)"></i>
+            <div style="font-size: 10px;">Rei dos Jogos</div>
+            <div id="top1-nome" style="font-size: 16px; font-weight: bold; color: var(--dourado-milenio);">--</div>
+            <div style="font-size: 14px;"><i class="fas fa-star"></i> <span id="top1-estrelas">0</span></div>
+        </div>
+
+        <div class="card-top top-3">
+            <i class="fas fa-medal"></i>
+            <div style="font-size: 10px;">Top 3</div>
+            <div id="top3-nome">--</div>
+            <div style="color: var(--dourado-milenio); font-size: 12px;"><i class="fas fa-star"></i> <span id="top3-estrelas">0</span></div>
+        </div>
+    </div>
+
+    <!-- 3. CARDS DE ESTATÍSTICAS -->
+    <div class="stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="stat-card"><i class="fas fa-layer-group"></i><span class="stat-value" id="total-estrelas">0</span><span class="stat-label">Estrelas Totais</span></div>
+        <div class="stat-card"><i class="fas fa-fist-raised"></i><span class="stat-value" id="total-duelos">0</span><span class="stat-label">Duelos Gerais</span></div>
+        <div class="stat-card"><i class="fas fa-shark"></i><span class="stat-value" id="shark-player">--</span><span class="stat-label">Shark</span></div>
+        <div class="stat-card" onclick="verRegras()"><i class="fas fa-scroll"></i><span class="stat-value">REGRAS</span><span class="stat-label">Torneio</span></div>
+    </div>
+
+    <!-- 4. ARENA DE APOSTAS -->
+    <div id="arena-apostas" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border: 1px solid var(--dourado-milenio);">
+        <h3 style="font-family:'Orbitron'; color:var(--dourado-milenio); text-align:center; font-size:14px; margin-top:0;">SALAS DE APOSTAS</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <button class="btn-sala" onclick="entrarSala(1)">1 <i class="fas fa-star"></i></button>
             <button class="btn-sala" onclick="entrarSala(3)">3 <i class="fas fa-star"></i></button>
             <button class="btn-sala" onclick="entrarSala(5)">5 <i class="fas fa-star"></i></button>
@@ -292,132 +325,37 @@ input:focus {
         </div>
     </div>
 
-    <!-- BOTÕES DE AÇÃO -->
-    <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
-        <button class="btn-acao" onclick="abrirRanking()"><i class="fas fa-list-ol"></i> RANKING GERAL</button>
-        <button class="btn-acao" style="background: #444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR DO REINO</button>
-    </div>
-
-</div>
-
-    <!-- Dashboard Top 3 -->
-        <div class="top3-container">
-            <div class="card-top top-2">
-                <i class="fas fa-medal medal-icon"></i>
-                <div style="font-size: 12px;">Top 2</div>
-                <div id="top2-nome" style="font-weight: bold;">--</div>
-                <div style="color: var(--dourado-milenio); font-size: 14px;"><i class="fas fa-star estrela-ygo"></i> <span id="top2-estrelas">0</span></div>
-        </div>
-
-<!-- No Bloco de Notas, dentro do body -->
-<div id="aba-juiz" style="display:none !important; background: #222; border: 2px solid gold;">
-   <h3>Painel de Controle do Juiz</h3>
-   <button onclick="resetarPlanilha()">RESETAR TORNEIO</button>
-    <div
-<!-- Dentro da div id="aba-juiz" que criamos antes -->
-<div id="lista-conflitos" style="margin-top: 15px; border-top: 1px solid #444; padding-top: 10px;">
-    <h4 style="color: #ff4444; font-size: 12px; text-align: center;">CONFLITOS DETECTADOS</h4>
-    <div id="container-conflitos">
-        <!-- O JS vai preencher isso aqui com duelos em erro -->
-        <p style="font-size: 10px; text-align: center; color: #888;">Nenhum conflito no momento.</p>
-    </div>
-</div>
-
-            <div class="card-top rei-dos-jogos">
-                <i class="fas fa-crown coroa"></i>
-                <i class="fas fa-eye medal-icon" style="color: var(--dourado-milenio)"></i>
-                <div style="font-size: 12px;">Rei dos Jogos</div>
-                <div id="top1-nome" style="font-size: 18px; font-weight: bold; color: var(--dourado-milenio);">--</div>
-                <div id="top1-deck" style="font-size: 10px; margin-bottom: 5px;">Deck --</div>
-                <div style="font-size: 20px;"><i class="fas fa-star estrela-ygo"></i> <span id="top1-estrelas">0</span></div>
-                </div>
-            </div>
+    <!-- 5. ABA DO JUIZ -->
+    <div id="aba-juiz" style="display:none; background: #1a0033; border: 2px solid gold; padding: 15px; border-radius: 10px;">
+        <h3 style="color: gold; text-align: center; margin-top: 0;">PAINEL DO JUIZ</h3>
+        <button class="btn-acao" style="background: #600;" onclick="resetarTorneio()">RESETAR TORNEIO</button>
         
-
-            <div class="card-top top-3">
-                <i class="fas fa-medal medal-icon"></i>
-                <div style="font-size: 12px;">Top 3</div>
-                <div id="top3-nome" style="font-weight: bold;">--</div>
-                <div style="color: var(--dourado-milenio); font-size: 14px;"><i class="fas fa-star estrela-ygo"></i> <span id="top3-estrelas">0</span></div>
-            </div>
+        <!-- EDIÇÃO DE REGRAS (Movido para cá) -->
+        <div style="margin-top:15px; border-top:1px solid #444; padding-top: 10px;">
+            <h4 style="color:var(--dourado-milenio); font-size:12px;">EDITAR REGRAS</h4>
+            <textarea id="edit-regras-input" style="width:100%; height:80px; background:#111; color:white; border:1px solid #444; border-radius:5px;"></textarea>
+            <button class="btn-acao" style="padding:5px; font-size: 12px;" onclick="publicarRegras()">PUBLICAR</button>
         </div>
-
-        <!-- Cards de Estatísticas Gerais -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <i class="fas fa-layer-group"></i>
-                <span class="stat-value" id="total-estrelas">0</span>
-                <span class="stat-label">Estrelas Totais</span>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-fist-raised"></i>
-                <span class="stat-value" id="total-duelos">0</span>
-                <span class="stat-label">Duelos Gerais</span>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-shark"></i>
-                <span class="stat-value" id="shark-player">--</span>
-                <span class="stat-label">Shark (Apostas)</span>
-            </div>
-            <div class="stat-card" onclick="verRegras()">
-                <i class="fas fa-scroll"></i>
-                <span class="stat-value">REGRAS</span>
-                <span class="stat-label">Torneio</span>
-            </div>
-        </div>
-
-        <!-- Ações Principais -->
-        <button class="btn-acao" onclick="abrirArena()">
-            <i class="fas fa-swords"></i> ARENA DE DUELOS
-        </button>
-
-        <button class="btn-acao" style="background: #333;" onclick="abrirPerfil()">
-            <i class="fas fa-user-circle"></i> MEU PERFIL / RANKING
-        </button>
-
-        <div id="notificacao-aviso" style="margin-top: 20px; padding: 15px; background: rgba(255,0,0,0.1); border-radius: 10px; border: 1px solid red; display:none;">
-            <i class="fas fa-exclamation-triangle"></i> Conflito de resultado! O Juiz foi avisado.
-        </div>
-
-<!-- MODAL DE REGRAS -->
-<div id="modal-regras" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; padding:20px; box-sizing:border-box;">
-    <div style="background:var(--roxo-profundo); border:2px solid var(--dourado-milenio); padding:20px; border-radius:15px; max-height:80%; overflow-y:auto;">
-        <h2 style="font-family:'Orbitron'; color:var(--dourado-milenio); text-align:center;">DIRETRIZES DO REINO</h2>
-        <p id="texto-regras" style="white-space: pre-wrap; line-height:1.6; font-size:14px; color:#ccc;">Carregando pergaminhos...</p>
-        <button class="btn-acao" onclick="fecharRegras()">FECHAR</button>
     </div>
-</div>
 
-<!-- MODAL DE PERFIL DETALHADO -->
+    <!-- 6. BOTÕES DE NAVEGAÇÃO -->
+    <button class="btn-acao" onclick="abrirPerfil()"><i class="fas fa-user-circle"></i> MEU PERFIL / RANKING</button>
+    <button class="btn-acao" style="background: #333;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
+
+</div> <!-- FECHA PAINEL PRINCIPAL -->
+
+<!-- MODAL PERFIL (Fora do painel para flutuar) -->
 <div id="modal-perfil" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2500; padding:20px; box-sizing:border-box;">
-    <div style="background:linear-gradient(180deg, var(--roxo-profundo), #000); border:2px solid var(--dourado-milenio); padding:20px; border-radius:20px; text-align:center; position:relative;">
-        
-        <div style="font-family:'Orbitron'; color:var(--dourado-milenio); font-size:22px; margin-bottom:5px;" id="perfil-nick">Duelista</div>
-        <div style="font-size:12px; color:#888; margin-bottom:20px;" id="perfil-id">YG-000</div>
-
-        <div style="background:rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
-            <div><span style="display:block; font-size:10px; color:var(--dourado-milenio);">DECK</span><strong id="perfil-deck">--</strong></div>
-            <div><span style="display:block; font-size:10px; color:var(--dourado-milenio);">ESTRELAS</span><strong id="perfil-estrelas">0</strong></div>
-            <div><span style="display:block; font-size:10px; color:var(--dourado-milenio);">VITÓRIAS</span><strong id="perfil-vitorias">0</strong></div>
-            <div><span style="display:block; font-size:10px; color:var(--dourado-milenio);">WINRATE</span><strong id="perfil-winrate">0%</strong></div>
-            <div><span style="display:block; font-size:10px; color:var(--dourado-milenio);">SEQUÊNCIA</span><strong id="perfil-sequencia">0</strong></div>
-            <div><span style="display:block; font-size:10px; color:var(--dourado-milenio);">SHARK</span><strong id="perfil-shark">0</strong></div>
+    <div style="background:linear-gradient(180deg, var(--roxo-profundo), #000); border:2px solid var(--dourado-milenio); padding:20px; border-radius:20px; text-align:center;">
+        <div id="perfil-nick" style="font-family:'Orbitron'; color:var(--dourado-milenio); font-size:22px;">Duelista</div>
+        <div style="background:rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin: 20px 0;">
+            <div><span style="font-size:10px;">DECK</span><br><strong id="perfil-deck">--</strong></div>
+            <div><span style="font-size:10px;">ESTRELAS</span><br><strong id="perfil-estrelas">0</strong></div>
         </div>
-
-        <button class="btn-acao" onclick="fecharPerfil()">VOLTAR AO REINO</button>
-        <button class="btn-acao" style="background:#500; margin-top:10px;" onclick="logout()">LOGOUT (SAIR)</button>
+        <button class="btn-acao" onclick="fecharPerfil()">VOLTAR</button>
     </div>
 </div>
 
-<!-- CAMPO DE EDIÇÃO NA ABA DO JUIZ -->
-<!-- Adicione isso dentro da div id="aba-juiz" -->
-<div style="margin-top:15px; border-top:1px solid #444;">
-    <h4 style="color:var(--dourado-milenio); font-size:12px;">EDITAR REGRAS DO TORNEIO</h4>
-    <textarea id="edit-regras-input" style="width:100%; height:80px; background:#111; color:white; border:1px solid #444; border-radius:5px;"></textarea>
-    <button class="btn-acao" style="padding:5px;" onclick="publicarRegras()">PUBLICAR REGRAS</button>
-</div>
-</div> 
-    </div>
 <script>
     // URL que você copiou ao publicar o Google Apps Script (PARTE 1)
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; 
