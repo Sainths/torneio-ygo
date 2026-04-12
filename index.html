@@ -205,10 +205,11 @@ const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhC
 window.onload = () => {
     const jogadorSalvo = localStorage.getItem('duelista_v1');
     if (jogadorSalvo && jogadorSalvo !== "null") {
-        try {
-            const dados = JSON.parse(jogadorSalvo);
-            mostrarApp(dados);
-        } catch (e) { localStorage.removeItem('duelista_v1'); location.reload(); }
+        const dados = JSON.parse(jogadorSalvo);
+        mostrarApp(dados);
+        
+        // A MÁGICA: Isso força o app a buscar o ranking assim que abre
+        atualizarDashboard(); 
     } else {
         document.getElementById('auth-container').style.display = 'flex';
         document.getElementById('painel-principal').style.display = 'none';
@@ -267,13 +268,23 @@ async function login(nick, senha) {
 }
 
 function mostrarApp(dados) {
-    document.getElementById('auth-container').style.display = 'none';
-    document.getElementById('painel-principal').style.display = 'flex';
-    if (dados) {
-        if(document.getElementById('minha-conta-nome')) document.getElementById('minha-conta-nome').innerText = dados.nickname;
-        if(document.getElementById('minhas-estrelas-painel')) document.getElementById('minhas-estrelas-painel').innerText = dados.estrelas || 10;
+    const auth = document.getElementById('auth-container');
+    const painel = document.getElementById('painel-principal');
+
+    // 1. Liga a Arena (Prioridade)
+    if (auth) auth.style.display = 'none';
+    if (painel) painel.style.display = 'flex';
+
+    // 2. Tenta preencher seu nome (Sem travar se falhar)
+    if (dados && dados.nickname) {
+        const el = document.getElementById('minha-conta-nome');
+        if (el) el.innerText = dados.nickname;
     }
-    atualizarDashboard();
+
+    // 3. Chama o Ranking da Planilha
+    if (typeof atualizarDashboard === "function") {
+        atualizarDashboard();
+    }
 }
 
 async function atualizarDashboard() {
