@@ -56,7 +56,7 @@ input:focus {
 
 /* Garante que elementos escondidos NÃO ocupem espaço */
 #painel-principal, #loader, #aba-juiz { 
-    display: none !important; 
+    display: none; 
 }
 
 #auth-container { 
@@ -432,32 +432,29 @@ window.onload = () => {
 };
 
 function mostrarApp(dados) {
+    console.log("Comando de iluminação enviado...");
     const auth = document.getElementById('auth-container');
     const painel = document.getElementById('painel-principal');
 
-    // PASSO 1: ACENDER A LUZ (Prioridade máxima)
+    // 1. Esconde o login com prioridade máxima
     if (auth) auth.setAttribute('style', 'display: none !important');
+
+    // 2. Liga o painel principal forçando visibilidade total
     if (painel) {
-        painel.style.display = 'flex'; // Isso mata a tela preta
+        painel.setAttribute('style', 'display: flex !important; flex-direction: column !important; min-height: 100vh !important; background: #0a0a0a !important; visibility: visible !important; opacity: 1 !important;');
+        console.log("Arena visível no console!");
     }
 
-    // PASSO 2: PREENCHER OS DADOS (Com proteção contra erro de ID)
+    // 3. Preenchimento seguro de dados
     if (dados) {
-        // Criamos uma lista de IDs que o código vai tentar preencher
-        // Se o ID não existir no HTML, o código apenas pula para o próximo
-        const mapas = [
-            { id: 'minha-conta-nome', valor: dados.nickname },
-            { id: 'minhas-estrelas-painel', valor: dados.estrelas || 10 },
-            { id: 'top1-nome', valor: dados.nickname },
-            { id: 'perfil-nick', valor: dados.nickname }
-        ];
-
-        mapas.forEach(item => {
-            const elemento = document.getElementById(item.id);
-            if (elemento) {
-                elemento.innerText = item.valor;
-            }
+        const ids = ['minha-conta-nome', 'minhas-estrelas-painel', 'top1-nome', 'perfil-nick'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = dados.nickname;
         });
+        
+        const elEstrela = document.getElementById('minhas-estrelas-painel');
+        if (elEstrela) elEstrela.innerText = dados.estrelas || 10;
     }
 }
 
