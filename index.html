@@ -200,113 +200,80 @@
 </div>
 
 <script>
-    // URL que você copiou ao publicar o Google Apps Script (PARTE 1)
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; 
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; // RECOLOQUE SUA URL AQUI
 
- // 2. FUNÇÃO DE TROCA (COLE LOGO ABAIXO DA URL)
-    window.alternarAuth = function(mostrarRegistro) {
-        console.log("Comando recebido: Mostrar registro =", mostrarRegistro);
-        const login = document.getElementById('form-login');
-        const registro = document.getElementById('form-registro');
-        
-        if (mostrarRegistro) {
-            if(login) login.style.display = 'none';
-            if(registro) registro.style.display = 'block';
-        } else {
-            if(login) login.style.display = 'block';
-            if(registro) registro.style.display = 'none';
-        }
-    };
-    
-    // Armazenamento Local (Manter logado - Ponto 2 e 3)
-    let jogadorLogado = JSON.parse(localStorage.getItem('duelista_v1')) || null;
-    
-// Função que o botão "ENTRAR" chama
+window.onload = () => {
+    const jogadorSalvo = localStorage.getItem('duelista_v1');
+    if (jogadorSalvo && jogadorSalvo !== "null") {
+        try {
+            const dados = JSON.parse(jogadorSalvo);
+            mostrarApp(dados);
+        } catch (e) { localStorage.removeItem('duelista_v1'); location.reload(); }
+    } else {
+        document.getElementById('auth-container').style.display = 'flex';
+        document.getElementById('painel-principal').style.display = 'none';
+    }
+};
+
+function alternarAuth(mostrarRegistro) {
+    const loginDiv = document.getElementById('form-login');
+    const registroDiv = document.getElementById('form-registro');
+    loginDiv.style.display = mostrarRegistro ? 'none' : 'block';
+    registroDiv.style.display = mostrarRegistro ? 'block' : 'none';
+}
+
 async function executarLogin() {
     const nick = document.getElementById('login-usuario').value;
     const senha = document.getElementById('login-pass').value;
-
-    if (!nick || !senha) {
-        alert("Informe Nickname e Senha!");
-        return;
-    }
-    // Chama a função logística que já temos
+    if (!nick || !senha) return alert("Preencha tudo!");
     await login(nick, senha);
 }
 
-// Função que o botão "CRIAR ID" chama
 async function executarRegistro() {
     const nick = document.getElementById('reg-usuario').value;
     const deck = document.getElementById('reg-deck-name').value;
     const senha = document.getElementById('reg-pass').value;
-
-    if (!nick || !deck || !senha) {
-        alert("Preencha todos os campos, Duelista!");
-        return;
-    }
-    // Chama a função logística que já temos
+    if (!nick || !deck || !senha) return alert("Preencha tudo!");
     await registrar(nick, deck, senha);
 }
 
-window.onload = () => {
-    console.log("Iniciando Sistema de Duelo...");
-    // 1. Tenta buscar o jogador salvo
-    const jogadorSalvo = localStorage.getItem('duelista_v1');
-    
-    if (jogadorSalvo && jogadorSalvo !== "null") {
-        try {
-            const dados = JSON.parse(jogadorSalvo);
-            // 2. Chama a função para acender a arena
-            mostrarApp(dados); 
-            // 3. Tenta atualizar os dados reais do servidor
-            if (typeof atualizarDashboard === "function") atualizarDashboard();
-        } catch (e) {
-            console.error("Erro ao processar dados salvos:", e);
-            localStorage.removeItem('duelista_v1'); // Limpa dados corrompidos
+async function registrar(nick, deck, senha) {
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'registrar', nickname: nick, deck: deck, senha: senha })
+        });
+        const res = await response.json();
+        if (res.status === "sucesso") {
+            alert("ID Gerado!");
+            localStorage.setItem('duelista_v1', JSON.stringify({ id: res.id, nickname: nick, estrelas: 10 }));
             location.reload();
         }
-    } else {
-        // 4. Se não tem login, garante que a tela de acesso apareça
-        const auth = document.getElementById('auth-container');
-        if (auth) auth.style.display = 'flex';
-        const painel = document.getElementById('painel-principal');
-        if (painel) painel.style.display = 'none';
-        // Atualiza o Ranking e os Top 3 a cada 2 minutos sem precisar dar F5
-         setInterval(() => {
-         if (localStorage.getItem('duelista_v1')) {
-            atualizarDashboard();
-         }
-    }, 120000); 
+    } catch (e) { alert("Erro de conexão!"); }
+}
 
-    }
-};
+async function login(nick, senha) {
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'login', nickname: nick, senha: senha })
+        });
+        const res = await response.json();
+        if (res.status === "sucesso") {
+            localStorage.setItem('duelista_v1', JSON.stringify(res));
+            location.reload();
+        } else { alert("Senha incorreta!"); }
+    } catch (e) { alert("Erro no servidor!"); }
+}
 
 function mostrarApp(dados) {
-    console.log("Invocando Arena e Dashboard...");
-    const auth = document.getElementById('auth-container');
-    const painel = document.getElementById('painel-principal');
-
-    // 1. ESCONDE O LOGIN E MOSTRA O PAINEL (LIGA A ARENA)
-    if (auth) auth.style.display = 'none';
-    if (painel) {
-        painel.style.display = 'flex'; // Exibe o painel organizado em coluna
-    }
-
-    // 2. PREENCHE OS DADOS PESSOAIS (DADOS DO LOCALSTORAGE)
+    document.getElementById('auth-container').style.display = 'none';
+    document.getElementById('painel-principal').style.display = 'flex';
     if (dados) {
-        // Preenche seu nome e suas estrelas no cabeçalho
-        const elNome = document.getElementById('minha-conta-nome');
-        const elEstrelas = document.getElementById('minhas-estrelas-painel');
-        
-        if (elNome) elNome.innerText = dados.nickname;
-        if (elEstrelas) elEstrelas.innerText = dados.estrelas || 10;
+        if(document.getElementById('minha-conta-nome')) document.getElementById('minha-conta-nome').innerText = dados.nickname;
+        if(document.getElementById('minhas-estrelas-painel')) document.getElementById('minhas-estrelas-painel').innerText = dados.estrelas || 10;
     }
-
-    // 3. BUSCA OS DADOS REAIS DO RANKING (DADOS DA PLANILHA)
-    // Chama a função que vai preencher o Top 1, 2, 3 e os Decks
-    if (typeof atualizarDashboard === "function") {
-        atualizarDashboard();
-    }
+    atualizarDashboard();
 }
 
 async function atualizarDashboard() {
@@ -319,93 +286,28 @@ async function atualizarDashboard() {
             if (el) el.innerText = valor || "--";
         };
 
-        if (d.top1) {
-            preencher('top1-nome', d.top1.nickname);
-            preencher('top1-deck', "Deck: " + d.top1.deck);
-            preencher('top1-estrelas', d.top1.estrelas);
-        }
-        if (d.top2) {
-            preencher('top2-nome', d.top2.nickname);
-            preencher('top2-deck', "Deck: " + d.top2.deck);
-            preencher('top2-estrelas', d.top2.estrelas);
-        }
-        if (d.top3) {
-            preencher('top3-nome', d.top3.nickname);
-            preencher('top3-deck', "Deck: " + d.top3.deck);
-            preencher('top3-estrelas', d.top3.estrelas);
-        }
+        // TRAVA DE SEGURANÇA CONTRA UNDEFINED
+        const p1 = d.top1 || { nickname: "Vago", deck: "--", estrelas: 0 };
+        const p2 = d.top2 || { nickname: "Vago", deck: "--", estrelas: 0 };
+        const p3 = d.top3 || { nickname: "Vago", deck: "--", estrelas: 0 };
+
+        preencher('top1-nome', p1.nickname);
+        preencher('top1-deck', "Deck: " + p1.deck);
+        preencher('top1-estrelas', p1.estrelas);
+
+        preencher('top2-nome', p2.nickname);
+        preencher('top2-deck', "Deck: " + p2.deck);
+        preencher('top2-estrelas', p2.estrelas);
+
+        preencher('top3-nome', p3.nickname);
+        preencher('top3-deck', "Deck: " + p3.deck);
+        preencher('top3-estrelas', p3.estrelas);
 
         preencher('total-estrelas', d.totalEstrelas);
         preencher('total-duelos', d.totalDuelos);
-
-    } catch (e) {
-        console.error("Erro no Dashboard:", e);
-    }
+    } catch (e) { console.log("Dashboard aguardando dados..."); }
 }
-
-        // Guarda o ranking para o Modal Geral
-        window.dadosRanking = d.ranking;
-
-    } catch (e) {
-        console.error("Erro ao buscar dados do Reino:", e);
-    }
-}
-
-// --- SISTEMA DE ACESSO ---
-async function registrar(nick, deck, senha) {
-    if (typeof exibirLoader === "function") exibirLoader(true, "Invocando ID do Destino...");
-    try {
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'registrar',
-                nickname: nick,
-                deck: deck,
-                senha: senha
-            })
-        });
-        const res = await response.json();
-        if (res.status === "sucesso") {
-            alert("Registro concluído! Seu ID é: " + res.id);
-            localStorage.setItem('duelista_v1', JSON.stringify({
-                id: res.id, 
-                nickname: nick, 
-                estrelas: 10
-            }));
-            location.reload(); 
-        } else {
-            alert("Erro: " + (res.message || "Falha no registro"));
-        }
-    } catch (e) {
-        console.error("Erro no registro:", e);
-        alert("Erro de conexão com o Reino dos Duelistas.");
-    } finally {
-        if (typeof exibirLoader === "function") exibirLoader(false);
-    }
-}
-
-async function login(nick, senha) {
-    if (typeof exibirLoader === "function") exibirLoader(true, "Verificando...");
-    try {
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'login', nickname: nick, senha: senha })
-        });
-        const res = await response.json();
-        if (res.status === "sucesso") {
-            localStorage.setItem('duelista_v1', JSON.stringify(res));
-            location.reload();
-        } else {
-            alert("Dados incorretos!");
-        }
-    } catch (e) {
-        console.error(e);
-        alert("Falha no servidor.");
-    } finally {
-        if (typeof exibirLoader === "function") exibirLoader(false);
-    }
-}
-
+    
 </script>
 </body>
 </html>
