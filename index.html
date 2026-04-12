@@ -406,46 +406,58 @@ async function executarRegistro() {
 }
 
 window.onload = () => {
-    // Busca os dados do jogador que acabamos de salvar no registro
-    const jogadorLogado = JSON.parse(localStorage.getItem('duelista_v1'));
+    console.log("Iniciando Sistema de Duelo...");
+    // 1. Tenta buscar o jogador salvo
+    const jogadorSalvo = localStorage.getItem('duelista_v1');
     
-    if (jogadorLogado) {
-        // Se o jogador existe, mostra o app e esconde o login
-        mostrarApp(); 
-        if (typeof atualizarDashboard === "function") atualizarDashboard();
-    } else {
-        // Se não existe, garante que o login apareça
-        document.getElementById('auth-container').style.display = 'flex';
-        if (document.getElementById('painel-principal')) {
-            document.getElementById('painel-principal').style.display = 'none';
+    if (jogadorSalvo && jogadorSalvo !== "null") {
+        try {
+            const dados = JSON.parse(jogadorSalvo);
+            // 2. Chama a função para acender a arena
+            mostrarApp(dados); 
+            // 3. Tenta atualizar os dados reais do servidor
+            if (typeof atualizarDashboard === "function") atualizarDashboard();
+        } catch (e) {
+            console.error("Erro ao processar dados salvos:", e);
+            localStorage.removeItem('duelista_v1'); // Limpa dados corrompidos
+            location.reload();
         }
+    } else {
+        // 4. Se não tem login, garante que a tela de acesso apareça
+        const auth = document.getElementById('auth-container');
+        if (auth) auth.style.display = 'flex';
+        const painel = document.getElementById('painel-principal');
+        if (painel) painel.style.display = 'none';
     }
 };
 
-function mostrarApp() {
-    console.log("Invocando Arena...");
+function mostrarApp(dados) {
     const auth = document.getElementById('auth-container');
     const painel = document.getElementById('painel-principal');
-    
-    // 1. Esconde o login e mostra o painel (Ações principais)
-    if (auth) auth.style.display = 'none';
+
+    // PASSO 1: ACENDER A LUZ (Prioridade máxima)
+    if (auth) auth.setAttribute('style', 'display: none !important');
     if (painel) {
         painel.style.display = 'flex'; // Isso mata a tela preta
     }
 
-    // 2. Preenchimento de dados com "Trava de Segurança"
-    try {
-        const dados = JSON.parse(localStorage.getItem('duelista_v1'));
-        if (dados) {
-            // Tenta preencher cada campo, mas não trava se não achar
-            const elNome = document.getElementById('minha-conta-nome');
-            const elEstrelas = document.getElementById('minhas-estrelas-painel');
-            
-            if (elNome) elNome.innerText = dados.nickname;
-            if (elEstrelas) elEstrelas.innerText = dados.estrelas || 10;
-        }
-    } catch (e) {
-        console.log("Aviso: Alguns campos do dashboard não foram preenchidos ainda.");
+    // PASSO 2: PREENCHER OS DADOS (Com proteção contra erro de ID)
+    if (dados) {
+        // Criamos uma lista de IDs que o código vai tentar preencher
+        // Se o ID não existir no HTML, o código apenas pula para o próximo
+        const mapas = [
+            { id: 'minha-conta-nome', valor: dados.nickname },
+            { id: 'minhas-estrelas-painel', valor: dados.estrelas || 10 },
+            { id: 'top1-nome', valor: dados.nickname },
+            { id: 'perfil-nick', valor: dados.nickname }
+        ];
+
+        mapas.forEach(item => {
+            const elemento = document.getElementById(item.id);
+            if (elemento) {
+                elemento.innerText = item.valor;
+            }
+        });
     }
 }
 
