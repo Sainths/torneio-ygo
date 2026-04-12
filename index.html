@@ -423,31 +423,31 @@ window.onload = () => {
 };
 
 function mostrarApp() {
-    console.log("Iniciando visual do Dashboard...");
+    console.log("Invocando Arena...");
     const auth = document.getElementById('auth-container');
     const painel = document.getElementById('painel-principal');
     
-    // 1. Esconde o login
+    // 1. Esconde o login e mostra o painel (Ações principais)
     if (auth) auth.style.display = 'none';
-    
-    // 2. Tenta ligar o painel
     if (painel) {
-        painel.style.display = 'flex'; // Força o painel a aparecer
-        
-        // 3. Preenche os dados apenas se os IDs existirem no HTML
+        painel.style.display = 'flex'; // Isso mata a tela preta
+    }
+
+    // 2. Preenchimento de dados com "Trava de Segurança"
+    try {
         const dados = JSON.parse(localStorage.getItem('duelista_v1'));
         if (dados) {
-            const campoNome = document.getElementById('minha-conta-nome');
-            const campoEstrelas = document.getElementById('minhas-estrelas-painel');
+            // Tenta preencher cada campo, mas não trava se não achar
+            const elNome = document.getElementById('minha-conta-nome');
+            const elEstrelas = document.getElementById('minhas-estrelas-painel');
             
-            if (campoNome) campoNome.innerText = dados.nickname;
-            if (campoEstrelas) campoEstrelas.innerText = dados.estrelas || 10;
+            if (elNome) elNome.innerText = dados.nickname;
+            if (elEstrelas) elEstrelas.innerText = dados.estrelas || 10;
         }
-    } else {
-        console.error("Erro: Div 'painel-principal' não encontrada no HTML!");
+    } catch (e) {
+        console.log("Aviso: Alguns campos do dashboard não foram preenchidos ainda.");
     }
 }
-
 
 // --- SISTEMA DE ACESSO ---
 async function registrar(nick, deck, senha) {
