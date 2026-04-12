@@ -281,39 +281,38 @@ async function atualizarDashboard() {
         const response = await fetch(`${WEB_APP_URL}?action=getDashboard`);
         const d = await response.json();
         
-        // Se houver dados no console, o problema é o nome das propriedades
-        console.log("RESPOSTA DO GOOGLE:", d);
+        // Se isso não aparecer, o problema é o Google Script
+        console.log("Dados Brutos:", d);
 
-        // Função de preenchimento que testa dois tipos de nomes (português e inglês)
-        const colocarTexto = (id, obj) => {
+        // FUNÇÃO DE SEGURANÇA: Tenta preencher por ID
+        const preencher = (id, valor) => {
             const el = document.getElementById(id);
-            if (!el) return;
-            if (!obj) { el.innerText = "Vago"; return; }
-            // Tenta pegar nickname (nosso código) ou nickname (padrão antigo)
-            el.innerText = obj.nickname || obj.nickname || "Vago";
+            if (el) {
+                el.innerText = valor || "Vago";
+                console.log(`Preenchendo ${id} com ${valor}`);
+            }
         };
 
-        const colocarEstrelas = (id, obj) => {
-            const el = document.getElementById(id);
-            if (el) el.innerText = obj ? (obj.estrelas || 0) : 0;
-        };
+        // Preenchendo o Top 1 (Rei)
+        if (d.top1) {
+            preencher('top1-nome', d.top1.nickname);
+            preencher('top1-deck', "Deck: " + (d.top1.deck || "--"));
+            preencher('top1-estrelas', d.top1.estrelas);
+        }
 
-        // Preenchendo com redundância para não dar erro
-        colocarTexto('top1-nome', d.top1);
-        colocarEstrelas('top1-estrelas', d.top1);
-        
-        colocarTexto('top2-nome', d.top2);
-        colocarEstrelas('top2-estrelas', d.top2);
-
-        colocarTexto('top3-nome', d.top3);
-        colocarEstrelas('top3-estrelas', d.top3);
+        // Preenchendo o Top 2
+        if (d.top2) {
+            preencher('top2-nome', d.top2.nickname);
+            preencher('top2-deck', "Deck: " + (d.top2.deck || "--"));
+            preencher('top2-estrelas', d.top2.estrelas);
+        }
 
         // Stats Gerais
-        if(document.getElementById('total-estrelas')) 
-            document.getElementById('total-estrelas').innerText = d.totalEstrelas || 0;
+        preencher('total-estrelas', d.totalEstrelas);
+        preencher('total-duelos', d.totalDuelos);
 
     } catch (e) {
-        console.error("Erro na comunicação:", e);
+        console.error("Erro no Dashboard:", e);
     }
 }
     
