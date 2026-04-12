@@ -274,19 +274,33 @@ input:focus {
     </div>
 </div>
     
-<div id="painel-principal" class="app-container">
-    <div class="app-container">
-        <!-- ARENA DE APOSTAS -->
-<div id="arena-apostas" style="margin-top: 20px;">
-    <h3 style="font-family:'Orbitron'; color:var(--dourado-milenio); text-align:center;">Salas de Apostas</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <button class="btn-sala" onclick="entrarSala(1)">1 <i class="fas fa-star estrela-ygo"></i></button>
-        <button class="btn-sala" onclick="entrarSala(3)">3 <i class="fas fa-star estrela-ygo"></i></button>
-        <button class="btn-sala" onclick="entrarSala(5)">5 <i class="fas fa-star estrela-ygo"></i></button>
-        <button class="btn-sala" onclick="entrarSala(10)">10 <i class="fas fa-star estrela-ygo"></i></button>
+<!-- PAINEL PRINCIPAL (A Arena) -->
+<div id="painel-principal" style="display: none; width: 100%; max-width: 500px; margin: 0 auto; padding: 20px;">
+    
+    <!-- DASHBOARD (Adicionei para não ficar vazio) -->
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h2 style="font-family:'Orbitron'; color:var(--dourado-milenio);">DASHBOARD</h2>
+        <div style="font-size: 20px;"><i class="fas fa-star" style="color: gold;"></i> <span id="minhas-estrelas">10</span></div>
+        <div id="top1-nome" style="color: #aaa; font-size: 14px;">Duelista</div>
     </div>
-</div>
-        <!-- Dashboard Top 3 -->
+
+    <!-- ARENA DE APOSTAS -->
+    <div id="arena-apostas" style="margin-top: 20px;">
+        <h3 style="font-family:'Orbitron'; color:var(--dourado-milenio); text-align:center;">Salas de Apostas</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button class="btn-sala" onclick="entrarSala(1)">1 <i class="fas fa-star"></i></button>
+            <button class="btn-sala" onclick="entrarSala(3)">3 <i class="fas fa-star"></i></button>
+            <button class="btn-sala" onclick="entrarSala(5)">5 <i class="fas fa-star"></i></button>
+            <button class="btn-sala" onclick="entrarSala(10)">10 <i class="fas fa-star"></i></button>
+        </div>
+    </div>
+
+    <!-- BOTÃO DE LOGOUT -->
+    <button class="btn-acao" style="background: #333; margin-top: 40px;" onclick="logout()">SAIR DO REINO</button>
+
+</div> <!-- FIM DO PAINEL PRINCIPAL -->
+
+    <!-- Dashboard Top 3 -->
         <div class="top3-container">
             <div class="card-top top-2">
                 <i class="fas fa-medal medal-icon"></i>
@@ -471,20 +485,19 @@ window.onload = () => {
 };
 
 function mostrarApp() {
-    console.log("Iniciando visual do Dashboard...");
     const auth = document.getElementById('auth-container');
     const painel = document.getElementById('painel-principal');
     
-    if (auth) auth.setAttribute('style', 'display: none !important');
+    if (auth) auth.style.display = 'none';
     if (painel) {
-        painel.style.display = 'block';
-        // Preenche os dados básicos para não ficar vazio
+        // Usamos flex ou block para garantir a visibilidade
+        painel.style.display = 'block'; 
+        
+        // Preenche o nome do duelista logado
         const dados = JSON.parse(localStorage.getItem('duelista_v1'));
-        if(dados && document.getElementById('top1-nome')) {
+        if(dados) {
             document.getElementById('top1-nome').innerText = dados.nickname;
-            if(document.getElementById('minhas-estrelas')) {
-                document.getElementById('minhas-estrelas').innerText = dados.estrelas || 10;
-            }
+            document.getElementById('minhas-estrelas').innerText = dados.estrelas || 10;
         }
     }
 }
