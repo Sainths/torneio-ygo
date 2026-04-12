@@ -4,332 +4,132 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reino dos Duelistas</title>
+    <!-- Fontes e Ícones -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="https://cloudflare.com">
     
-    <!-- Links limpos e sem espaços -->
-    <link rel="stylesheet" href="//://cloudflare.com">
-    <link rel="stylesheet" href="//://googleapis.com">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icone.png">
+    <style>
+        :root {
+            --roxo-profundo: #1a0033;
+            --roxo-magico: #4b0082;
+            --dourado-milenio: #d4af37;
+            --preto-caos: #0a0a0a;
+            --texto-claro: #e0e0e0;
+        }
 
-<style>
-    /* 1. VARIÁVEIS E RESET */
-    :root { 
-        --roxo-profundo: #1a0033; --roxo-magico: #4b0082; --dourado-milenio: #d4af37; 
-        --preto-caos: #0a0a0a; --texto-claro: #e0e0e0; --borda-glow: 0 0 15px rgba(212, 175, 55, 0.4);
-    }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; background: var(--preto-caos); color: var(--texto-claro); font-family: 'Roboto', sans-serif; overflow-x: hidden; height: 100%; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(-45deg, #0a0a0a, #1a0033, #2e004d, #0a0a0a);
+            background-size: 400% 400%;
+            animation: gradientMove 15s ease infinite;
+            color: var(--texto-claro);
+            font-family: 'Roboto', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
 
-    /* 2. LOGIN (CARD CENTRALIZADO) */
-    #auth-container { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 999; background: linear-gradient(135deg, #0a0a0a, #1a0033); }
-    input { width: 100%; padding: 12px; background: rgba(0, 0, 0, 0.6); border: 1px solid var(--roxo-magico); color: white; border-radius: 8px; margin-bottom: 15px; outline: none; }
-    input:focus { border-color: var(--dourado-milenio); box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-    /* 3. PAINEL PRINCIPAL (GRID E COLUNA) */
-    #painel-principal { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 500px; margin: 0 auto; padding: 20px; gap: 25px; }
+        /* CARD DE LOGIN/REGISTRO */
+        #auth-container {
+            background: rgba(20, 0, 40, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid var(--dourado-milenio);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            z-index: 1000;
+        }
 
-    /* 4. TOP 3 (ESTILO TAG FORCE) */
-    .top3-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; height: 180px; width: 100%; margin-top: 20px; }
-    .card-top { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 2px solid var(--dourado-milenio); border-radius: 12px 12px 0 0; text-align: center; padding: 10px; width: 32%; box-shadow: var(--borda-glow); position: relative; }
-    .rei-dos-jogos { height: 100%; border-color: gold; box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); }
-    .top-2 { height: 85%; border-color: #c0c0c0; }
-    .top-3 { height: 75%; border-color: #cd7f32; }
-    .coroa { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 20px; color: gold; }
+        h2 { font-family: 'Orbitron'; color: var(--dourado-milenio); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
 
-    /* 5. BOTÕES E CARDS */
-    .btn-sala { background: rgba(75, 0, 130, 0.4); border: 1px solid var(--dourado-milenio); color: white; padding: 15px; border-radius: 10px; font-family: 'Orbitron'; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; }
-    .btn-acao { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid var(--dourado-milenio); background: linear-gradient(45deg, var(--roxo-magico), #4b0082); color: white; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-    .stat-card { background: rgba(75, 0, 130, 0.2); border-left: 4px solid var(--dourado-milenio); padding: 15px; border-radius: 8px; text-align: center; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--roxo-magico);
+            border-radius: 8px;
+            color: white;
+            outline: none;
+            box-sizing: border-box;
+        }
 
-    /* 6. UTILITÁRIOS */
-    #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 10, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
-    .spinner { width: 50px; height: 50px; border: 5px solid var(--roxo-magico); border-top: 5px solid var(--dourado-milenio); border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-    .estrela-ygo { color: #ffcc00; text-shadow: 0 0 5px #ff0000; }
-    
-</style>
+        input:focus { border-color: var(--dourado-milenio); }
+
+        .btn-acao {
+            width: 100%;
+            padding: 14px;
+            margin-top: 15px;
+            background: linear-gradient(45deg, var(--roxo-magico), #8a2be2);
+            border: 1px solid var(--dourado-milenio);
+            color: white;
+            font-family: 'Orbitron';
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        #painel-principal { display: none; } /* Escondido por enquanto */
+    </style>
 </head>
 <body>
-    
-    <!-- LOADER CORRIGIDO (Começa escondido para não travar no meio da tela) -->
-    <div id="loader" style="display: none !important; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); flex-direction: column; justify-content: center; align-items: center; z-index: 9999;">
-        <div class="spinner"></div>
-        <p id="loader-msg" style="margin-top:20px; font-family:'Orbitron'; color: gold;">Invocando...</p>
-    </div>
 
-    <!-- CONTAINER DE LOGIN CENTRALIZADO -->
+    <!-- TELA DE ACESSO -->
     <div id="auth-container">
-    <!-- ÍCONE E TÍTULO -->
-    <div style="text-align: center; margin-bottom: 20px;">
-        <img src="icone.png" width="70" style="filter: drop-shadow(0 0 8px var(--dourado-milenio));">
-        <h2 style="color: var(--dourado-milenio); font-family: 'Orbitron'; font-size: 18px; margin: 10px 0 0 0;">REINO DOS DUELISTAS</h2>
-    </div>
+        <img src="icone.png" width="70" style="margin-bottom: 10px; filter: drop-shadow(0 0 5px var(--dourado-milenio));">
+        <h2>Acesso</h2>
 
-    <!-- CARD DE LOGIN -->
-    <div id="form-login" style="background: rgba(30, 0, 60, 0.6); backdrop-filter: blur(15px); padding: 25px; border-radius: 20px; border: 1px solid var(--dourado-milenio); box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 100%; max-width: 320px;">
-        <div style="margin-bottom: 15px;">
-            <input type="text" id="login-usuario" placeholder="NICKNAME" style="margin-bottom: 10px;">
+        <!-- Formulário de Login -->
+        <div id="form-login">
+            <input type="text" id="login-nick" placeholder="NICKNAME">
             <input type="password" id="login-pass" placeholder="SENHA">
+            <button class="btn-acao" onclick="fazerLogin()">Entrar no Duelo</button>
+            <p onclick="trocarTela(true)" style="font-size: 11px; color: var(--dourado-milenio); cursor: pointer; margin-top: 15px;">Novo Duelista? Registre-se</p>
         </div>
-        <button class="btn-acao" onclick="executarLogin()">ENTRAR NO DUELO</button>
-        <p onclick="alternarAuth(true)" style="cursor:pointer; font-size: 11px; color: var(--dourado-milenio); text-align: center; margin-top: 15px; position: relative; z-index: 1000;">
-           NOVO DUELISTA? REGISTRE-SE
-        </p>
-    </div>
 
-    <!-- CARD DE REGISTRO (Escondido por padrão) -->
-    <div id="form-registro" style="display: none; background: rgba(30, 0, 60, 0.6); backdrop-filter: blur(15px); padding: 25px; border-radius: 20px; border: 1px solid var(--roxo-magico); box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 100%; max-width: 320px;">
-        <h3 style="color: #fff; font-size: 14px; text-align: center; margin-top: 0;">NOVO CADASTRO</h3>
-        <input type="text" id="reg-usuario" placeholder="NICKNAME">
-        <input type="text" id="reg-deck-name" placeholder="NOME DO DECK">
-        <input type="password" id="reg-pass" placeholder="SENHA">
-        <button class="btn-acao" onclick="executarRegistro()" style="background: linear-gradient(45deg, #ffd700, #b8860b); color: #000;">CRIAR ID</button>
-        <p onclick="alternarAuth(false)" style="cursor:pointer; font-size: 11px; color: var(--dourado-milenio); text-align: center; margin-top: 15px;">JÁ TEM ID? FAÇA LOGIN</p>
-    </div>
-</div>
-
-<!-- Procure o início do seu painel e deixe EXATAMENTE assim -->
-<div id="painel-principal" style="display: none; background: #0a0a0a; width: 100%; min-height: 100vh;">
-    
-    <!-- TESTE DE VISIBILIDADE (Adicione isso logo na primeira linha interna) -->
-    <h1 style="color: gold; text-align: center; padding-top: 50px; font-family: 'Orbitron';">ARENA ATIVA</h1>
-<button onclick="atualizarDashboard()" style="padding:10px; background:gold; color:black; z-index:9999; position:relative;">
-    FORÇAR ATUALIZAÇÃO DO RANKING
-</button>
-
-    <!-- 1. BLOCO ELITE (TOP 3) -->
-<div class="top3-container" style="display: flex; justify-content: center; align-items: flex-end; gap: 10px; height: 210px; margin-bottom: 20px;">
-    
-    <!-- Top 2 -->
-    <div class="card-top top-2" style="height: 85%; border-color: #c0c0c0;">
-        <i class="fas fa-medal" style="color: #c0c0c0; font-size: 22px;"></i>
-        <div style="font-family: 'Orbitron'; font-size: 11px; color: #c0c0c0; margin: 5px 0;">TOP 2</div>
-        <div id="top2-nome" style="font-size: 15px; font-weight: bold;">--</div>
-        <div id="top2-deck" style="font-size: 10px; opacity: 0.7;">Deck --</div>
-        <div style="color: var(--dourado-milenio); font-size: 14px; margin-top: 5px;">
-            <i class="fas fa-star"></i> <span id="top2-estrelas">0</span>
+        <!-- Formulário de Registro -->
+        <div id="form-reg" style="display: none;">
+            <input type="text" id="reg-nick" placeholder="NICKNAME">
+            <input type="text" id="reg-deck" placeholder="NOME DO DECK">
+            <input type="password" id="reg-pass" placeholder="SENHA">
+            <button class="btn-acao" onclick="fazerRegistro()">Criar Conta</button>
+            <p onclick="trocarTela(false)" style="font-size: 11px; color: var(--dourado-milenio); cursor: pointer; margin-top: 15px;">Já tem conta? Login</p>
         </div>
     </div>
 
-    <!-- Rei dos Jogos -->
-    <div class="card-top rei-dos-jogos" style="height: 100%; border: 3px solid gold; box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);">
-        <i class="fas fa-crown coroa" style="font-size: 35px; top: -30px;"></i>
-        <div style="font-family: 'Orbitron'; font-size: 12px; color: gold; margin-top: 15px; letter-spacing: 1px;">REI DOS JOGOS</div>
-        <div id="top1-nome" style="font-size: 20px; font-weight: bold; color: #fff; text-shadow: 0 0 10px gold;">--</div>
-        <div id="top1-deck" style="font-size: 11px; color: #eee; margin-bottom: 5px;">Deck --</div>
-        <div style="font-size: 22px;">
-            <i class="fas fa-star" style="color: gold; filter: drop-shadow(0 0 5px red);"></i> 
-            <span id="top1-estrelas">0</span>
-        </div>
+    <!-- PAINEL PRINCIPAL (Vazio por enquanto para teste) -->
+    <div id="painel-principal">
+        <h1 style="color: gold;">ARENA ATIVA</h1>
     </div>
 
-    <!-- Top 3 -->
-    <div class="card-top top-3" style="height: 75%; border-color: #cd7f32;">
-        <i class="fas fa-medal" style="color: #cd7f32; font-size: 22px;"></i>
-        <div style="font-family: 'Orbitron'; font-size: 11px; color: #cd7f32; margin: 5px 0;">TOP 3</div>
-        <div id="top3-nome" style="font-size: 15px; font-weight: bold;">--</div>
-        <div id="top3-deck" style="font-size: 10px; opacity: 0.7;">Deck --</div>
-        <div style="color: var(--dourado-milenio); font-size: 14px; margin-top: 5px;">
-            <i class="fas fa-star"></i> <span id="top3-estrelas">0</span>
-        </div>
-    </div>
-</div>
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec";
 
-<!-- 2. GRID DE STATUS (LETRA AUMENTADA) -->
-<div class="stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-    <div class="stat-card" style="padding: 18px;">
-        <i class="fas fa-layer-group" style="font-size: 24px;"></i>
-        <span id="total-estrelas" style="font-size: 22px; display: block; color: #fff;">0</span>
-        <span style="font-size: 11px; color: var(--dourado-milenio);">ESTRELAS TOTAIS</span>
-    </div>
-    <div class="stat-card" style="padding: 18px;">
-        <i class="fas fa-fist-raised" style="font-size: 24px;"></i>
-        <span id="total-duelos" style="font-size: 22px; display: block; color: #fff;">0</span>
-        <span style="font-size: 11px; color: var(--dourado-milenio);">DUELOS GERAIS</span>
-    </div>
-    <div class="stat-card" style="padding: 18px;">
-        <i class="fas fa-shark" style="font-size: 24px;"></i>
-        <span id="shark-nome" style="font-size: 18px; display: block; color: #fff;">--</span>
-        <span style="font-size: 11px; color: var(--dourado-milenio);">SHARK (APOSTADOR)</span>
-    </div>
-    <div class="stat-card" style="padding: 18px;">
-        <i class="fas fa-fire" style="font-size: 24px;"></i>
-        <span id="maior-aposta" style="font-size: 22px; display: block; color: #fff;">0</span>
-        <span style="font-size: 11px; color: var(--dourado-milenio);">MAIOR APOSTA</span>
-    </div>
-</div>
-
-    <!-- 4. ARENA DE APOSTAS -->
-    <div id="arena-apostas" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border: 1px solid var(--dourado-milenio);">
-        <h3 style="font-family:'Orbitron'; color:var(--dourado-milenio); text-align:center; font-size:14px; margin-top:0;">SALAS DE APOSTAS</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <button class="btn-sala" onclick="entrarSala(1)">1 <i class="fas fa-star"></i></button>
-            <button class="btn-sala" onclick="entrarSala(3)">3 <i class="fas fa-star"></i></button>
-            <button class="btn-sala" onclick="entrarSala(5)">5 <i class="fas fa-star"></i></button>
-            <button class="btn-sala" onclick="entrarSala(10)">10 <i class="fas fa-star"></i></button>
-        </div>
-    </div>
-
-    <!-- 5. ABA DO JUIZ -->
-    <div id="aba-juiz" style="display:none; background: #1a0033; border: 2px solid gold; padding: 15px; border-radius: 10px;">
-        <h3 style="color: gold; text-align: center; margin-top: 0;">PAINEL DO JUIZ</h3>
-        <button class="btn-acao" style="background: #600;" onclick="resetarTorneio()">RESETAR TORNEIO</button>
-        
-        <!-- EDIÇÃO DE REGRAS (Movido para cá) -->
-        <div style="margin-top:15px; border-top:1px solid #444; padding-top: 10px;">
-            <h4 style="color:var(--dourado-milenio); font-size:12px;">EDITAR REGRAS</h4>
-            <textarea id="edit-regras-input" style="width:100%; height:80px; background:#111; color:white; border:1px solid #444; border-radius:5px;"></textarea>
-            <button class="btn-acao" style="padding:5px; font-size: 12px;" onclick="publicarRegras()">PUBLICAR</button>
-        </div>
-    </div>
-
-    <!-- 6. BOTÕES DE NAVEGAÇÃO -->
-    <button class="btn-acao" onclick="abrirPerfil()"><i class="fas fa-user-circle"></i> MEU PERFIL / RANKING</button>
-    <button class="btn-acao" style="background: #333;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> SAIR</button>
-
-</div> <!-- FECHA PAINEL PRINCIPAL -->
-
-<!-- MODAL PERFIL (Fora do painel para flutuar) -->
-<div id="modal-perfil" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2500; padding:20px; box-sizing:border-box;">
-    <div style="background:linear-gradient(180deg, var(--roxo-profundo), #000); border:2px solid var(--dourado-milenio); padding:20px; border-radius:20px; text-align:center;">
-        <div id="perfil-nick" style="font-family:'Orbitron'; color:var(--dourado-milenio); font-size:22px;">Duelista</div>
-        <div style="background:rgba(255,255,255,0.05); border-radius:10px; padding:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin: 20px 0;">
-            <div><span style="font-size:10px;">DECK</span><br><strong id="perfil-deck">--</strong></div>
-            <div><span style="font-size:10px;">ESTRELAS</span><br><strong id="perfil-estrelas">0</strong></div>
-        </div>
-        <button class="btn-acao" onclick="fecharPerfil()">VOLTAR</button>
-    </div>
-</div>
-
-<script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; // RECOLOQUE SUA URL AQUI
-
-window.onload = () => {
-    const jogadorSalvo = localStorage.getItem('duelista_v1');
-    if (jogadorSalvo && jogadorSalvo !== "null") {
-        const dados = JSON.parse(jogadorSalvo);
-        mostrarApp(dados);
-        
-        // A MÁGICA: Isso força o app a buscar o ranking assim que abre
-        atualizarDashboard(); 
-    } else {
-        document.getElementById('auth-container').style.display = 'flex';
-        document.getElementById('painel-principal').style.display = 'none';
-    }
-};
-
-function alternarAuth(mostrarRegistro) {
-    const loginDiv = document.getElementById('form-login');
-    const registroDiv = document.getElementById('form-registro');
-    loginDiv.style.display = mostrarRegistro ? 'none' : 'block';
-    registroDiv.style.display = mostrarRegistro ? 'block' : 'none';
-}
-
-async function executarLogin() {
-    const nick = document.getElementById('login-usuario').value;
-    const senha = document.getElementById('login-pass').value;
-    if (!nick || !senha) return alert("Preencha tudo!");
-    await login(nick, senha);
-}
-
-async function executarRegistro() {
-    const nick = document.getElementById('reg-usuario').value;
-    const deck = document.getElementById('reg-deck-name').value;
-    const senha = document.getElementById('reg-pass').value;
-    if (!nick || !deck || !senha) return alert("Preencha tudo!");
-    await registrar(nick, deck, senha);
-}
-
-async function registrar(nick, deck, senha) {
-    try {
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'registrar', nickname: nick, deck: deck, senha: senha })
-        });
-        const res = await response.json();
-        if (res.status === "sucesso") {
-            alert("ID Gerado!");
-            localStorage.setItem('duelista_v1', JSON.stringify({ id: res.id, nickname: nick, estrelas: 10 }));
-            location.reload();
-        }
-    } catch (e) { alert("Erro de conexão!"); }
-}
-
-async function login(nick, senha) {
-    try {
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'login', nickname: nick, senha: senha })
-        });
-        const res = await response.json();
-        if (res.status === "sucesso") {
-            localStorage.setItem('duelista_v1', JSON.stringify(res));
-            location.reload();
-        } else { alert("Senha incorreta!"); }
-    } catch (e) { alert("Erro no servidor!"); }
-}
-
-function mostrarApp(dados) {
-    const auth = document.getElementById('auth-container');
-    const painel = document.getElementById('painel-principal');
-
-    // 1. Liga a Arena (Prioridade)
-    if (auth) auth.style.display = 'none';
-    if (painel) painel.style.display = 'flex';
-
-    // 2. Tenta preencher seu nome (Sem travar se falhar)
-    if (dados && dados.nickname) {
-        const el = document.getElementById('minha-conta-nome');
-        if (el) el.innerText = dados.nickname;
-    }
-
-    // 3. Chama o Ranking da Planilha
-    if (typeof atualizarDashboard === "function") {
-        atualizarDashboard();
-    }
-}
-
-async function atualizarDashboard() {
-    try {
-        const response = await fetch(`${WEB_APP_URL}?action=getDashboard`);
-        const d = await response.json();
-        
-        // Se isso não aparecer, o problema é o Google Script
-        console.log("Dados Brutos:", d);
-
-        // FUNÇÃO DE SEGURANÇA: Tenta preencher por ID
-        const preencher = (id, valor) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.innerText = valor || "Vago";
-                console.log(`Preenchendo ${id} com ${valor}`);
-            }
-        };
-
-        // Preenchendo o Top 1 (Rei)
-        if (d.top1) {
-            preencher('top1-nome', d.top1.nickname);
-            preencher('top1-deck', "Deck: " + (d.top1.deck || "--"));
-            preencher('top1-estrelas', d.top1.estrelas);
+        function trocarTela(mostrarRegistro) {
+            document.getElementById('form-login').style.display = mostrarRegistro ? 'none' : 'block';
+            document.getElementById('form-reg').style.display = mostrarRegistro ? 'block' : 'none';
         }
 
-        // Preenchendo o Top 2
-        if (d.top2) {
-            preencher('top2-nome', d.top2.nickname);
-            preencher('top2-deck', "Deck: " + (d.top2.deck || "--"));
-            preencher('top2-estrelas', d.top2.estrelas);
+        function fazerLogin() {
+            alert("Login clicado! Vamos testar a troca de tela primeiro.");
         }
 
-        // Stats Gerais
-        preencher('total-estrelas', d.totalEstrelas);
-        preencher('total-duelos', d.totalDuelos);
-
-    } catch (e) {
-        console.error("Erro no Dashboard:", e);
-    }
-}
-    
-</script>
+        function fazerRegistro() {
+            alert("Registro clicado!");
+        }
+    </script>
 </body>
 </html>
