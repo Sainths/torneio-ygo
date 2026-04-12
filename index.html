@@ -365,7 +365,6 @@ async function registrar(nick, deck, senha) {
             })
         });
         const res = await response.json();
-        
         if (res.status === "sucesso") {
             alert("Registro concluído! Seu ID é: " + res.id);
             localStorage.setItem('duelista_v1', JSON.stringify({
