@@ -271,33 +271,78 @@ window.onload = () => {
         if (auth) auth.style.display = 'flex';
         const painel = document.getElementById('painel-principal');
         if (painel) painel.style.display = 'none';
+        // Atualiza o Ranking e os Top 3 a cada 2 minutos sem precisar dar F5
+         setInterval(() => {
+         if (localStorage.getItem('duelista_v1')) {
+            atualizarDashboard();
+         }
+    }, 120000); 
+
     }
 };
 
 function mostrarApp(dados) {
-    console.log("Comando de iluminação enviado...");
+    console.log("Invocando Arena e Dashboard...");
     const auth = document.getElementById('auth-container');
     const painel = document.getElementById('painel-principal');
 
-    // 1. Esconde o login com prioridade máxima
-    if (auth) auth.setAttribute('style', 'display: none !important');
-
-    // 2. Liga o painel principal forçando visibilidade total
+    // 1. ESCONDE O LOGIN E MOSTRA O PAINEL (LIGA A ARENA)
+    if (auth) auth.style.display = 'none';
     if (painel) {
-        painel.setAttribute('style', 'display: flex !important; flex-direction: column !important; min-height: 100vh !important; background: #0a0a0a !important; visibility: visible !important; opacity: 1 !important;');
-        console.log("Arena visível no console!");
+        painel.style.display = 'flex'; // Exibe o painel organizado em coluna
     }
 
-    // 3. Preenchimento seguro de dados
+    // 2. PREENCHE OS DADOS PESSOAIS (DADOS DO LOCALSTORAGE)
     if (dados) {
-        const ids = ['minha-conta-nome', 'minhas-estrelas-painel', 'top1-nome', 'perfil-nick'];
-        ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.innerText = dados.nickname;
-        });
+        // Preenche seu nome e suas estrelas no cabeçalho
+        const elNome = document.getElementById('minha-conta-nome');
+        const elEstrelas = document.getElementById('minhas-estrelas-painel');
         
-        const elEstrela = document.getElementById('minhas-estrelas-painel');
-        if (elEstrela) elEstrela.innerText = dados.estrelas || 10;
+        if (elNome) elNome.innerText = dados.nickname;
+        if (elEstrelas) elEstrelas.innerText = dados.estrelas || 10;
+    }
+
+    // 3. BUSCA OS DADOS REAIS DO RANKING (DADOS DA PLANILHA)
+    // Chama a função que vai preencher o Top 1, 2, 3 e os Decks
+    if (typeof atualizarDashboard === "function") {
+        atualizarDashboard();
+    }
+}
+
+async function atualizarDashboard() {
+    try {
+        // Busca os dados da planilha usando a URL que você já tem
+        const response = await fetch(`${WEB_APP_URL}?action=getDashboard`);
+        const d = await response.json();
+
+        // 1. Preenche Rei dos Jogos (Top 1)
+        if(document.getElementById('top1-nome')) document.getElementById('top1-nome').innerText = d.top1.nickname;
+        if(document.getElementById('top1-deck')) document.getElementById('top1-deck').innerText = "Deck: " + d.top1.deck;
+        if(document.getElementById('top1-estrelas')) document.getElementById('top1-estrelas').innerText = d.top1.estrelas;
+
+        // 2. Preenche Top 2
+        if(document.getElementById('top2-nome')) document.getElementById('top2-nome').innerText = d.top2.nickname;
+        if(document.getElementById('top2-deck')) document.getElementById('top2-deck').innerText = "Deck: " + d.top2.deck;
+        if(document.getElementById('top2-estrelas')) document.getElementById('top2-estrelas').innerText = d.top2.estrelas;
+
+        // 3. Preenche Top 3
+        if(document.getElementById('top3-nome')) document.getElementById('top3-nome').innerText = d.top3.nickname;
+        if(document.getElementById('top3-deck')) document.getElementById('top3-deck').innerText = "Deck: " + d.top3.deck;
+        if(document.getElementById('top3-estrelas')) document.getElementById('top3-estrelas').innerText = d.top3.estrelas;
+
+        // 4. Preenche Estatísticas Gerais
+        if(document.getElementById('total-estrelas')) document.getElementById('total-estrelas').innerText = d.totalEstrelas;
+        if(document.getElementById('total-duelos')) document.getElementById('total-duelos').innerText = d.totalDuelos;
+        // Dentro do seu atualizarDashboard, adicione:
+        if(document.getElementById('shark-nome')) {
+           document.getElementById('shark-nome').innerText = formatarDados(d.shark);
+         }
+
+        // Guarda o ranking para o Modal Geral
+        window.dadosRanking = d.ranking;
+
+    } catch (e) {
+        console.error("Erro ao buscar dados do Reino:", e);
     }
 }
 
