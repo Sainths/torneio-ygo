@@ -314,30 +314,42 @@ async function atualizarDashboard() {
         const response = await fetch(`${WEB_APP_URL}?action=getDashboard`);
         const d = await response.json();
 
-        // Função de segurança: se não houver duelista, coloca "--" em vez de dar erro
-        const seguro = (obj, prop) => obj ? obj[prop] : "--";
+        // Função de segurança extrema
+        const preencher = (id, valor) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = valor || "--";
+        };
 
-        // Preenche Rei dos Jogos
-        document.getElementById('top1-nome').innerText = seguro(d.top1, 'nickname');
-        document.getElementById('top1-deck').innerText = "Deck: " + seguro(d.top1, 'deck');
-        document.getElementById('top1-estrelas').innerText = d.top1 ? d.top1.estrelas : 0;
+        // Top 1
+        if (d.top1) {
+            preencher('top1-nome', d.top1.nickname);
+            preencher('top1-deck', "Deck: " + d.top1.deck);
+            preencher('top1-estrelas', d.top1.estrelas);
+        }
 
-        // Preenche Top 2
-        document.getElementById('top2-nome').innerText = seguro(d.top2, 'nickname');
-        document.getElementById('top2-deck').innerText = "Deck: " + seguro(d.top2, 'deck');
-        document.getElementById('top2-estrelas').innerText = d.top2 ? d.top2.estrelas : 0;
+        // Top 2
+        if (d.top2) {
+            preencher('top2-nome', d.top2.nickname);
+            preencher('top2-deck', "Deck: " + d.top2.deck);
+            preencher('top2-estrelas', d.top2.estrelas);
+        }
 
-        // Preenche Top 3 (Aqui é onde estava o erro!)
-        document.getElementById('top3-nome').innerText = seguro(d.top3, 'nickname');
-        document.getElementById('top3-deck').innerText = "Deck: " + seguro(d.top3, 'deck');
-        document.getElementById('top3-estrelas').innerText = d.top3 ? d.top3.estrelas : 0;
+        // Top 3
+        if (d.top3) {
+            preencher('top3-nome', d.top3.nickname);
+            preencher('top3-deck', "Deck: " + d.top3.deck);
+            preencher('top3-estrelas', d.top3.estrelas);
+        } else {
+            preencher('top3-nome', "Vazio");
+            preencher('top3-deck', "Aguardando...");
+        }
 
-        // Preenche Stats Gerais
-        document.getElementById('total-estrelas').innerText = d.totalEstrelas || 0;
-        document.getElementById('total-duelos').innerText = d.totalDuelos || 0;
+        // Stats Gerais
+        preencher('total-estrelas', d.totalEstrelas);
+        preencher('total-duelos', d.totalDuelos);
 
     } catch (e) {
-        console.error("Erro ao carregar Dashboard:", e);
+        console.error("Erro ao carregar dados:", e);
     }
 }
 
