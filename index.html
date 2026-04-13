@@ -464,12 +464,11 @@
 
     <!-- Painel de Confirmação de Resultado (Aparece quando pareia) -->
     <div id="painel-resultado" class="hidden">
-        <p>Duelo contra: <strong id="oponente-nome">---</strong></p>
-        <div style="display: flex; gap: 10px;">
-            <button onclick="enviarResultado('Vitoria')" style="background:green">GANHEI</button>
-            <button onclick="enviarResultado('Derrota')" style="background:red">PERDI</button>
-        </div>
-        <p id="msg-aguardo" style="font-size:0.7rem; margin-top:10px; color:#aaa;">Aguardando oponente confirmar...</p>
+    <p>Duelo contra: <strong id="oponente-nome">---</strong></p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button onclick="enviarResultado('Vitoria')" style="background:green">GANHEI</button>
+        <button onclick="enviarResultado('Derrota')" style="background:red">PERDI</button>
+        <button onclick="enviarResultado('Empate')" style="grid-column: span 2; background:gray">EMPATE</button>
     </div>
 </div>
 
@@ -675,17 +674,17 @@ async function abrirLobby(modo, valor) {
 }
 		
 async function atualizarListaFila(modo, valor) {
-	// Adicione isso logo no começo de atualizarListaFila(modo, valor)
-try {
     const user = JSON.parse(localStorage.getItem('duelista'));
-    // Pergunta ao Google se esse jogador está em algum duelo ativo
-    const checkDuelo = await fetch(`${URL_API}?action=statusDuelo&nome=${user.nome}`);
-    const status = await checkDuelo.json();
+
+    // CHECAGEM DE SEGURANÇA: Alguém já me desafiou?
+    const respCheck = await fetch(`${URL_API}?action=statusDuelo&nome=${user.nome}`);
+    const status = await respCheck.json();
 
     if (status && status.emAndamento) {
+        clearInterval(loopArena);
         dueloAtivoID = status.idDuelo;
         abrirPainelResultado(status.oponente);
-        return; // Sai da fila e vai para o duelo
+        return; // Ele sai da fila e não consegue desafiar mais ninguém
     }
 } catch (e) { console.log("Buscando desafios..."); }
 
