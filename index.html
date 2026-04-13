@@ -344,7 +344,7 @@
     </div>
 
  <div id="main-screen" class="container hidden" style="max-width: 600px;">
-    
+    <p>Bem-vindo, <span id="user-name" style="color:var(--dourado-brilho)">Duelista</span>!</p>
     <!-- DASHBOARD SUPERIOR (TOP 3) -->
     <div class="podium-container">
         <!-- TOP 2 -->
@@ -536,18 +536,23 @@
 	}
 
 	function mostrarArena(dados) {
- 	   // 1. Esconde a tela de login e a arena IMEDIATAMENTE
-  	   document.getElementById('auth-screen').classList.add('hidden');
- 	   document.getElementById('arena-modal').classList.add('hidden'); // Força fechar a arena
- 	   document.getElementById('main-screen').classList.remove('hidden');
-    
- 	   // Preenche o nome do duelista se existir
- 	   if(dados && dados.nome) {
- 	       document.getElementById('user-name').innerText = dados.nome;
+	    // Esconde as telas com segurança
+	    const telasParaEsconder = ['auth-screen', 'arena-modal'];
+	    telasParaEsconder.forEach(id => {
+ 	       const el = document.getElementById(id);
+ 	       if (el) el.classList.add('hidden');
+ 	   });
+
+ 	   const mainScreen = document.getElementById('main-screen');
+ 	   if (mainScreen) mainScreen.classList.remove('hidden');
+
+	   // SÓ TENTA ESCREVER SE O ID EXISTIR
+ 	   const userNameElement = document.getElementById('user-name');
+	   if (userNameElement && dados && dados.nome) {
+ 	       userNameElement.innerText = dados.nome;
  	   }
 
- 	   // 2. Tenta carregar o ranking, mas se der erro, o app continua funcionando
-	    carregarRanking().catch(e => console.warn("Ranking não carregou, mas o app segue ativo."));
+	   carregarRanking();
 	}
 
 	async function carregarRanking() {
@@ -637,7 +642,7 @@
 	    // Avisa a planilha que você está buscando duelo
 	    const dados = {
 	        action: "entrarNaFila",
-	        nome: user.nome,
+	        nome: user-nome,
 	        modo: modo,
 	        valor: valor
 	    };
@@ -657,7 +662,7 @@
 	   const dados = {
 	        action: "confirmarDuelo",
 	        idDuelo: dueloAtivoID,
-	        jogador: user.nome,
+	        jogador: user-nome,
 	        resultado: meuResultado // "Vitoria" ou "Derrota"
 	    };
 
@@ -700,7 +705,7 @@
  	// 1. Avisa a planilha que você entrou na fila
  	   const dados = {
 	        action: "entrarNaFila",
-	        nome: user.nome,
+	        nome: user-nome,
 	        modo: modo,
  	        valor: valor
 	  };
@@ -775,7 +780,7 @@
 	    const dados = {
 	        action: "iniciarDuelo",
 	        idDuelo: idDuelo,
- 	        jogador1: user.nome,
+ 	        jogador1: user-nome,
                 jogador2: nomeOponente,
 	        tipo: modo,
 	        valor: valor
