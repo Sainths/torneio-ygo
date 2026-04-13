@@ -675,6 +675,20 @@ async function abrirLobby(modo, valor) {
 }
 		
 async function atualizarListaFila(modo, valor) {
+	// Adicione isso logo no começo de atualizarListaFila(modo, valor)
+try {
+    const user = JSON.parse(localStorage.getItem('duelista'));
+    // Pergunta ao Google se esse jogador está em algum duelo ativo
+    const checkDuelo = await fetch(`${URL_API}?action=statusDuelo&nome=${user.nome}`);
+    const status = await checkDuelo.json();
+
+    if (status && status.emAndamento) {
+        dueloAtivoID = status.idDuelo;
+        abrirPainelResultado(status.oponente);
+        return; // Sai da fila e vai para o duelo
+    }
+} catch (e) { console.log("Buscando desafios..."); }
+
     const listaDiv = document.getElementById('lista-disponiveis');
     const user = JSON.parse(localStorage.getItem('duelista'));
 
@@ -731,6 +745,39 @@ async function enviarResultado(meuResultado) {
     } catch (e) {
         alert("Falha na Rede Holográfica. Tente novamente.");
     }
+}
+		
+// FUNÇÃO QUE É CHAMADA QUANDO VOCÊ CLICA EM "DESAFIAR"
+async function desafiar(nomeOponente, modo, valor) {
+    const user = JSON.parse(localStorage.getItem('duelista'));
+    const idDuelo = "D-" + Date.now(); // Gera um ID único
+
+    const dados = {
+        action: "iniciarDuelo",
+        idDuelo: idDuelo,
+        jogador1: user.nome,
+        jogador2: nomeOponente,
+        tipo: modo,
+        valor: valor
+    };
+
+    try {
+        await fetch(URL_API, { method: 'POST', body: JSON.stringify(dados) });
+        
+        // Entra na tela de resultado
+        dueloAtivoID = idDuelo;
+        abrirPainelResultado(nomeOponente);
+    } catch (e) {
+        alert("Falha ao iniciar duelo.");
+    }
+}
+
+// FUNÇÃO PARA MUDAR A TELA
+function abrirPainelResultado(oponente) {
+    if (loopArena) clearInterval(loopArena);
+    document.getElementById('lobby-espera').classList.add('hidden');
+    document.getElementById('painel-resultado').classList.remove('hidden');
+    document.getElementById('oponente-nome').innerText = oponente;
 }
 
     </script>
