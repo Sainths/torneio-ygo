@@ -324,24 +324,26 @@
 <body>
 
     <!-- TELA DE REGISTRO/LOGIN -->
-    <div id="auth-screen" class="container">
-	<img src="icone.png" class="app-logo"> 
-        <h1>Reino dos Duelistas</h1>
+<div id="auth-screen" class="container">
+    <img src="icone.png" alt="Logo" class="app-logo">
+    <h1>Reino dos Duelistas</h1>
+    <div class="input-group">
+        <label>Nome do Duelista</label>
+        <input type="text" id="nome" placeholder="Ex: Yugi Muto">
+    </div>
+    <div class="input-group">
+        <label>Senha de Acesso</label>
+        <input type="password" id="senha" placeholder="****">
+    </div>
+    <div id="registro-extra" class="hidden">
         <div class="input-group">
-            <label>Nome do Duelista</label>
-            <input type="text" id="nome" placeholder="Ex: Yugi Muto">
-        </div>
-        <div class="input-group">
-            <label>Seu Deck</label>
+            <label>Seu Deck (Apenas para novos)</label>
             <input type="text" id="deck" placeholder="Ex: Mago Negro">
         </div>
-        <div class="input-group">
-            <label>Senha de Acesso</label>
-            <input type="password" id="senha" placeholder="****">
-        </div>
-        <button onclick="entrarNaArena()">Entrar na Arena</button>
-        <p id="status"></p>
     </div>
+    <button onclick="entrarNaArena()" id="btn-entrar">ENTRAR NA ARENA</button>
+    <p id="status" style="font-size: 0.8rem; margin-top: 10px; color: var(--dourado-brilho);"></p>
+</div>
 
  <div id="main-screen" class="container hidden" style="max-width: 600px;">
     <p>Bem-vindo, <span id="user-name" style="color:var(--dourado-brilho)">Duelista</span>!</p>
@@ -419,7 +421,7 @@
 </div>
 
 <!-- MODAL DA ARENA DE DUELOS -->
-<div id="arena-modal" class="container hidden" style="position:fixed; top:5%; z-index:100; background:rgba(10,0,20,0.95); border: 3px solid var(--dourado);">
+<div id="arena-modal" class="container hidden" style="display:none; top:5%; z-index:100; background:rgba(10,0,20,0.95); border: 3px solid var(--dourado);">
  	  <!-- Cabeçalho da Arena com o X -->
 	  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 10px;">
     
@@ -475,61 +477,86 @@
 </div>
 
     <script>
-const URL_API = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; // Cole sua URL do Google aqui
+// CONFIGURAÇÃO INICIAL
+const URL_API = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; // Certifique-se de que o link está entre aspas
 
-window.onload = () => {
+// 1. AO CARREGAR A PÁGINA
+window.onload = function() {
     const userLogado = localStorage.getItem('duelista');
     if (userLogado) {
         mostrarArena(JSON.parse(userLogado));
-    } else {
-        // Garante que comece na tela de login e esconda a arena
-        document.getElementById('auth-screen').classList.remove('hidden');
-        document.getElementById('main-screen').classList.add('hidden');
-        document.getElementById('arena-modal').classList.add('hidden');
     }
 };
 
+// 2. FUNÇÃO DE LOGIN / REGISTRO
+async function entrarNaArena() {
+    const nome = document.getElementById('nome').value.trim();
+    const senha = document.getElementById('senha').value;
+    const deck = document.getElementById('deck') ? document.getElementById('deck').value : "";
+    const status = document.getElementById('status');
+
+    if (!nome || !senha) {
+        alert("Duelista, informe seu Nome e Senha!");
+        return;
+    }
+
+    if (status) status.innerText = "Conectando ao Reino...";
+
+    try {
+        const response = await fetch(URL_API);
+        const jogadores = await response.json();
+
+        // Procura se o duelista já existe
+        const duelista = jogadores.find(j => j.nome.toLowerCase() === nome.toLowerCase());
+
+        if (duelista) {
+            // LOGIN: Existe, checa a senha
+            if (duelista.senha == senha) {
+                localStorage.setItem('duelista', JSON.stringify(duelista));
+                mostrarArena(duelista);
+            } else {
+                if (status) status.innerText = "Senha incorreta!";
+            }
+        } else {
+            // REGISTRO: Não existe, mostra campo de deck
+            const registroExtra = document.getElementById('registro-extra');
+            if (registroExtra && registroExtra.classList.contains('hidden')) {
+                registroExtra.classList.remove('hidden');
+                if (status) status.innerText = "Duelista novo! Informe o Deck e clique novamente.";
+            } else {
+                if (!deck) { alert("Informe o Deck para o registro!"); return; }
+                if (status) status.innerText = "Registrando na Planilha...";
+                
+                const novo = { action: "registrar", nome: nome, deck: deck, senha: senha };
+                await fetch(URL_API, { method: 'POST', body: JSON.stringify(novo) });
+                
+                const dadosFinais = { nome, deck, vitorias: 0, derrotas: 0, pontos: 0 };
+                localStorage.setItem('duelista', JSON.stringify(dadosFinais));
+                mostrarArena(dadosFinais);
+            }
+        }
+    } catch (e) {
+        if (status) status.innerText = "Erro ao conectar. Verifique a URL do Google.";
+        console.error(e);
+    }
+}
+
+// 3. MOSTRAR O DASHBOARD
 function mostrarArena(dados) {
-    // 1. FORÇAR EXIBIÇÃO DAS TELAS (Isso resolve o travamento)
     const auth = document.getElementById('auth-screen');
     const main = document.getElementById('main-screen');
     const arena = document.getElementById('arena-modal');
 
     if (auth) auth.classList.add('hidden');
-    if (arena) arena.classList.add('hidden'); 
+    if (arena) arena.classList.add('hidden');
     if (main) main.classList.remove('hidden');
 
     const userDisplay = document.getElementById('user-name');
     if (userDisplay && dados) userDisplay.innerText = dados.nome;
 
-    // 2. TENTAR carregar o ranking (Se falhar, o app não trava mais)
-    carregarRanking();
-}
-
-async function carregarRanking() {
-    try {
-        const response = await fetch(URL_API);
-        if (!response.ok) return;
-        const jogadores = await response.json();
-        
-        // Aqui você pode recolocar a lógica de preencher os cards do Top 1, 2, 3 dps
-        console.log("Dados carregados com sucesso!");
-        
-    } catch (error) {
-        console.warn("Erro de conexão com o Google. O app continuará funcionando.");
-    }
-}
-
-function fecharArena() {
-    document.getElementById('arena-modal').classList.add('hidden');
-    if (typeof loopArena !== 'undefined' && loopArena) clearInterval(loopArena);
-}
-
-function abrirModulo(tipo) {
-    if (tipo === 'registrar-duelo') {
-        document.getElementById('arena-modal').classList.remove('hidden');
-        document.getElementById('selecao-modo').classList.remove('hidden');
-        document.getElementById('lobby-espera').classList.add('hidden');
+    // Tenta carregar o ranking se a função existir
+    if (typeof carregarRanking === "function") {
+        carregarRanking();
     }
 }
 
@@ -537,6 +564,7 @@ function logout() {
     localStorage.removeItem('duelista');
     location.reload();
 }
+
 
     </script>
 </body>
