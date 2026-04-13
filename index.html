@@ -475,384 +475,68 @@
 </div>
 
     <script>
-      const URL_API = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; // Cole sua URL do Apps Script aqui
+const URL_API = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; // Cole sua URL do Google aqui
 
-	// 1. VERIFICAÇÃO AO ABRIR (Memory Card)
-	window.onload = () => {
-	    const userLogado = localStorage.getItem('duelista');
-   	    if (userLogado) {
-       		 mostrarArena(JSON.parse(userLogado));
-    	   }
-	};
+window.onload = () => {
+    const userLogado = localStorage.getItem('duelista');
+    if (userLogado) {
+        mostrarArena(JSON.parse(userLogado));
+    } else {
+        // Garante que comece na tela de login e esconda a arena
+        document.getElementById('auth-screen').classList.remove('hidden');
+        document.getElementById('main-screen').classList.add('hidden');
+        document.getElementById('arena-modal').classList.add('hidden');
+    }
+};
 
-	// 2. FUNÇÃO ENTRAR (REGISTRA OU LOGA)
-	async function entrarNaArena() {
-	    const nome = document.getElementById('nome').value;
-	    const deck = document.getElementById('deck').value;
-	    const senha = document.getElementById('senha').value;
-	    const statusMsg = document.getElementById('status');
+function mostrarArena(dados) {
+    // 1. FORÇAR EXIBIÇÃO DAS TELAS (Isso resolve o travamento)
+    const auth = document.getElementById('auth-screen');
+    const main = document.getElementById('main-screen');
+    const arena = document.getElementById('arena-modal');
 
-	    if (!nome || !senha) {
- 	       alert("Nome e Senha são obrigatórios para entrar!");
- 	       return;
-	    }
+    if (auth) auth.classList.add('hidden');
+    if (arena) arena.classList.add('hidden'); 
+    if (main) main.classList.remove('hidden');
 
-	    statusMsg.innerText = "Verificando Credenciais...";
+    const userDisplay = document.getElementById('user-name');
+    if (userDisplay && dados) userDisplay.innerText = dados.nome;
 
-	    try {
-	        // Busca todos os jogadores para conferir se já existe
-	        const resp = await fetch(URL_API);
-	        const jogadores = await resp.json();
+    // 2. TENTAR carregar o ranking (Se falhar, o app não trava mais)
+    carregarRanking();
+}
+
+async function carregarRanking() {
+    try {
+        const response = await fetch(URL_API);
+        if (!response.ok) return;
+        const jogadores = await response.json();
         
-	        const duelistaExistente = jogadores.find(j => j.nome.toLowerCase() === nome.toLowerCase());
-
-	        if (duelistaExistente) {
-	            // Se já existe, checa a senha (Coluna C da planilha)
-	            if (duelistaExistente.senha == senha) {
-	                logar(duelistaExistente);
- 	           } else {
-               		 statusMsg.innerText = "Senha incorreta para este Duelista!";
-  	           }
- 	       } else {
- 	           // Se não existe, cria um novo
- 	           if(!deck) { alert("Para novo registro, informe o Deck!"); return; }
- 	           statusMsg.innerText = "Criando novo registro...";
- 	           await registrarNovo(nome, deck, senha);
-	       }
-	    } catch (e) {
-	        statusMsg.innerText = "Erro de conexão.";
-	    }
-	}
-
-	async function registrarNovo(nome, deck, senha) {
-	    const dados = { action: "registrar", nome, deck, senha };
-	    await fetch(URL_API, { method: 'POST', body: JSON.stringify(dados) });
-	    logar({nome, deck, vitorias:0, derrotas:0, pontos:0});
-	}
-
-	function logar(dados) {
-	    localStorage.setItem('duelista', JSON.stringify(dados));
-	    mostrarArena(dados);
-	}
-
-	function mostrarArena(dados) {
-	    // Esconde as telas com segurança
-	    const telasParaEsconder = ['auth-screen', 'arena-modal'];
-	    telasParaEsconder.forEach(id => {
- 	       const el = document.getElementById(id);
- 	       if (el) el.classList.add('hidden');
- 	   });
-
- 	   const mainScreen = document.getElementById('main-screen');
- 	   if (mainScreen) mainScreen.classList.remove('hidden');
-
-	   // SÓ TENTA ESCREVER SE O ID EXISTIR
- 	   const userNameElement = document.getElementById('user-name');
-	   if (userNameElement && dados && dados.nome) {
- 	       userNameElement.innerText = dados.nome;
- 	   }
-
-	   carregarRanking();
-	}
-
-	async function carregarRanking() {
- 	   try {
-	       const response = await fetch(URL_API, { method: 'GET' });
- 	       if (!response.ok) return; // Se der erro, sai da função sem travar nada
+        // Aqui você pode recolocar a lógica de preencher os cards do Top 1, 2, 3 dps
+        console.log("Dados carregados com sucesso!");
         
-	       const jogadores = await response.json();
-		// 1. Ordena por Estrelas (Pontos) do maior para o menor
-	        jogadores.sort((a, b) => b.pontos - a.pontos);
- 	       // 2. Preencher o Top 3 (Se houver jogadores suficientes)
- 	       if (jogadores[0]) {
- 	           document.getElementById('top1-nome').innerText = jogadores[0].nome;
-  	           document.getElementById('top1-deck').innerText = jogadores[0].deck;
-  	           document.getElementById('top1-estrelas').innerText = jogadores[0].pontos;
- 	       }
-  	      if (jogadores[1]) {
-	          document.getElementById('top2-nome').innerText = jogadores[1].nome;
- 	          document.getElementById('top2-deck').innerText = jogadores[1].deck;
- 	          document.getElementById('top2-estrelas').innerText = jogadores[1].pontos;
-	        }
- 	       if (jogadores[2]) {
- 	           document.getElementById('top3-nome').innerText = jogadores[2].nome;
- 	           document.getElementById('top3-deck').innerText = jogadores[2].deck;
- 	           document.getElementById('top3-estrelas').innerText = jogadores[2].pontos;
-	        }
+    } catch (error) {
+        console.warn("Erro de conexão com o Google. O app continuará funcionando.");
+    }
+}
 
- 	       // 3. Atualizar Estatísticas Gerais no Dashboard
-	        const totalE = jogadores.reduce((acc, j) => acc + (parseInt(j.pontos) || 0), 0);
- 	        const totalD = jogadores.reduce((acc, j) => acc + (parseInt(j.vitorias) + parseInt(j.derrotas) || 0), 0);
-        
-	        document.getElementById('total-estrelas').innerText = totalE;
-	        document.getElementById('total-duelos').innerText = totalD;
+function fecharArena() {
+    document.getElementById('arena-modal').classList.add('hidden');
+    if (typeof loopArena !== 'undefined' && loopArena) clearInterval(loopArena);
+}
 
- 	       // 4. Encontrar o SHARK (Quem tem mais vitórias/apostas - exemplo por pontos)
- 	       const shark = [...jogadores].sort((a,b) => b.vitorias - a.vitorias)[0];
- 	       if(shark) document.getElementById('shark-player').innerText = shark.nome;
+function abrirModulo(tipo) {
+    if (tipo === 'registrar-duelo') {
+        document.getElementById('arena-modal').classList.remove('hidden');
+        document.getElementById('selecao-modo').classList.remove('hidden');
+        document.getElementById('lobby-espera').classList.add('hidden');
+    }
+}
 
- 	       // 5. Ranking Geral (do 4º em diante)
- 	       const listaGeral = document.getElementById('lista-ranking-geral');
-	       listaGeral.innerHTML = ""; 
-
-  	       jogadores.forEach((j, index) => {
- 		   const pos = index + 1;
-		   const totalDuelos = parseInt(j.vitorias) + parseInt(j.derrotas) + (parseInt(j.empates) || 0);
-		   const winrate = totalDuelos > 0 ? ((parseInt(j.vitorias) / totalDuelos) * 100).toFixed(0) : 0;
-    
- 		   // Ícone de Sequência (Win Streak) - Supondo que você tenha essa coluna 'streak' na planilha
- 		   const streakIcon = j.streak > 2 ? `<span class="win-streak">🔥 ${j.streak}x ON!</span>` : "";
-
- 		   listaGeral.innerHTML += `
-		   <div class="ranking-row-item" style="flex-direction: column; align-items: flex-start;">
-		            <div style="display: flex; justify-content: space-between; width: 100%;">
- 		               <div class="ranking-info">
- 		                   <span class="rank-number">${pos}º</span>
-		                   <span style="font-weight:bold">${j.nome}</span>
-  		               </div>
-		               <div style="color: var(--dourado-brilho); font-weight: bold;">⭐ ${j.pontos}</div>
-  		       	    </div>
-            
-	               <div class="rank-stats-row">
-		           <span class="stat-tag">V:${j.vitorias} E:${j.empates || 0} D:${j.derrotas}</span>
- 	                   <span class="stat-tag ${winrate >= 60 ? 'winrate-high' : ''}">${winrate}% WR</span>
-	                   <span class="stat-tag ${totalDuelos > 40 ? 'duelos-warning' : ''}">Total: ${totalDuelos}</span>
-	                   ${streakIcon}
-	               </div>
- 		       <div style="font-size: 0.6rem; color: #666; margin-top: 2px;">Deck: ${j.deck}</div>
-        	   </div>`;
-	});
-	
-           } catch (error) {
-	        console.error("Erro ao carregar dados:", error);
-	   }
-	}
-
-	let dueloAtivoID = null;
-	let oponenteAtual = null;
-
-	// Entrar na fila de uma sala
-	async function abrirLobby(modo, valor) {
- 	   document.getElementById('selecao-modo').classList.add('hidden');
- 	   document.getElementById('lobby-espera').classList.remove('hidden');
- 	   document.getElementById('titulo-sala').innerText = `Sala: ${modo} (${valor} ⭐)`;
-    
- 	   const user = JSON.parse(localStorage.getItem('duelista'));
-    
-	    // Avisa a planilha que você está buscando duelo
-	    const dados = {
-	        action: "entrarNaFila",
-	        nome: user-nome,
-	        modo: modo,
-	        valor: valor
-	    };
-    
-	    await fetch(URL_API, { method: 'POST', body: JSON.stringify(dados) });
-	    iniciarBuscaRealtime(); // Começa a checar se alguém te desafiou
-	}
-
-	// Função para o jogador enviar se Ganhou ou Perdeu
-	async function enviarResultado(meuResultado) {
-	    const user = JSON.parse(localStorage.getItem('duelista'));
-	    const statusMsg = document.getElementById('msg-aguardo');
-    
-	   statusMsg.innerText = "Registrando seu resultado...";
-	   statusMsg.style.color = "var(--dourado)";
-
-	   const dados = {
-	        action: "confirmarDuelo",
-	        idDuelo: dueloAtivoID,
-	        jogador: user-nome,
-	        resultado: meuResultado // "Vitoria" ou "Derrota"
-	    };
-
-	    try {
-	        await fetch(URL_API, { method: 'POST', body: JSON.stringify(dados) });
- 	        statusMsg.innerText = "Aguardando oponente confirmar...";
-        
-	        // Inicia um loop para checar se o duelo terminou ou deu conflito
-	        const checkFim = setInterval(async () => {
-	            const resp = await fetch(`${URL_API}?action=statusDuelo&id=${dueloAtivoID}`);
-	            const status = await resp.json();
-            
-	            if (status.finalizado) {
-	                clearInterval(checkFim);
-	                alert("Duelo Finalizado! O Ranking foi atualizado.");
-	                location.reload(); // Recarrega para atualizar as estrelas no Dashboard
-	            } else if (status.conflito) {
- 	               clearInterval(checkFim);
-	               alert("CONFLITO DETECTADO! O Juiz foi notificado para resolver.");
-	               location.reload();
-	            }
-	        }, 4000);
-
-	    } catch (e) {
-	        statusMsg.innerText = "Erro ao enviar. Tente novamente.";
-	    }
-	}
-
-	// Variável para controlar a atualização automática da arena
-	let loopArena = null;
-
-	async function abrirLobby(modo, valor) {
- 	   const user = JSON.parse(localStorage.getItem('duelista'));
-    
- 	// Mostra o visual do Lobby
- 	   document.getElementById('selecao-modo').classList.add('hidden');
- 	   document.getElementById('lobby-espera').classList.remove('hidden');
-	   document.getElementById('titulo-sala').innerText = `Sala: ${modo} (${valor > 0 ? valor + ' ⭐' : 'Normal'})`;
-    
- 	// 1. Avisa a planilha que você entrou na fila
- 	   const dados = {
-	        action: "entrarNaFila",
-	        nome: user-nome,
-	        modo: modo,
- 	        valor: valor
-	  };
-    
-	  try {
-	       await fetch(URL_API, { method: 'POST', body: JSON.stringify(dados) });
-        
- 	// 2. Inicia o loop para ver quem está na sala (tempo real)
- 		   loopArena = setInterval(() => atualizarListaFila(modo, valor), 3000);
-		} catch (e) {
- 		   alert("Erro ao entrar na rede de duelos.");
-		}
-	}
-
-	// Certifique-se de que a função tenha o "async" antes de "function"
-	async function atualizarListaFila(modo, valor) {
-	    const listaDiv = document.getElementById('lista-disponiveis');
-	    const user = JSON.parse(localStorage.getItem('duelista'));
-
-	    try {
-	    // O await só pode existir aqui dentro porque a função é async
-	    const response = await fetch(URL_API + "?action=lerFila");
-            const fila = await response.json();
-
-           // Checagem de duelo ativo para oponente (Matchmaking)
-           const respDuelos = await fetch(URL_API + "?action=checarDuelo&nome=" + user.nome);
-           const dueloStatus = await respDuelos.json();
-
-           if (dueloStatus && dueloStatus.ativo) {
-	       clearInterval(loopArena);
-	       dueloAtivoID = dueloStatus.idDuelo;
-               oponenteAtual = dueloStatus.oponente;
-               abrirPainelResultado(oponenteAtual);
-               return; // Para a execução aqui se já estiver em duelo
-           }
-
-           // Filtra e mostra oponentes
-           const oponentes = fila.filter(f => f.modo === modo && f.valor == valor && f.nome !== user.nome);
-           listaDiv.innerHTML = "";
-        
-           if (oponentes.length === 0) {
-              listaDiv.innerHTML = "<p style='padding:10px; font-size:0.7rem;'>Aguardando duelistas...</p>";
-              return;
-           }
-
-           oponentes.forEach(op => {
-              listaDiv.innerHTML += `
-                  <div class="ranking-row-item">
-                       <span>${op.nome}</span>
-                       <button onclick="desafiar('${op.nome}', '${modo}', ${valor})" 
-                            style="padding:5px 10px; background:var(--dourado); color:black; font-size:0.7rem; font-weight:bold;">
-                        DESAFIAR
-                       </button>
-                  </div>`;
-           });
-       } catch (e) {
-           console.error("Erro na busca da fila:", e);
-       }
-   }
-
-	async function desafiar(nomeOponente, modo, valor) {
-	    const user = JSON.parse(localStorage.getItem('duelista'));
-    
-	    // Para o loop de busca para focar no duelo
-	    clearInterval(loopArena); 
-    
-	    // Cria um ID único para este duelo (Nome1 + Nome2 + Hora)
-	    const idDuelo = "D-" + Date.now();
-	    dueloAtivoID = idDuelo;
-	    oponenteAtual = nomeOponente;
-
-	    const dados = {
-	        action: "iniciarDuelo",
-	        idDuelo: idDuelo,
- 	        jogador1: user-nome,
-                jogador2: nomeOponente,
-	        tipo: modo,
-	        valor: valor
-	    };
-
-	    try {
-	        await fetch(URL_API, { method: 'POST', body: JSON.stringify(dados) });
-	        abrirPainelResultado(nomeOponente);
-	    } catch (e) {
-	        alert("Erro ao iniciar desafio.");
-	    }
-	}
-
-	function abrirPainelResultado(oponente) {
-	    document.getElementById('lobby-espera').classList.add('hidden');
-	    document.getElementById('painel-resultado').classList.remove('hidden');
-	    document.getElementById('oponente-nome').innerText = oponente;
-	}
-
-	// Função para abrir os módulos (Arena/Registro)
-	function abrirModulo(tipo) {
-	    if (tipo === 'registrar-duelo') {
-	        const modal = document.getElementById('arena-modal');
-	        modal.classList.remove('hidden');
-	        // Resetar para a tela inicial do modal
-	        document.getElementById('selecao-modo').classList.remove('hidden');
-	        document.getElementById('lobby-espera').classList.add('hidden');
-	        document.getElementById('painel-resultado').classList.add('hidden');
-	    }
-	}
-
-	// Função de FECHAR (Botão X) - Agora com proteção total
-	function fecharArena() {
-	    const modal = document.getElementById('arena-modal');
-	    modal.classList.add('hidden');
-    
- 	   // Para qualquer busca de duelistas
-	    if (typeof loopArena !== 'undefined' && loopArena) {
-	        clearInterval(loopArena);
- 	       loopArena = null;
-	    }
-    
-	    // Tira o jogador da fila (se ele estiver)
-	    sairDaFila();
-	}
-
-	// Função de CANCELAR/SAIR DA FILA
-	async function sairDaFila() {
-	    document.getElementById('lobby-espera').classList.add('hidden');
-	    document.getElementById('selecao-modo').classList.remove('hidden');
-
-	    const userStr = localStorage.getItem('duelista');
- 	    if (!userStr) return;
-    
- 	    const user = JSON.parse(userStr);
-
-	    // Envia o sinal de saída em background sem travar o app
- 	   try {
-	        fetch(URL_API, {
- 	           method: 'POST',
- 	           mode: 'no-cors', // Evita erro de CORS ao fechar
- 	           body: JSON.stringify({ action: "removerDaFila", nome: user.nome })
- 	       });
-	    } catch (e) {
- 	       console.warn("Saída silenciosa da fila.");
- 	    }
-	}
-
-	function logout() {
-	    localStorage.removeItem('duelista');
-	    location.reload();
-	}
+function logout() {
+    localStorage.removeItem('duelista');
+    location.reload();
+}
 
     </script>
 </body>
