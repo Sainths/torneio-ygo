@@ -684,50 +684,52 @@
 		}
 	}
 
+	// Certifique-se de que a função tenha o "async" antes de "function"
 	async function atualizarListaFila(modo, valor) {
- 	   const listaDiv = document.getElementById('lista-disponiveis');
-	   const user = JSON.parse(localStorage.getItem('duelista'));
+	    const listaDiv = document.getElementById('lista-disponiveis');
+	    const user = JSON.parse(localStorage.getItem('duelista'));
 
-	   try {
-  	      // Usamos o doGet para ler quem está na fila
-	      const response = await fetch(URL_API + "?action=lerFila");
- 	      const fila = await response.json();
+	    try {
+	    // O await só pode existir aqui dentro porque a função é async
+	    const response = await fetch(URL_API + "?action=lerFila");
+            const fila = await response.json();
 
-  	      // Filtra para mostrar apenas pessoas na MESMA sala e que NÃO seja você
-	      const oponentes = fila.filter(f => f.modo === modo && f.valor == valor && f.nome !== user.nome);
+           // Checagem de duelo ativo para oponente (Matchmaking)
+           const respDuelos = await fetch(URL_API + "?action=checarDuelo&nome=" + user.nome);
+           const dueloStatus = await respDuelos.json();
 
- 	      listaDiv.innerHTML = "";
- 	      if (oponentes.length === 0) {
-	           listaDiv.innerHTML = "<p style='padding:10px; font-size:0.7rem;'>Aguardando duelistas...</p>";
- 	           return;
-  	      }
+           if (dueloStatus && dueloStatus.ativo) {
+	       clearInterval(loopArena);
+	       dueloAtivoID = dueloStatus.idDuelo;
+               oponenteAtual = dueloStatus.oponente;
+               abrirPainelResultado(oponenteAtual);
+               return; // Para a execução aqui se já estiver em duelo
+           }
 
-	      oponentes.forEach(op => {
-	            listaDiv.innerHTML += `
-	                <div class="ranking-row-item">
-  	                    <span>${op.nome}</span>
-	                    <button onclick="desafiar('${op.nome}', '${modo}', ${valor})" 
-  	                            style="padding:5px 10px; background:var(--dourado); color:black; font-size:0.7rem; font-weight:bold;">
-  	                        DESAFIAR
-   	                    </button>
- 	                </div>`;
+           // Filtra e mostra oponentes
+           const oponentes = fila.filter(f => f.modo === modo && f.valor == valor && f.nome !== user.nome);
+           listaDiv.innerHTML = "";
+        
+           if (oponentes.length === 0) {
+              listaDiv.innerHTML = "<p style='padding:10px; font-size:0.7rem;'>Aguardando duelistas...</p>";
+              return;
+           }
 
-	      // Dentro de atualizarListaFila(modo, valor)
-	      const respDuelos = await fetch(URL_API + "?action=checarDuelo&nome=" + user.nome);
-	      const dueloStatus = await respDuelos.json();
+           oponentes.forEach(op => {
+              listaDiv.innerHTML += `
+                  <div class="ranking-row-item">
+                       <span>${op.nome}</span>
+                       <button onclick="desafiar('${op.nome}', '${modo}', ${valor})" 
+                            style="padding:5px 10px; background:var(--dourado); color:black; font-size:0.7rem; font-weight:bold;">
+                        DESAFIAR
+                       </button>
+                  </div>`;
+           });
+       } catch (e) {
+           console.error("Erro na busca da fila:", e);
+       }
+   }
 
-	      if (dueloStatus.ativo) {
-		  clearInterval(loopArena);
-		  dueloAtivoID = dueloStatus.idDuelo;
-		  oponenteAtual = dueloStatus.oponente;
-		  abrirPainelResultado(oponenteAtual);
-	      }
-
-        });
-    } catch (e) {
-        console.error("Erro ao atualizar fila");
-    }
-}
 
 	async function desafiar(nomeOponente, modo, valor) {
 	    const user = JSON.parse(localStorage.getItem('duelista'));
