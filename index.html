@@ -542,10 +542,17 @@
 	    carregarRanking(); 
 	}
 
+	
 	async function carregarRanking() {
 	    try {
-	        const response = await fetch(URL_API);
-	        const jogadores = await response.json();
+	        // Usamos cache: 'no-cache' para garantir que pegue dados novos
+	        const response = await fetch(URL_API, { 
+ 	           method: 'GET',
+ 	           cache: 'no-cache',
+  	          redirect: 'follow' 
+  	      });
+        
+	      if (!response.ok) throw new Error('Erro na rede');
 
 	        // 1. Ordena por Estrelas (Pontos) do maior para o menor
 	        jogadores.sort((a, b) => b.pontos - a.pontos);
@@ -609,8 +616,6 @@
  		       <div style="font-size: 0.6rem; color: #666; margin-top: 2px;">Deck: ${j.deck}</div>
         	   </div>`;
 	});
-
-
 	
            } catch (error) {
 	        console.error("Erro ao carregar dados:", error);
@@ -679,7 +684,6 @@
 	        statusMsg.innerText = "Erro ao enviar. Tente novamente.";
 	    }
 	}
-
 
 	// Variável para controlar a atualização automática da arena
 	let loopArena = null;
@@ -756,7 +760,6 @@
        }
    }
 
-
 	async function desafiar(nomeOponente, modo, valor) {
 	    const user = JSON.parse(localStorage.getItem('duelista'));
     
@@ -791,60 +794,54 @@
 	    document.getElementById('oponente-nome').innerText = oponente;
 	}
 
+	// Função para abrir os módulos (Arena/Registro)
 	function abrirModulo(tipo) {
- 	   if (tipo === 'registrar-duelo') {
-	       // Mostra o modal da Arena que criamos
-	       document.getElementById('arena-modal').classList.remove('hidden');
-	       // Reseta para a tela de seleção de modo (Normal/Aposta)
-	       document.getElementById('selecao-modo').classList.remove('hidden');
-	       document.getElementById('lobby-espera').classList.add('hidden');
- 	       document.getElementById('painel-resultado').classList.add('hidden');
-	   }
-	}
-
-	function fecharArena() {
- 	   // 1. Esconde o Modal inteiro
- 	   document.getElementById('arena-modal').classList.add('hidden');
-    
- 	   // 2. Esconde todos os sub-painéis para quando abrir de novo estar limpo
-	    document.getElementById('selecao-modo').classList.remove('hidden');
- 	    document.getElementById('lobby-espera').classList.add('hidden');
-	    document.getElementById('painel-resultado').classList.add('hidden');
-    
-	    // 3. Para qualquer busca que esteja rodando
-	    if (loopArena) {
-	        clearInterval(loopArena);
-	        loopArena = null;
+	    if (tipo === 'registrar-duelo') {
+	        const modal = document.getElementById('arena-modal');
+	        modal.classList.remove('hidden');
+	        // Resetar para a tela inicial do modal
+	        document.getElementById('selecao-modo').classList.remove('hidden');
+	        document.getElementById('lobby-espera').classList.add('hidden');
+	        document.getElementById('painel-resultado').classList.add('hidden');
 	    }
-
-	    // 4. Limpa as variáveis de controle de duelo
-	    dueloAtivoID = null;
-	    oponenteAtual = null;
-
- 	   // 5. Tenta avisar a planilha para te tirar da fila (caso estivesse nela)
- 	   sairDaFila();
 	}
 
-async function sairDaFila() {
-    // 1. PRIMEIRO: Limpa o visual para não travar o usuário
-    document.getElementById('lobby-espera').classList.add('hidden');
-    document.getElementById('selecao-modo').classList.remove('hidden');
-    if (loopArena) { clearInterval(loopArena); loopArena = null; }
+	// Função de FECHAR (Botão X) - Agora com proteção total
+	function fecharArena() {
+	    const modal = document.getElementById('arena-modal');
+	    modal.classList.add('hidden');
+    
+ 	   // Para qualquer busca de duelistas
+	    if (typeof loopArena !== 'undefined' && loopArena) {
+	        clearInterval(loopArena);
+ 	       loopArena = null;
+	    }
+    
+	    // Tira o jogador da fila (se ele estiver)
+	    sairDaFila();
+	}
 
-    // 2. DEPOIS: Tenta avisar o Google, mas não trava se der erro
-    const user = JSON.parse(localStorage.getItem('duelista'));
-    if (!user) return;
+	// Função de CANCELAR/SAIR DA FILA
+	async function sairDaFila() {
+	    document.getElementById('lobby-espera').classList.add('hidden');
+	    document.getElementById('selecao-modo').classList.remove('hidden');
 
-    try {
-        await fetch(URL_API, { 
-            method: 'POST', 
-            mode: 'no-cors', // TÉCNICA PARA EVITAR TRAVAMENTO DE CORS NO POST
-            body: JSON.stringify({ action: "removerDaFila", nome: user.nome }) 
-        });
-    } catch (e) {
-        console.warn("Aviso de saída falhou, mas o visual foi resetado.");
-    }
-}
+	    const userStr = localStorage.getItem('duelista');
+ 	    if (!userStr) return;
+    
+ 	    const user = JSON.parse(userStr);
+
+	    // Envia o sinal de saída em background sem travar o app
+ 	   try {
+	        fetch(URL_API, {
+ 	           method: 'POST',
+ 	           mode: 'no-cors', // Evita erro de CORS ao fechar
+ 	           body: JSON.stringify({ action: "removerDaFila", nome: user.nome })
+ 	       });
+	    } catch (e) {
+ 	       console.warn("Saída silenciosa da fila.");
+ 	    }
+	}
 
 	function logout() {
 	    localStorage.removeItem('duelista');
