@@ -630,6 +630,74 @@ function fecharArena() {
     if (typeof loopArena !== 'undefined' && loopArena) clearInterval(loopArena);
 }
 
+// Função para alternar entre Notificações e Regras
+function verInfo(aba) {
+    const display = document.getElementById('display-info');
+    if (aba === 'notificacoes') {
+        display.innerHTML = `<p id="msg-juiz">Aguardando ordens do Juiz...</p>`;
+    } else if (aba === 'regras') {
+        display.innerHTML = `
+            <ul style="padding-left: 15px; margin: 0;">
+                <li>Duelos de 8000 LP.</li>
+                <li>Vitória simples concede estrelas.</li>
+                <li>Conflitos serão resolvidos pelo Juiz.</li>
+            </ul>`;
+    }
+    // Remove classe ativa de todos e coloca no clicado
+    document.querySelectorAll('.tab-buttons button').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// Função para entrar nas salas (Duelo Normal ou Apostas)
+async function abrirLobby(modo, valor) {
+    const userStr = localStorage.getItem('duelista');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+
+    // 1. Visual: Esconde seleção e mostra lobby
+    document.getElementById('selecao-modo').classList.add('hidden');
+    document.getElementById('lobby-espera').classList.remove('hidden');
+    document.getElementById('titulo-sala').innerText = `Sala: ${modo} (${valor > 0 ? valor + ' ⭐' : 'Normal'})`;
+    
+    // 2. Banco de Dados: Avisa a planilha que você está na fila
+    try {
+        await fetch(URL_API, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: "entrarNaFila", nome: user.nome, modo: modo, valor: valor }) 
+        });
+        
+        // 3. Loop: Começa a procurar oponentes
+        if (typeof loopArena !== 'undefined') clearInterval(loopArena);
+        loopArena = setInterval(() => atualizarListaFila(modo, valor), 4000);
+    } catch (e) {
+        console.error("Erro ao entrar na fila:", e);
+    }
+}
+
+async function enviarResultado(meuResultado) {
+    const statusMsg = document.getElementById('msg-aguardo');
+    statusMsg.innerText = "Registrando... Aguarde o oponente.";
+
+    const dados = {
+        action: "confirmarDuelo",
+        idDuelo: dueloAtivoID, // ID gerado ao clicar em Desafiar
+        jogador: JSON.parse(localStorage.getItem('duelista')).nome,
+        resultado: meuResultado
+    };
+
+    try {
+        await fetch(URL_API, { method: 'POST', body: JSON.stringify(dados) });
+        
+        // Alerta nostálgico e recarrega para atualizar o ranking
+        setTimeout(() => {
+            alert("Resultado enviado ao Reino dos Duelistas!");
+            location.reload();
+        }, 2000);
+    } catch (e) {
+        alert("Falha na Rede Holográfica. Tente novamente.");
+    }
+}
+
     </script>
 </body>
 </html>
