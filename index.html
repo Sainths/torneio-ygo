@@ -3,133 +3,559 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reino dos Duelistas</title>
-    <!-- Fontes e Ícones -->
-    <link href="https://googleapis.com" rel="stylesheet">
-    <link rel="stylesheet" href="https://cloudflare.com">
-    
+    <title>Torneio Reino dos Duelistas</title>
+    <link rel="manifest" href="manifest.json">
     <style>
-        :root {
-            --roxo-profundo: #1a0033;
-            --roxo-magico: #4b0082;
-            --dourado-milenio: #d4af37;
-            --preto-caos: #0a0a0a;
-            --texto-claro: #e0e0e0;
+
+	.app-logo {
+            width: 80px;         /* Ajuste o tamanho aqui */
+            height: 80px;
+            border-radius: 50%;  /* Deixa redondo se for quadrado */
+            border: 2px solid var(--dourado);
+            box-shadow: 0 0 15px var(--dourado);
+            margin-bottom: 10px;
+            background-color: var(--preto);
         }
+	
+	/* Organização do Pódio */
+	.podium-container {
+    		display: flex;
+  		justify-content: center;
+   		align-items: flex-end;
+   		gap: 10px;
+   		margin: 20px 0;
+	}
 
-        body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(-45deg, #0a0a0a, #1a0033, #2e004d, #0a0a0a);
-            background-size: 400% 400%;
-            animation: gradientMove 15s ease infinite;
-            color: var(--texto-claro);
-            font-family: 'Roboto', sans-serif;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
+	.podium-card {
+   		 background: rgba(20, 20, 20, 0.9);
+   		 border-radius: 8px;
+   		 padding: 10px;
+  		 flex: 1;
+  	 	 text-align: center;
+  	 	 border: 1px solid #444;
+	}
 
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+	.gold { border: 2px solid #d4af37; box-shadow: 0 0 15px #d4af37; transform: scale(1.1); z-index: 2; }
+	.silver { border: 1px solid #aaa; opacity: 0.9; }
+	.bronze { border: 1px solid #cd7f32; opacity: 0.9; }
 
-        /* CARD DE LOGIN/REGISTRO */
-        #auth-container {
-            background: rgba(20, 0, 40, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 20px;
-            border: 2px solid var(--dourado-milenio);
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-            width: 90%;
-            max-width: 350px;
-            text-align: center;
-            z-index: 1000;
-        }
+	.title-badge { font-size: 0.6rem; font-weight: bold; margin-bottom: 5px; }
+	.rank-name { font-size: 0.9rem; color: #fff; overflow: hidden; text-overflow: ellipsis; }
+	.rank-deck { font-size: 0.65rem; color: #888; }
+	.rank-stars { color: #f9e295; font-size: 0.8rem; margin-top: 5px; }
 
-        h2 { font-family: 'Orbitron'; color: var(--dourado-milenio); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+	/* Grid de Status */
+	.stats-grid {
+   		 display: grid;
+   		 grid-template-columns: 1fr 1fr;
+    		 gap: 10px;
+   		 margin-bottom: 15px;
+	}
 
-        input {
+	.stat-item {
+   		 background: rgba(46, 0, 79, 0.3);
+   		 border: 1px solid var(--roxo);
+  		 padding: 10px;
+   		 border-radius: 5px;
+	}
+
+	.shark { grid-column: span 2; border-color: #00ccff; }
+
+	/* Área de Texto */
+	.info-section {
+  		 background: #000;
+  		 border: 1px solid var(--dourado);
+    		border-radius: 5px;
+    		text-align: left;
+	}
+
+	.scroll-area { height: 80px; padding: 10px; overflow-y: auto; font-size: 0.8rem; color: #ddd; }
+
+	.btn-duel {
+   		 width: 100%;
+   		 padding: 15px;
+   		 background: linear-gradient(to right, #660000, #990000);
+   		 color: white;
+    		font-weight: bold;
+    		border: 2px solid var(--dourado);
+   		 cursor: pointer;
+	}
+
+	        /* Estilo da Tabela de Ranking */
+        .ranking-table {
             width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--roxo-magico);
-            border-radius: 8px;
-            color: white;
-            outline: none;
-            box-sizing: border-box;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.85rem;
         }
 
-        input:focus { border-color: var(--dourado-milenio); }
-
-        .btn-acao {
-            width: 100%;
-            padding: 14px;
-            margin-top: 15px;
-            background: linear-gradient(45deg, var(--roxo-magico), #8a2be2);
-            border: 1px solid var(--dourado-milenio);
-            color: white;
-            font-family: 'Orbitron';
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
+        .ranking-table th {
+            color: var(--dourado);
+            border-bottom: 2px solid var(--dourado);
+            padding: 8px;
             text-transform: uppercase;
         }
 
-        #painel-principal { display: none; } /* Escondido por enquanto */
+        .ranking-table td {
+            padding: 10px 5px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            text-align: center;
+        }
+
+        .ranking-row:nth-child(1) { /* O Primeiro lugar brilha mais! */
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--dourado-brilho);
+            font-weight: bold;
+        }
+
+        .deck-name {
+            font-size: 0.7rem;
+            display: block;
+            color: #aaa;
+        }
+
+        :root {
+            --roxo: #2e004f;
+            --preto: #0a0a0a;
+            --dourado: #d4af37;
+            --dourado-brilho: #f9e295;
+        }
+
+        body {
+            background-color: var(--preto);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-image: radial-gradient(circle, var(--roxo) 0%, var(--preto) 80%);
+            min-height: 100vh;
+        }
+	.ranking-container {
+ 	   margin-top: 15px;
+	    border: 1px solid rgba(212, 175, 55, 0.3);
+ 	    border-radius: 10px;
+	    background: rgba(10, 10, 10, 0.8);
+	    overflow: hidden;
+	}
+
+	.ranking-header {
+	    background: var(--roxo);
+	    color: var(--dourado);
+	    display: flex;
+	    justify-content: space-between;
+	    padding: 8px 15px;
+	    font-size: 0.7rem;
+	    font-weight: bold;
+ 	    border-bottom: 1px solid var(--dourado);
+	}
+
+	.ranking-scroll {
+ 	   max-height: 250px; /* Altura máxima antes de começar a rolar */
+	   overflow-y: auto;
+	}
+
+	/* Estilo de cada linha do ranking */
+	.ranking-title {
+	    color: var(--dourado);
+	    text-transform: uppercase;
+	    letter-spacing: 3px;
+ 	    font-size: 1.2rem;
+	    text-align: center;
+	    margin: 20px 0 10px 0;
+	    text-shadow: 0 0 10px var(--dourado);
+	    display: flex;
+	    align-items: center;
+            justify-content: center;
+	    gap: 10px;
+	}
+
+	.ranking-title::before, .ranking-title::after {
+	    content: "";
+	    flex: 1;
+	    height: 1px;
+	    background: linear-gradient(to right, transparent, var(--dourado), transparent);
+	}
+
+	.ranking-row-item {
+	    display: flex;
+	    justify-content: space-between;
+	    align-items: center;
+	    padding: 12px 15px;
+	    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+ 	    transition: 0.3s;
+	}
+
+	.ranking-row-item:hover {
+	    background: rgba(212, 175, 55, 0.05);
+	}
+
+	.ranking-info {
+	    text-align: left;
+	}
+
+	.rank-number {
+	    color: var(--dourado);
+	    font-weight: bold;
+	    margin-right: 10px;
+	}
+
+	.rank-deck-sub {
+	    display: block;
+	    font-size: 0.65rem;
+ 	    color: #777;
+	}
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            margin-top: 50px;
+            padding: 20px;
+            border: 2px solid var(--dourado);
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 20px var(--dourado);
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--dourado);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px var(--preto), 0 0 10px var(--dourado);
+            font-size: 1.5rem;
+        }
+
+        .input-group {
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: var(--dourado-brilho);
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px solid var(--dourado);
+            color: white;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to bottom, var(--dourado), #8a6d3b);
+            border: none;
+            color: var(--preto);
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+	.rank-stats-row {
+	    display: flex;
+	    gap: 8px;
+	    font-size: 0.65rem;
+	    color: #bbb;
+	    margin-top: 4px;
+	    text-transform: uppercase;
+	}
+
+	.stat-tag {
+	    background: rgba(255, 255, 255, 0.05);
+	    padding: 2px 5px;
+	    border-radius: 3px;
+	    border: 1px solid rgba(212, 175, 55, 0.2);
+	}
+
+	.win-streak {
+	    color: #f9e295;
+	    font-weight: bold;
+	    text-shadow: 0 0 5px #d4af37;
+	    animation: pulse 1.5s infinite;
+	}
+
+	@keyframes pulse {
+	    0% { opacity: 0.8; }
+	    50% { opacity: 1; text-shadow: 0 0 10px #d4af37; }
+	    100% { opacity: 0.8; }
+	}
+
+	.winrate-high { color: #00ff00; }
+	.duelos-warning { color: #ff8c00; } /* Para alertar quem duelou demais/depois */
+
+        button:hover {
+            background: var(--dourado-brilho);
+            transform: scale(1.02);
+        }
+
+        #status {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--dourado-brilho);
+        }
+
+        /* Esconder telas */
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- TELA DE ACESSO -->
-    <div id="auth-container">
-        <img src="icone.png" width="70" style="margin-bottom: 10px; filter: drop-shadow(0 0 5px var(--dourado-milenio));">
-        <h2>Acesso</h2>
+    <!-- TELA DE REGISTRO/LOGIN -->
+    <div id="auth-screen" class="container">
+	<img src="icone.png" class="app-logo"> 
+        <h1>Reino dos Duelistas</h1>
+        <div class="input-group">
+            <label>Nome do Duelista</label>
+            <input type="text" id="nome" placeholder="Ex: Yugi Muto">
+        </div>
+        <div class="input-group">
+            <label>Seu Deck</label>
+            <input type="text" id="deck" placeholder="Ex: Mago Negro">
+        </div>
+        <div class="input-group">
+            <label>Senha de Acesso</label>
+            <input type="password" id="senha" placeholder="****">
+        </div>
+        <button onclick="entrarNaArena()">Entrar na Arena</button>
+        <p id="status"></p>
+    </div>
 
-        <!-- Formulário de Login -->
-        <div id="form-login">
-            <input type="text" id="login-nick" placeholder="NICKNAME">
-            <input type="password" id="login-pass" placeholder="SENHA">
-            <button class="btn-acao" onclick="fazerLogin()">Entrar no Duelo</button>
-            <p onclick="trocarTela(true)" style="font-size: 11px; color: var(--dourado-milenio); cursor: pointer; margin-top: 15px;">Novo Duelista? Registre-se</p>
+ <div id="main-screen" class="container hidden" style="max-width: 600px;">
+    
+    <!-- DASHBOARD SUPERIOR (TOP 3) -->
+    <div class="podium-container">
+        <!-- TOP 2 -->
+        <div class="podium-card silver">
+            <div class="title-badge">🥈 TOP 2</div>
+            <div class="rank-name" id="top2-nome">---</div>
+            <div class="rank-deck" id="top2-deck">---</div>
+            <div class="rank-stars">⭐ <span id="top2-estrelas">0</span></div>
         </div>
 
-        <!-- Formulário de Registro -->
-        <div id="form-reg" style="display: none;">
-            <input type="text" id="reg-nick" placeholder="NICKNAME">
-            <input type="text" id="reg-deck" placeholder="NOME DO DECK">
-            <input type="password" id="reg-pass" placeholder="SENHA">
-            <button class="btn-acao" onclick="fazerRegistro()">Criar Conta</button>
-            <p onclick="trocarTela(false)" style="font-size: 11px; color: var(--dourado-milenio); cursor: pointer; margin-top: 15px;">Já tem conta? Login</p>
+        <!-- TOP 1 (REI DOS JOGOS) -->
+        <div class="podium-card gold king">
+            <div class="title-badge">👑 REI DOS JOGOS</div>
+            <div class="rank-name" id="top1-nome">---</div>
+            <div class="rank-deck" id="top1-deck">---</div>
+            <div class="rank-stars">⭐ <span id="top1-estrelas">0</span></div>
+        </div>
+
+        <!-- TOP 3 -->
+        <div class="podium-card bronze">
+            <div class="title-badge">🥉 TOP 3</div>
+            <div class="rank-name" id="top3-nome">---</div>
+            <div class="rank-deck" id="top3-deck">---</div>
+            <div class="rank-stars">⭐ <span id="top3-estrelas">0</span></div>
         </div>
     </div>
 
-    <!-- PAINEL PRINCIPAL (Vazio por enquanto para teste) -->
-    <div id="painel-principal">
-        <h1 style="color: gold;">ARENA ATIVA</h1>
+	<!-- RANKING GERAL ESTILO LISTA -->
+	<div class="ranking-title">Ranking</div>
+
+	<div class="ranking-container">
+	    <!-- Cabeçalho com colunas extras se precisar -->
+ 	    <div class="ranking-header">
+	        <span>DUELISTA</span>
+	        <span id="label-extra">STATUS</span> <!-- Podemos mudar esse nome depois -->
+	        <span>ESTRELAS ⭐</span>
+	    </div>
+ 	    <div id="lista-ranking-geral" class="ranking-scroll">
+	        <!-- Os dados vão entrar aqui via JS -->
+	    </div>
+	</div>
+
+    <!-- WIDGETS DE ESTATÍSTICAS TOTAIS -->
+    <div class="stats-grid">
+        <div class="stat-item">
+            <small>Duelos Totais</small>
+            <strong id="total-duelos">0</strong>
+        </div>
+        <div class="stat-item">
+            <small>Estrelas Totais</small>
+            <strong id="total-estrelas">0</strong>
+        </div>
+        <div class="stat-item shark">
+            <small>🦈 SHARK (Apostas)</small>
+            <strong id="shark-player">Ninguém</strong>
+        </div>
     </div>
+
+    <!-- ÁREA DE COMUNICADOS E REGRAS -->
+    <div class="info-section">
+        <div class="tab-buttons">
+            <button onclick="verInfo('notificacoes')" class="active">Notificações</button>
+            <button onclick="verInfo('regras')">Regras</button>
+        </div>
+        <div id="display-info" class="scroll-area">
+            <p id="msg-juiz">Aguardando ordens do Juiz...</p>
+        </div>
+    </div>
+
+    <button onclick="abrirModulo('registrar-duelo')" class="btn-duel">REGISTRAR DUELO</button>
+    <button onclick="logout()" style="color:#888; background:none; border:none; margin-top:10px;">Sair</button>
+</div>
+
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec";
+      const URL_API = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; // Cole sua URL do Apps Script aqui
 
-        function trocarTela(mostrarRegistro) {
-            document.getElementById('form-login').style.display = mostrarRegistro ? 'none' : 'block';
-            document.getElementById('form-reg').style.display = mostrarRegistro ? 'block' : 'none';
-        }
+	// 1. VERIFICAÇÃO AO ABRIR (Memory Card)
+	window.onload = () => {
+	    const userLogado = localStorage.getItem('duelista');
+   	    if (userLogado) {
+       		 mostrarArena(JSON.parse(userLogado));
+    	   }
+	};
 
-        function fazerLogin() {
-            alert("Login clicado! Vamos testar a troca de tela primeiro.");
-        }
+	// 2. FUNÇÃO ENTRAR (REGISTRA OU LOGA)
+	async function entrarNaArena() {
+	    const nome = document.getElementById('nome').value;
+	    const deck = document.getElementById('deck').value;
+	    const senha = document.getElementById('senha').value;
+	    const statusMsg = document.getElementById('status');
 
-        function fazerRegistro() {
-            alert("Registro clicado!");
-        }
+	    if (!nome || !senha) {
+ 	       alert("Nome e Senha são obrigatórios para entrar!");
+ 	       return;
+	    }
+
+	    statusMsg.innerText = "Verificando Credenciais...";
+
+	    try {
+	        // Busca todos os jogadores para conferir se já existe
+	        const resp = await fetch(URL_API);
+	        const jogadores = await resp.json();
+        
+	        const duelistaExistente = jogadores.find(j => j.nome.toLowerCase() === nome.toLowerCase());
+
+	        if (duelistaExistente) {
+	            // Se já existe, checa a senha (Coluna C da planilha)
+	            if (duelistaExistente.senha == senha) {
+	                logar(duelistaExistente);
+ 	           } else {
+               		 statusMsg.innerText = "Senha incorreta para este Duelista!";
+  	           }
+ 	       } else {
+ 	           // Se não existe, cria um novo
+ 	           if(!deck) { alert("Para novo registro, informe o Deck!"); return; }
+ 	           statusMsg.innerText = "Criando novo registro...";
+ 	           await registrarNovo(nome, deck, senha);
+	       }
+	    } catch (e) {
+	        statusMsg.innerText = "Erro de conexão.";
+	    }
+	}
+
+	async function registrarNovo(nome, deck, senha) {
+	    const dados = { action: "registrar", nome, deck, senha };
+	    await fetch(URL_API, { method: 'POST', body: JSON.stringify(dados) });
+	    logar({nome, deck, vitorias:0, derrotas:0, pontos:0});
+	}
+
+	function logar(dados) {
+	    localStorage.setItem('duelista', JSON.stringify(dados));
+	    mostrarArena(dados);
+	}
+
+	function mostrarArena(dados) {
+	    document.getElementById('auth-screen').classList.add('hidden');
+	    document.getElementById('main-screen').classList.remove('hidden');
+	    // Chama a função que preenche o ranking e os tops que fizemos antes
+	    carregarRanking(); 
+	}
+
+	async function carregarRanking() {
+	    try {
+	        const response = await fetch(URL_API);
+	        const jogadores = await response.json();
+
+	        // 1. Ordena por Estrelas (Pontos) do maior para o menor
+	        jogadores.sort((a, b) => b.pontos - a.pontos);
+
+ 	       // 2. Preencher o Top 3 (Se houver jogadores suficientes)
+ 	       if (jogadores[0]) {
+ 	           document.getElementById('top1-nome').innerText = jogadores[0].nome;
+  	           document.getElementById('top1-deck').innerText = jogadores[0].deck;
+  	           document.getElementById('top1-estrelas').innerText = jogadores[0].pontos;
+ 	       }
+  	      if (jogadores[1]) {
+	          document.getElementById('top2-nome').innerText = jogadores[1].nome;
+ 	          document.getElementById('top2-deck').innerText = jogadores[1].deck;
+ 	          document.getElementById('top2-estrelas').innerText = jogadores[1].pontos;
+	        }
+ 	       if (jogadores[2]) {
+ 	           document.getElementById('top3-nome').innerText = jogadores[2].nome;
+ 	           document.getElementById('top3-deck').innerText = jogadores[2].deck;
+ 	           document.getElementById('top3-estrelas').innerText = jogadores[2].pontos;
+	        }
+
+ 	       // 3. Atualizar Estatísticas Gerais no Dashboard
+	        const totalE = jogadores.reduce((acc, j) => acc + (parseInt(j.pontos) || 0), 0);
+ 	        const totalD = jogadores.reduce((acc, j) => acc + (parseInt(j.vitorias) + parseInt(j.derrotas) || 0), 0);
+        
+	        document.getElementById('total-estrelas').innerText = totalE;
+	        document.getElementById('total-duelos').innerText = totalD;
+
+ 	       // 4. Encontrar o SHARK (Quem tem mais vitórias/apostas - exemplo por pontos)
+ 	       const shark = [...jogadores].sort((a,b) => b.vitorias - a.vitorias)[0];
+ 	       if(shark) document.getElementById('shark-player').innerText = shark.nome;
+
+ 	       // 5. Ranking Geral (do 4º em diante)
+ 	       const listaGeral = document.getElementById('lista-ranking-geral');
+	       listaGeral.innerHTML = ""; 
+
+  	       jogadores.slice(3).forEach((j, index) => {
+ 		   const pos = index + 4;
+		   const totalDuelos = parseInt(j.vitorias) + parseInt(j.derrotas) + (parseInt(j.empates) || 0);
+		   const winrate = totalDuelos > 0 ? ((parseInt(j.vitorias) / totalDuelos) * 100).toFixed(0) : 0;
+    
+ 		   // Ícone de Sequência (Win Streak) - Supondo que você tenha essa coluna 'streak' na planilha
+ 		   const streakIcon = j.streak > 2 ? `<span class="win-streak">🔥 ${j.streak}x ON!</span>` : "";
+
+ 		   listaGeral.innerHTML += `
+		   <div class="ranking-row-item" style="flex-direction: column; align-items: flex-start;">
+		            <div style="display: flex; justify-content: space-between; width: 100%;">
+ 		               <div class="ranking-info">
+ 		                   <span class="rank-number">${pos}º</span>
+		                   <span style="font-weight:bold">${j.nome}</span>
+  		               </div>
+		               <div style="color: var(--dourado-brilho); font-weight: bold;">⭐ ${j.pontos}</div>
+  		       	    </div>
+            
+	               <div class="rank-stats-row">
+		           <span class="stat-tag">V:${j.vitorias} E:${j.empates || 0} D:${j.derrotas}</span>
+ 	                   <span class="stat-tag ${winrate >= 60 ? 'winrate-high' : ''}">${winrate}% WR</span>
+	                   <span class="stat-tag ${totalDuelos > 40 ? 'duelos-warning' : ''}">Total: ${totalDuelos}</span>
+	                   ${streakIcon}
+	               </div>
+ 		       <div style="font-size: 0.6rem; color: #666; margin-top: 2px;">Deck: ${j.deck}</div>
+        	   </div>`;
+	});
+
+
+	
+           } catch (error) {
+	        console.error("Erro ao carregar dados:", error);
+	   }
+	}
+
+	function logout() {
+	    localStorage.removeItem('duelista');
+	    location.reload();
+	}
+
     </script>
 </body>
 </html>
