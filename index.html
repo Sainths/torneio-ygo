@@ -724,26 +724,27 @@ async function atualizarListaFila(modo, valor) {
 
 async function enviarResultado(meuResultado) {
     const statusMsg = document.getElementById('msg-aguardo');
-    statusMsg.innerText = "Registrando... Aguarde o oponente.";
+    if (statusMsg) statusMsg.innerText = "Registrando... Aguarde o oponente.";
 
     const dados = {
         action: "confirmarDuelo",
-        idDuelo: dueloAtivoID, // ID gerado ao clicar em Desafiar
+        idDuelo: dueloAtivoID,
         jogador: JSON.parse(localStorage.getItem('duelista')).nome,
         resultado: meuResultado
     };
 
     try {
-        await fetch(URL_API, { method: 'POST', body: JSON.stringify(dados) });
-        
-        // Alerta nostálgico e recarrega para atualizar o ranking
-        setTimeout(() => {
-            alert("Resultado enviado ao Reino dos Duelistas!");
-            location.reload();
-        }, 2000);
+        const response = await fetch(URL_API, { method: 'POST', body: JSON.stringify(dados) });
+        if (response.ok) {
+            setTimeout(() => {
+                alert("Resultado enviado! O ranking atualizará em breve.");
+                location.reload();
+            }, 2000);
+        }
     } catch (e) {
-        alert("Falha na Rede Holográfica. Tente novamente.");
-    }
+        alert("Erro ao conectar com o Reino dos Duelistas.");
+        console.error(e);
+    } // Aqui estava o erro: certifique-se de que o catch fecha assim.
 }
 		
 // FUNÇÃO QUE É CHAMADA QUANDO VOCÊ CLICA EM "DESAFIAR"
