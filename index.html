@@ -181,16 +181,13 @@
 	.ranking-row-item {
 	    display: flex;
 	    justify-content: space-between;
-	    align-items: center;
-	    padding: 12px 15px;
-	    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
- 	    transition: 0.3s;
+	    padding: 12px;
+	    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+	    text-align: left;
 	}
-
-	.ranking-row-item:hover {
-	    background: rgba(212, 175, 55, 0.05);
-	}
-
+	.rank-stats-row { display: flex; gap: 5px; margin-top: 4px; }
+	.stat-tag { font-size: 0.6rem; background: rgba(255,255,255,0.05); padding: 2px 4px; border-radius: 3px; }
+	
 	.ranking-info {
 	    text-align: left;
 	}
@@ -560,11 +557,78 @@ function mostrarArena(dados) {
     }
 }
 
+async function carregarRanking() {
+    const listaGeral = document.getElementById('lista-ranking-geral');
+    if (!listaGeral) return;
+
+    try {
+        const response = await fetch(URL_API);
+        const jogadores = await response.json();
+
+        // 1. Ordena por Estrelas (Pontos)
+        jogadores.sort((a, b) => (parseInt(b.pontos) || 0) - (parseInt(a.pontos) || 0));
+
+        // 2. Preenche o TOP 3 (Os cards de cima)
+        if (jogadores[0]) preencherCardTop(jogadores[0], 'top1');
+        if (jogadores[1]) preencherCardTop(jogadores[1], 'top2');
+        if (jogadores[2]) preencherCardTop(jogadores[2], 'top3');
+
+        // 3. Preenche a Lista Geral (Do 1º ao último)
+        listaGeral.innerHTML = ""; 
+        jogadores.forEach((j, index) => {
+            const totalDuelos = (parseInt(j.vitorias) || 0) + (parseInt(j.derrotas) || 0);
+            const winrate = totalDuelos > 0 ? ((parseInt(j.vitorias) / totalDuelos) * 100).toFixed(0) : 0;
+            const streakIcon = parseInt(j.streak) > 2 ? `<span class="win-streak">🔥 ${j.streak}x</span>` : "";
+
+            listaGeral.innerHTML += `
+                <div class="ranking-row-item">
+                    <div class="ranking-info">
+                        <span class="rank-number">${index + 1}º</span>
+                        <span style="font-weight:bold">${j.nome}</span>
+                        <div class="rank-stats-row">
+                            <span class="stat-tag">V:${j.vitorias} D:${j.derrotas}</span>
+                            <span class="stat-tag">${winrate}% WR</span>
+                            ${streakIcon}
+                        </div>
+                    </div>
+                    <div style="color: var(--dourado-brilho); font-weight: bold;">⭐ ${j.pontos}</div>
+                </div>`;
+        });
+    } catch (error) {
+        console.error("Erro ao carregar ranking:", error);
+    }
+}
+
+function preencherCardTop(j, prefixo) {
+    if (document.getElementById(`${prefixo}-nome`)) document.getElementById(`${prefixo}-nome`).innerText = j.nome;
+    if (document.getElementById(`${prefixo}-deck`)) document.getElementById(`${prefixo}-deck`).innerText = j.deck;
+    if (document.getElementById(`${prefixo}-estrelas`)) document.getElementById(`${prefixo}-estrelas`).innerText = j.pontos;
+}
+
 function logout() {
     localStorage.removeItem('duelista');
     location.reload();
 }
 
+function abrirModulo(tipo) {
+    if (tipo === 'registrar-duelo') {
+        const modal = document.getElementById('arena-modal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'block';
+        
+        // Reseta para a tela de escolha de salas
+        document.getElementById('selecao-modo').classList.remove('hidden');
+        document.getElementById('lobby-espera').classList.add('hidden');
+        document.getElementById('painel-resultado').classList.add('hidden');
+    }
+}
+
+function fecharArena() {
+    const modal = document.getElementById('arena-modal');
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+    if (typeof loopArena !== 'undefined' && loopArena) clearInterval(loopArena);
+}
 
     </script>
 </body>
