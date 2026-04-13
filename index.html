@@ -826,26 +826,23 @@
 	}
 
 async function sairDaFila() {
-    // 1. Reseta o visual IMEDIATAMENTE
+    // 1. PRIMEIRO: Limpa o visual para não travar o usuário
     document.getElementById('lobby-espera').classList.add('hidden');
     document.getElementById('selecao-modo').classList.remove('hidden');
+    if (loopArena) { clearInterval(loopArena); loopArena = null; }
 
-    if (loopArena) {
-        clearInterval(loopArena);
-        loopArena = null;
-    }
-
+    // 2. DEPOIS: Tenta avisar o Google, mas não trava se der erro
     const user = JSON.parse(localStorage.getItem('duelista'));
     if (!user) return;
 
-    // 2. Tenta avisar a planilha, mas se falhar, o usuário nem percebe
     try {
-        fetch(URL_API, { 
+        await fetch(URL_API, { 
             method: 'POST', 
+            mode: 'no-cors', // TÉCNICA PARA EVITAR TRAVAMENTO DE CORS NO POST
             body: JSON.stringify({ action: "removerDaFila", nome: user.nome }) 
         });
     } catch (e) {
-        console.warn("Aviso de saída da fila falhou, mas o app resetou.");
+        console.warn("Aviso de saída falhou, mas o visual foi resetado.");
     }
 }
 
