@@ -686,7 +686,9 @@ async function atualizarListaFila(modo, valor) {
         abrirPainelResultado(status.oponente);
         return; // Ele sai da fila e não consegue desafiar mais ninguém
     }
-} catch (e) { console.log("Buscando desafios..."); }
+} catch (e) { console.log("Buscando desafios..."); 
+
+}
 
     const listaDiv = document.getElementById('lista-disponiveis');
     const user = JSON.parse(localStorage.getItem('duelista'));
