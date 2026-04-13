@@ -304,6 +304,13 @@
 	.btn-aposta { background: #1a1a1a; color: var(--dourado); border: 1px solid #444; padding: 10px; cursor: pointer; font-size: 0.8rem; }
 	.btn-aposta:hover { border-color: var(--dourado); background: var(--roxo); }
 
+	#arena-modal {
+	    padding-top: 20px;
+	    box-sizing: border-box;
+	    display: flex;
+	    flex-direction: column;
+	}
+
         #status {
             margin-top: 15px;
             font-size: 0.9rem;
@@ -413,8 +420,23 @@
 
 <!-- MODAL DA ARENA DE DUELOS -->
 <div id="arena-modal" class="container hidden" style="position:fixed; top:5%; z-index:100; background:rgba(10,0,20,0.95); border: 3px solid var(--dourado);">
-    <h2 style="color:var(--dourado)">Arena de Duelos</h2>
+ 	  <!-- Cabeçalho da Arena com o X -->
+	  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 10px;">
     
+	 	<!-- Espaço vazio à esquerda para equilibrar o título no centro -->
+		<div style="width: 30px;"></div> 
+
+ 	  	<!-- Título centralizado -->
+	  	<h2 style="color:var(--dourado); margin: 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; flex-grow: 1; text-align: center;">
+	 	     Arena de Duelos
+	  	</h2>
+
+	  	<!-- O botão X no canto direito -->
+	 	 <button onclick="fecharArena()" style="width: 30px; background: none; border: none; color: var(--dourado); font-size: 1.5rem; font-weight: bold; cursor: pointer; padding: 0; line-height: 1;">
+	  	    ✕
+	  	</button>
+	  </div>
+
     <!-- Seleção de Modo -->
     <div id="selecao-modo">
         <button onclick="abrirLobby('Normal', 0)" class="btn-lobby">Duelo Normal</button>
@@ -429,11 +451,16 @@
 
     <!-- Lista de Jogadores na Sala -->
     <div id="lobby-espera" class="hidden">
-        <h3 id="titulo-sala" style="font-size: 0.9rem;">Sala: Normal</h3>
-        <div id="lista-disponiveis" class="ranking-scroll" style="height: 150px; border: 1px solid #333;">
-            <!-- Jogadores querendo duelar aparecem aqui -->
+        <h3 id="titulo-sala" style="font-size: 0.9rem; color: var(--dourado);">Sala: Normal</h3>
+        
+        <div id="lista-disponiveis" class="ranking-scroll" style="height: 180px; border: 1px solid #333; margin: 10px 0;">
+            <!-- Jogadores aparecem aqui -->
         </div>
-        <button onclick="sairDaFila()" style="background:#555; margin-top:10px;">Cancelar</button>
+
+        <!-- O BOTÃO DE CANCELAR DEVE ESTAR AQUI -->
+        <button onclick="sairDaFila()" style="background: #444; color: white; border: 1px solid #888; padding: 10px; width: 100%; cursor: pointer; border-radius: 5px; font-weight: bold;">
+            CANCELAR BUSCA
+        </button>
     </div>
 
     <!-- Painel de Confirmação de Resultado (Aparece quando pareia) -->
@@ -446,7 +473,6 @@
         <p id="msg-aguardo" style="font-size:0.7rem; margin-top:10px; color:#aaa;">Aguardando oponente confirmar...</p>
     </div>
 </div>
-
 
     <script>
       const URL_API = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; // Cole sua URL do Apps Script aqui
@@ -764,6 +790,64 @@
 	    document.getElementById('painel-resultado').classList.remove('hidden');
 	    document.getElementById('oponente-nome').innerText = oponente;
 	}
+
+	function abrirModulo(tipo) {
+ 	   if (tipo === 'registrar-duelo') {
+	       // Mostra o modal da Arena que criamos
+	       document.getElementById('arena-modal').classList.remove('hidden');
+	       // Reseta para a tela de seleção de modo (Normal/Aposta)
+	       document.getElementById('selecao-modo').classList.remove('hidden');
+	       document.getElementById('lobby-espera').classList.add('hidden');
+ 	       document.getElementById('painel-resultado').classList.add('hidden');
+	   }
+	}
+
+	function fecharArena() {
+ 	   // 1. Esconde o Modal inteiro
+ 	   document.getElementById('arena-modal').classList.add('hidden');
+    
+ 	   // 2. Esconde todos os sub-painéis para quando abrir de novo estar limpo
+	    document.getElementById('selecao-modo').classList.remove('hidden');
+ 	    document.getElementById('lobby-espera').classList.add('hidden');
+	    document.getElementById('painel-resultado').classList.add('hidden');
+    
+	    // 3. Para qualquer busca que esteja rodando
+	    if (loopArena) {
+	        clearInterval(loopArena);
+	        loopArena = null;
+	    }
+
+	    // 4. Limpa as variáveis de controle de duelo
+	    dueloAtivoID = null;
+	    oponenteAtual = null;
+
+ 	   // 5. Tenta avisar a planilha para te tirar da fila (caso estivesse nela)
+ 	   sairDaFila();
+	}
+
+async function sairDaFila() {
+    // 1. Reseta o visual IMEDIATAMENTE
+    document.getElementById('lobby-espera').classList.add('hidden');
+    document.getElementById('selecao-modo').classList.remove('hidden');
+
+    if (loopArena) {
+        clearInterval(loopArena);
+        loopArena = null;
+    }
+
+    const user = JSON.parse(localStorage.getItem('duelista'));
+    if (!user) return;
+
+    // 2. Tenta avisar a planilha, mas se falhar, o usuário nem percebe
+    try {
+        fetch(URL_API, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: "removerDaFila", nome: user.nome }) 
+        });
+    } catch (e) {
+        console.warn("Aviso de saída da fila falhou, mas o app resetou.");
+    }
+}
 
 	function logout() {
 	    localStorage.removeItem('duelista');
