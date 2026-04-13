@@ -536,27 +536,28 @@
 	}
 
 	function mostrarArena(dados) {
-	    document.getElementById('auth-screen').classList.add('hidden');
-	    document.getElementById('main-screen').classList.remove('hidden');
-	    // Chama a função que preenche o ranking e os tops que fizemos antes
-	    carregarRanking(); 
+ 	   // 1. Esconde a tela de login e a arena IMEDIATAMENTE
+  	   document.getElementById('auth-screen').classList.add('hidden');
+ 	   document.getElementById('arena-modal').classList.add('hidden'); // Força fechar a arena
+ 	   document.getElementById('main-screen').classList.remove('hidden');
+    
+ 	   // Preenche o nome do duelista se existir
+ 	   if(dados && dados.nome) {
+ 	       document.getElementById('user-name').innerText = dados.nome;
+ 	   }
+
+ 	   // 2. Tenta carregar o ranking, mas se der erro, o app continua funcionando
+	    carregarRanking().catch(e => console.warn("Ranking não carregou, mas o app segue ativo."));
 	}
 
-	
 	async function carregarRanking() {
-	    try {
-	        // Usamos cache: 'no-cache' para garantir que pegue dados novos
-	        const response = await fetch(URL_API, { 
- 	           method: 'GET',
- 	           cache: 'no-cache',
-  	          redirect: 'follow' 
-  	      });
+ 	   try {
+	       const response = await fetch(URL_API, { method: 'GET' });
+ 	       if (!response.ok) return; // Se der erro, sai da função sem travar nada
         
-	      if (!response.ok) throw new Error('Erro na rede');
-
-	        // 1. Ordena por Estrelas (Pontos) do maior para o menor
+	       const jogadores = await response.json();
+		// 1. Ordena por Estrelas (Pontos) do maior para o menor
 	        jogadores.sort((a, b) => b.pontos - a.pontos);
-
  	       // 2. Preencher o Top 3 (Se houver jogadores suficientes)
  	       if (jogadores[0]) {
  	           document.getElementById('top1-nome').innerText = jogadores[0].nome;
