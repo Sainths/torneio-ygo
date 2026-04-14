@@ -819,27 +819,48 @@ async function enviarResultado(res) {
 
 function fecharArena() {
     const modal = document.getElementById('arena-modal');
-    modal.classList.add('hidden');
-    modal.style.display = 'none';
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
     
-    // Para o cronômetro de busca de oponentes
     if (loopArena) {
         clearInterval(loopArena);
         loopArena = null;
     }
-
-    // Tira o seu nome da planilha para não bugar a fila
-    sairDaFila();
-} // <-- Faltava fechar essa chave!
     
-    // Avisa o servidor para tirar o nome da lista
-    const user = JSON.parse(localStorage.getItem('duelista'));
-    fetch(URL_API, { 
-        method: 'POST', 
-        mode: 'no-cors', 
-        body: JSON.stringify({ action: "removerDaFila", nome: user.nome }) 
-    });
+    // Chama a função de sair da fila para limpar o nome na planilha
+    sairDaFila();
 }
+
+async function sairDaFila() {
+    // 1. Limpa o visual
+    const lobby = document.getElementById('lobby-espera');
+    const selecao = document.getElementById('selecao-modo');
+    if (lobby) lobby.classList.add('hidden');
+    if (selecao) selecao.classList.remove('hidden');
+
+    // 2. Tira o nome da planilha
+    const userStr = localStorage.getItem('duelista');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+
+    try {
+        await fetch(URL_API, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({ action: "removerDaFila", nome: user.nome }) 
+        });
+    } catch (e) {
+        console.warn("Saída silenciosa da fila.");
+    }
+}
+
+function logout() {
+    localStorage.removeItem('duelista');
+    location.reload();
+}
+// CERTIFIQUE-SE DE QUE NÃO HÁ CHAVES } SOBRANDO ABAIXO DESTA LINHA
 		
 function avisarReino(msg, icone = "📢") {
     const notif = document.getElementById('custom-notification');
@@ -879,8 +900,11 @@ function mostrarConviteEstiloso(oponente, modo, idDuelo) {
     };
 }
 
-function logout() { localStorage.removeItem('duelista'); location.reload(); }
-
+function logout() {
+    localStorage.removeItem('duelista');
+    location.reload();
+}
+// CERTIFIQUE-SE DE QUE NÃO HÁ CHAVES } SOBRANDO ABAIXO DESTA LINHA
     </script>
 </body>
 </html>
