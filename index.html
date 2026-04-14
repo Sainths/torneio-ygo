@@ -269,6 +269,31 @@
  	   color: #ddd;
  	   margin-right: 4px;
 	}
+		
+#custom-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(145deg, #2a0a4d, #1a0533);
+    border: 2px solid var(--dourado);
+    border-radius: 8px;
+    padding: 15px 25px;
+    z-index: 9999;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+    transition: all 0.5s ease;
+}
+
+.notif-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px black;
+}
+
+#notif-icon { font-size: 1.2rem; }
 
 	.ranking-row-item {
 	    display: flex;
@@ -491,6 +516,12 @@
         <button onclick="enviarResultado('Empate')" style="grid-column: span 2; background:gray">EMPATE</button>
     </div>
 </div>
+<div id="custom-notification" class="hidden">
+    <div class="notif-content">
+        <span id="notif-icon">⚠️</span>
+        <span id="notif-text">Mensagem do Reino...</span>
+    </div>
+</div>
 
     <script>
 // CONFIGURAÇÃO INICIAL
@@ -678,13 +709,19 @@ async function atualizarListaFila(modo, valor) {
                 return;
             }
         } 
-        // Caso: Duelo Recusado (O Google agora marca como RECUSADO_LIDO, então aqui só entra uma vez)
+        // Caso: Duelo Recusado (Atualizado para aviso estiloso e reset visual completo)
         else if (statusD && statusD.recusado) {
-            alert(`O duelo contra ${statusD.oponente} foi recusado.`);
+            // Chamada da nova notificação visual
+            if (typeof avisarReino === "function") {
+                avisarReino(`O duelo contra ${statusD.oponente} foi recusado.`, "❌");
+            } else {
+                alert(`O duelo contra ${statusD.oponente} foi recusado.`);
+            }
             
-            // Limpa o loop e volta para a seleção de salas
+            // Limpa o loop e reseta todas as telas da arena para o estado inicial
             if (loopArena) { clearInterval(loopArena); loopArena = null; }
             document.getElementById('lobby-espera').classList.add('hidden');
+            document.getElementById('painel-resultado').classList.add('hidden'); // Garante que feche o painel se estiver aberto
             document.getElementById('selecao-modo').classList.remove('hidden');
             return;
         }
@@ -762,6 +799,19 @@ function fecharArena() {
         mode: 'no-cors', 
         body: JSON.stringify({ action: "removerDaFila", nome: user.nome }) 
     });
+}
+		
+function avisarReino(msg, icone = "📢") {
+    const notif = document.getElementById('custom-notification');
+    document.getElementById('notif-text').innerText = msg;
+    document.getElementById('notif-icon').innerText = icone;
+    
+    notif.classList.remove('hidden');
+    
+    // Some após 4 segundos
+    setTimeout(() => {
+        notif.classList.add('hidden');
+    }, 4000);
 }
 
 function logout() { localStorage.removeItem('duelista'); location.reload(); }
