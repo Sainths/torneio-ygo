@@ -259,6 +259,26 @@
             margin-top: 10px;
             transition: 0.3s;
         }
+	/* Garante o visual das tags de status no Ranking */
+	.stat-tag {
+	    font-size: 0.65rem;
+	    background: rgba(212, 175, 55, 0.1);
+ 	   padding: 2px 6px;
+ 	   border-radius: 4px;
+ 	   border: 1px solid rgba(212, 175, 55, 0.3);
+ 	   color: #ddd;
+ 	   margin-right: 4px;
+	}
+
+	.ranking-row-item {
+	    display: flex;
+	    flex-direction: column;
+	    padding: 12px;
+	    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+	    background: rgba(0, 0, 0, 0.2);
+	    margin-bottom: 5px;
+	    border-radius: 5px;
+	}
 
 	.rank-stats-row {
 	    display: flex;
@@ -545,20 +565,23 @@ async function carregarRanking() {
         const resp = await fetch(URL_API, { method: 'GET', redirect: 'follow' });
         const jogadores = await resp.json();
         
-        // 1. Ordena por Estrelas (Pontos)
+        console.log("Dados recebidos do Google:", jogadores); // Para depuração
+
+        // 1. Ordenação
         jogadores.sort((a, b) => (parseInt(b.pontos) || 0) - (parseInt(a.pontos) || 0));
 
-        // 2. Preenche o TOP 3 (Cards Superiores)
+        // 2. Preencher TOP 3
         const preencherTop = (index, id) => {
-            if (jogadores[index]) {
-                document.getElementById(`${id}-nome`).innerText = jogadores[index].nome;
-                document.getElementById(`${id}-deck`).innerText = jogadores[index].deck;
-                document.getElementById(`${id}-estrelas`).innerText = jogadores[index].pontos;
+            const j = jogadores[index];
+            if (j) {
+                document.getElementById(`${id}-nome`).innerText = j.nome || "---";
+                document.getElementById(`${id}-deck`).innerText = j.deck || "---";
+                document.getElementById(`${id}-estrelas`).innerText = j.pontos || "0";
             }
         };
         preencherTop(0, 'top1'); preencherTop(1, 'top2'); preencherTop(2, 'top3');
 
-        // 3. Preenche a Lista Geral com todas as informações
+        // 3. Preencher Lista Geral
         listaGeral.innerHTML = "";
         jogadores.forEach((j, i) => {
             const v = parseInt(j.vitorias) || 0;
@@ -566,39 +589,30 @@ async function carregarRanking() {
             const e = parseInt(j.empates) || 0;
             const pts = parseInt(j.pontos) || 0;
             const streak = parseInt(j.streak) || 0;
+            const total = v + d + e;
+            const wr = total > 0 ? ((v / total) * 100).toFixed(0) : 0;
             
-            const totalDuelos = v + d + e;
-            const wr = totalDuelos > 0 ? ((v / totalDuelos) * 100).toFixed(0) : 0;
-            const streakIcon = streak >= 3 ? `<span style="color:#f9e295; font-weight:bold; text-shadow: 0 0 5px #d4af37;">🔥 ${streak}x</span>` : "";
+            const streakIcon = streak >= 3 ? `<span style="color:#f9e295">🔥 ${streak}x</span>` : "";
 
             listaGeral.innerHTML += `
-                <div class="ranking-row-item" style="flex-direction: column; align-items: flex-start; padding: 12px 15px; border-bottom: 1px solid rgba(212,175,55,0.1);">
-                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                        <div style="text-align: left;">
-                            <span style="color:var(--dourado); font-weight:bold;">${i + 1}º</span>
-                            <span style="font-weight:bold; color:white; margin-left:5px;">${j.nome}</span>
-                        </div>
-                        <div style="color: var(--dourado-brilho); font-weight: bold;">⭐ ${pts}</div>
+                <div class="ranking-row-item">
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <span><b style="color:var(--dourado)">${i + 1}º</b> ${j.nome}</span>
+                        <span style="color:var(--dourado-brilho); font-weight:bold;">⭐ ${pts}</span>
                     </div>
-                    
-                    <div style="display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap;">
+                    <div style="display: flex; margin-top: 6px; flex-wrap: wrap; gap: 4px;">
                         <span class="stat-tag">V:${v} E:${e} D:${d}</span>
                         <span class="stat-tag">${wr}% WR</span>
-                        <span class="stat-tag">Duelos: ${totalDuelos}</span>
+                        <span class="stat-tag">Duelos: ${total}</span>
                         ${streakIcon}
                     </div>
-                    <div style="font-size: 0.65rem; color: #777; margin-top: 3px; font-style: italic;">Deck: ${j.deck}</div>
+                    <div style="font-size: 0.65rem; color: #888; margin-top: 4px;">Deck: ${j.deck}</div>
                 </div>`;
         });
 
-        // Atualiza as estatísticas globais do Dashboard (se os IDs existirem)
-        if(document.getElementById('total-estrelas')) {
-            const totalE = jogadores.reduce((acc, j) => acc + (parseInt(j.pontos) || 0), 0);
-            document.getElementById('total-estrelas').innerText = totalE;
-        }
-
-    } catch (e) {
-        console.warn("Erro ao processar ranking detalhado:", e);
+    } catch (error) {
+        console.error("Erro ao carregar o ranking:", error);
+        listaGeral.innerHTML = "<p style='color:red'>Erro ao carregar dados.</p>";
     }
 }
 
