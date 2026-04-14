@@ -409,6 +409,16 @@
 
  <div id="main-screen" class="container hidden" style="max-width: 600px;">
     <p>Bem-vindo, <span id="user-name" style="color:var(--dourado-brilho)">Duelista</span>!</p>
+	 <!-- Botão Secreto do Juiz (Começa escondido) -->
+	<div id="painel-admin" class="hidden" style="margin-top: 20px; padding: 15px; border: 1px dashed var(--dourado); border-radius: 10px; background: rgba(212, 175, 55, 0.05);">
+	    <h3 style="color: var(--dourado); font-size: 0.9rem; margin-bottom: 10px;">CENTRAL DO JUIZ</h3>
+  		<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      		  <button onclick="resetarTorneio()" style="background: #c0392b; color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer;">RESETAR TORNEIO</button>
+      		  <button onclick="limparFilaGeral()" style="background: #2980b9; color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer;">LIMPAR FILA</button>
+  		</div>
+    	<p style="font-size: 0.6rem; color: #888; margin-top: 10px;">* O Reset apaga pontos, vitórias e o histórico de duelos.</p>
+ 	</div>
+
     <!-- DASHBOARD SUPERIOR (TOP 3) -->
     <div class="podium-container">
         <!-- TOP 2 -->
@@ -614,6 +624,7 @@ function mostrarArena(dados) {
     if (userDisplay) userDisplay.innerText = dados.nome;
     
     carregarRanking();
+	verificarAdmin(dados.nome);
 }
 
 async function carregarRanking() {
@@ -899,12 +910,57 @@ function mostrarConviteEstiloso(oponente, modo, idDuelo) {
         await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "recusarDuelo", idDuelo: idDuelo }) });
     };
 }
+		
+// 1. CORREÇÃO DO BOTÃO DE REGRAS
+function verInfo(aba) {
+    const display = document.getElementById('display-info');
+    if (!display) return;
+
+    if (aba === 'notificacoes') {
+        display.innerHTML = `<p style="color:#888; font-size:0.8rem;">📢 Nenhuma nova ordem do Reino.</p>`;
+    } else if (aba === 'regras') {
+        display.innerHTML = `
+            <ul style="color: #ccc; font-size: 0.75rem; text-align: left; padding-left: 20px; line-height: 1.4;">
+                <li>Duelos normais: <b style="color:var(--dourado)">V:3 / E:1 / D:0</b> estrelas.</li>
+                <li>Duelos de aposta: O vencedor leva o valor total da sala.</li>
+                <li>Em caso de conflito, o Juiz dará o veredito final.</li>
+                <li>Desconexão durante o duelo conta como derrota.</li>
+            </ul>`;
+    }
+}
+
+// 2. LOGICA PARA EXIBIR O PAINEL DO JUIZ
+function verificarAdmin(nome) {
+    const ADMIN_NOME = "Jaden"; // SUBSTITUA PELO SEU NOME EXATO NA PLANILHA
+    const painel = document.getElementById('painel-admin');
+    if (nome === ADMIN_NOME && painel) {
+        painel.classList.remove('hidden');
+    }
+}
+
+// 3. COMANDOS DO JUIZ
+async function resetarTorneio() {
+    if (confirm("⚠️ ATENÇÃO: Isso apagará TODOS os pontos e duelos. Deseja iniciar um novo torneio?")) {
+        const senha = prompt("Digite a senha mestre:");
+        if (senha === "123") { // Mude sua senha aqui
+            await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "resetTotal" }) });
+            alert("O Reino foi resetado! Reiniciando...");
+            location.reload();
+        }
+    }
+}
+
+async function limparFilaGeral() {
+    await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "limparFilaGeral" }) });
+    alert("Fila de espera limpa!");
+}
 
 function logout() {
     localStorage.removeItem('duelista');
     location.reload();
 }
 // CERTIFIQUE-SE DE QUE NÃO HÁ CHAVES } SOBRANDO ABAIXO DESTA LINHA
+		
     </script>
 </body>
 </html>
