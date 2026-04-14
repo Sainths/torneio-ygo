@@ -642,19 +642,40 @@ async function atualizarListaFila(modo, valor) {
     const user = JSON.parse(localStorage.getItem('duelista'));
 
     try {
+        // CHECAGEM DE STATUS (Se foi desafiado ou aceito)
+        const respCheck = await fetch(`${URL_API}?action=statusDuelo&nome=${user.nome}`, { redirect: 'follow' });
+        const statusD = await respCheck.json();
+
+        if (statusD && statusD.emAndamento) {
+            if (statusD.subStatus === "PENDENTE" && statusD.souDesafiado) {
+                if (confirm(`O duelista ${statusD.oponente} te desafiou para um duelo ${statusD.modo}! Aceita?`)) {
+                    await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "aceitarDuelo", idDuelo: statusD.idDuelo }) });
+                    dueloAtivoID = statusD.idDuelo;
+                    abrirPainelResultado(statusD.oponente);
+                } else {
+                    await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "recusarDuelo", idDuelo: statusD.idDuelo }) });
+                }
+                return;
+            } else if (statusD.subStatus === "ACEITO") {
+                dueloAtivoID = statusD.idDuelo;
+                abrirPainelResultado(statusD.oponente);
+                return;
+            }
+        }
+
+        // BUSCA DE OPONENTES NA FILA
         const respFila = await fetch(`${URL_API}?action=lerFila`, { redirect: 'follow' });
         const fila = await respFila.json();
-        
-        // Matchmaking
         const oponentes = fila.filter(f => f.modo === modo && f.valor == valor && f.nome !== user.nome);
+        
         listaDiv.innerHTML = oponentes.length === 0 ? "<p>Aguardando...</p>" : "";
         oponentes.forEach(op => {
             listaDiv.innerHTML += `<div class="ranking-row-item"><span>${op.nome}</span>
                 <button onclick="desafiar('${op.nome}','${modo}',${valor})" style="background:var(--dourado); color:black; border:none; padding:5px; cursor:pointer;">DESAFIAR</button></div>`;
         });
-    } catch (e) { console.warn("Erro na fila"); }
+    } catch (e) { console.warn("Erro na rede"); }
 }
-
+		
 async function desafiar(nomeOp, modo, valor) {
     const user = JSON.parse(localStorage.getItem('duelista'));
     const idDuelo = "D-" + [user.nome, nomeOp].sort().join("-");
