@@ -631,7 +631,7 @@ async function abrirLobby(modo, valor) {
     const userStr = localStorage.getItem('duelista');
     if (!userStr) return;
     const user = JSON.parse(userStr);
-    const nomeLimpo = user.nome.trim(); // Limpa espaços extras
+    const nomeLimpo = user.nome.trim();
 
     document.getElementById('selecao-modo').classList.add('hidden');
     document.getElementById('lobby-espera').classList.remove('hidden');
@@ -655,13 +655,12 @@ async function atualizarListaFila(modo, valor) {
     const user = JSON.parse(userStr);
 
     try {
-        // 1. CHECAGEM DE STATUS (Convites, Aceites e Recusas)
         const respCheck = await fetch(`${URL_API}?action=statusDuelo&nome=${user.nome}`, { redirect: 'follow' });
         const statusD = await respCheck.json();
 
         if (statusD && statusD.emAndamento) {
             if (statusD.subStatus === "PENDENTE" && statusD.souDesafiado) {
-                if (confirm(`O duelista ${statusD.oponente} te desafiou para um duelo ${statusD.modo}! Aceita?`)) {
+                if (confirm(`DESAFIO! O duelista ${statusD.oponente} te chamou para um duelo ${statusD.modo}. Aceita?`)) {
                     await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "aceitarDuelo", idDuelo: statusD.idDuelo }) });
                     dueloAtivoID = statusD.idDuelo;
                     abrirPainelResultado(statusD.oponente);
@@ -669,48 +668,43 @@ async function atualizarListaFila(modo, valor) {
                     await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "recusarDuelo", idDuelo: statusD.idDuelo }) });
                 }
                 return;
-            } 
-            else if (statusD.subStatus === "ACEITO") {
+            } else if (statusD.subStatus === "ACEITO") {
                 dueloAtivoID = statusD.idDuelo;
                 abrirPainelResultado(statusD.oponente);
                 return;
             }
-        } 
-        else if (statusD && statusD.recusado) {
-            alert(`O duelista ${statusD.oponente} recusou o desafio.`);
-            location.reload(); 
+        } else if (statusD && statusD.recusado) {
+            alert(`O duelo contra ${statusD.oponente} foi recusado ou cancelado.`);
+            location.reload();
             return;
         }
 
-        // 2. BUSCA DE OPONENTES
         const respFila = await fetch(`${URL_API}?action=lerFila`, { redirect: 'follow' });
         const fila = await respFila.json();
         const oponentes = fila.filter(f => f.modo === modo && f.valor == valor && f.nome !== user.nome);
         
-        listaDiv.innerHTML = oponentes.length === 0 ? "<p style='padding:10px; font-size:0.8rem; color:#888;'>Aguardando duelistas...</p>" : "";
-        
+        listaDiv.innerHTML = oponentes.length === 0 ? "<p>Aguardando duelistas...</p>" : "";
         oponentes.forEach(op => {
-            listaDiv.innerHTML += `
-                <div class="ranking-row-item" style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid rgba(212,175,55,0.1);">
-                    <span style="color:white; font-weight:bold;">${op.nome}</span>
-                    <button onclick="desafiar('${op.nome}','${modo}',${valor})" 
-                            style="background:var(--dourado); color:black; border:none; padding:6px 12px; font-weight:bold; cursor:pointer; border-radius:3px;">
-                        DESAFIAR
-                    </button>
-                </div>`;
+            listaDiv.innerHTML += `<div class="ranking-row-item"><span>${op.nome}</span>
+                <button onclick="desafiar('${op.nome}','${modo}',${valor})" style="background:var(--dourado); color:black; border:none; padding:5px; cursor:pointer;">DESAFIAR</button></div>`;
         });
-    } catch (e) { 
-        console.warn("Erro ao atualizar arena."); 
-    }
+    } catch (e) { console.warn("Sincronizando arena..."); }
 }
 		
 async function desafiar(nomeOp, modo, valor) {
     const user = JSON.parse(localStorage.getItem('duelista'));
-    const idDuelo = "D-" + [user.nome, nomeOp].sort().join("-");
-    dueloAtivoID = idDuelo;
+    const nomes = [user.nome, nomeOp].sort();
+    const idDuelo = "D-" + nomes[0] + "-" + nomes[1] + "-" + Date.now();
     
-    await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "iniciarDuelo", idDuelo, jogador1: user.nome, jogador2: nomeOp, tipo: modo, valor }) });
-    abrirPainelResultado(nomeOp);
+    dueloAtivoID = idDuelo;
+    const listaDiv = document.getElementById('lista-disponiveis');
+    if (listaDiv) listaDiv.innerHTML = `<p style="color:var(--dourado)">Enviando desafio para ${nomeOp}...<br>Aguarde a resposta.</p>`;
+
+    await fetch(URL_API, { 
+        method: 'POST', 
+        mode: 'no-cors', 
+        body: JSON.stringify({ action: "iniciarDuelo", idDuelo, jogador1: user.nome, jogador2: nomeOp, tipo: modo, valor }) 
+    });
 }
 
 function abrirPainelResultado(oponente) {
@@ -722,7 +716,11 @@ function abrirPainelResultado(oponente) {
 
 async function enviarResultado(res) {
     const user = JSON.parse(localStorage.getItem('duelista'));
-    await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "confirmarDuelo", idDuelo: dueloAtivoID, jogador: user.nome, resultado: res }) });
+    await fetch(URL_API, { 
+        method: 'POST', 
+        mode: 'no-cors', 
+        body: JSON.stringify({ action: "confirmarDuelo", idDuelo: dueloAtivoID, jogador: user.nome, resultado: res }) 
+    });
     alert("Resultado enviado! O ranking será atualizado.");
     location.reload();
 }
