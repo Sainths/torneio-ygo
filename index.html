@@ -347,27 +347,30 @@
 	.btn-aposta:hover { border-color: var(--dourado); background: var(--roxo); }
 
 /* Fundo fixo para qualquer modal que abrir */
+/* Fundo que cobre a tela toda */
 #arena-modal, #modal-convite {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 9999;
-    display: none; /* O JS vai mudar para 'flex' */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95); /* Fundo escuro para dar foco */
+    z-index: 10000; /* Por cima de absolutamente tudo */
+    display: none; /* O JS mudará para 'flex' */
     align-items: center;
     justify-content: center;
 }
 
-/* Caixa interna dos modais */
+/* A caixa que contém o conteúdo (centralizada) */
 .arena-content, .convite-content {
+    width: 90%;
+    max-width: 400px;
     background: linear-gradient(145deg, #1a0533, #2a0a4d);
     border: 2px solid var(--dourado);
-    width: 90%;
-    max-width: 350px;
-    padding: 20px;
     border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
+    padding: 25px;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+    position: relative; /* Para o botão de fechar não fugir */
 }
 
         #status {
@@ -480,23 +483,27 @@
 </div>
 
 <!-- MODAL DA ARENA DE DUELOS -->
-<div id="arena-modal" class="container hidden" style="display:none; top:5%; z-index:100; background:rgba(10,0,20,0.95); border: 3px solid var(--dourado);">
- 	  <!-- Cabeçalho da Arena com o X -->
-	  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 10px;">
+<!-- Fundo escuro fixo que cobre a tela toda -->
+<div id="arena-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center;">
     
-	 	<!-- Espaço vazio à esquerda para equilibrar o título no centro -->
-		<div style="width: 30px;"></div> 
+    <!-- Caixa de conteúdo (O "Miolo" centralizado) -->
+    <div style="background: linear-gradient(145deg, #1a0533, #2a0a4d); border: 3px solid var(--dourado); width: 90%; max-width: 400px; padding: 20px; border-radius: 15px; box-shadow: 0 0 30px rgba(212,175,55,0.4);">
+        
+        <!-- Cabeçalho da Arena com o X -->
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 10px;">
+            <div style="width: 30px;"></div> 
+            <h2 style="color:var(--dourado); margin: 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; flex-grow: 1; text-align: center;">
+                Arena de Duelos
+            </h2>
+            <button onclick="fecharArena()" style="width: 30px; background: none; border: none; color: var(--dourado); font-size: 1.5rem; font-weight: bold; cursor: pointer; padding: 0; line-height: 1;">
+                ✕
+            </button>
+        </div>
 
- 	  	<!-- Título centralizado -->
-	  	<h2 style="color:var(--dourado); margin: 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; flex-grow: 1; text-align: center;">
-	 	     Arena de Duelos
-	  	</h2>
-
-	  	<!-- O botão X no canto direito -->
-	 	 <button onclick="fecharArena()" style="width: 30px; background: none; border: none; color: var(--dourado); font-size: 1.5rem; font-weight: bold; cursor: pointer; padding: 0; line-height: 1;">
-	  	    ✕
-	  	</button>
-	  </div>
+        <!-- AQUI CONTINUA O RESTANTE DO SEU CONTEÚDO (Salas, botões, etc) -->
+        
+    </div> <!-- Fim da caixa de conteúdo -->
+</div> <!-- Fim do fundo escuro -->
 
     <!-- Seleção de Modo -->
     <div id="selecao-modo">
@@ -851,7 +858,7 @@ function mostrarConviteEstiloso(oponente, modo, idDuelo) {
 
     btnAceitar.onclick = async () => {
         modal.classList.add('hidden');
-        modal.style.display = 'none';
+        modal.style.display = 'flex';
         await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "aceitarDuelo", idDuelo: idDuelo }) });
         dueloAtivoID = idDuelo;
         abrirPainelResultado(oponente);
@@ -859,7 +866,7 @@ function mostrarConviteEstiloso(oponente, modo, idDuelo) {
 
     btnRecusar.onclick = async () => {
         modal.classList.add('hidden');
-        modal.style.display = 'none';
+        modal.style.display = 'flex';
         await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "recusarDuelo", idDuelo: idDuelo }) });
     };
 }
