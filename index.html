@@ -482,64 +482,56 @@
     <button onclick="logout()" style="color:#888; background:none; border:none; margin-top:10px;">Sair</button>
 </div>
 
-<!-- MODAL DA ARENA DE DUELOS -->
-<!-- Fundo escuro fixo que cobre a tela toda -->
-<div id="arena-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center;">
+<!-- Fundo escuro fixo (Ocupa a tela toda) -->
+<div id="arena-modal" class="hidden" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center;">
     
-    <!-- Caixa de conteúdo (O "Miolo" centralizado) -->
-    <div style="background: linear-gradient(145deg, #1a0533, #2a0a4d); border: 3px solid var(--dourado); width: 90%; max-width: 400px; padding: 20px; border-radius: 15px; box-shadow: 0 0 30px rgba(212,175,55,0.4);">
+    <!-- Caixa de conteúdo única (O "Miolo" roxo e dourado) -->
+    <div style="background: linear-gradient(145deg, #1a0533, #2a0a4d); border: 3px solid var(--dourado); width: 90%; max-width: 400px; padding: 20px; border-radius: 15px; box-shadow: 0 0 30px rgba(212,175,55,0.4); position: relative; text-align: center;">
         
-        <!-- Cabeçalho da Arena com o X -->
+        <!-- 1. Cabeçalho Interno -->
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 10px;">
             <div style="width: 30px;"></div> 
-            <h2 style="color:var(--dourado); margin: 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; flex-grow: 1; text-align: center;">
-                Arena de Duelos
+            <h2 style="color:var(--dourado); margin: 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; flex-grow: 1; text-align: center;"> 
+                Arena de Duelos 
             </h2>
-            <button onclick="fecharArena()" style="width: 30px; background: none; border: none; color: var(--dourado); font-size: 1.5rem; font-weight: bold; cursor: pointer; padding: 0; line-height: 1;">
-                ✕
-            </button>
+            <button onclick="fecharArena()" style="width: 30px; background: none; border: none; color: var(--dourado); font-size: 1.5rem; font-weight: bold; cursor: pointer; line-height: 1;"> ✕ </button>
         </div>
 
-        <!-- AQUI CONTINUA O RESTANTE DO SEU CONTEÚDO (Salas, botões, etc) -->
-        
+        <!-- 2. Seleção de Modo/Salas -->
+        <div id="selecao-modo">
+            <p style="color: #ccc; font-size: 0.8rem; margin-bottom: 15px;">Escolha onde deseja duelar:</p>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                <button onclick="abrirLobby('Normal', 0)" style="padding: 12px; background: #333; color: white; border: 1px solid #555; border-radius: 5px; cursor: pointer; font-weight: bold;">DUELO NORMAL</button>
+                <button onclick="abrirLobby('Aposta', 1)" style="padding: 12px; background: rgba(212,175,55,0.1); color: var(--dourado); border: 1px solid var(--dourado); border-radius: 5px; cursor: pointer; font-weight: bold;">⭐ 1 ESTRELA</button>
+                <button onclick="abrirLobby('Aposta', 3)" style="padding: 12px; background: rgba(212,175,55,0.1); color: var(--dourado); border: 1px solid var(--dourado); border-radius: 5px; cursor: pointer; font-weight: bold;">⭐ 3 ESTRELAS</button>
+                <button onclick="abrirLobby('Aposta', 5)" style="padding: 12px; background: rgba(212,175,55,0.1); color: var(--dourado); border: 1px solid var(--dourado); border-radius: 5px; cursor: pointer; font-weight: bold;">⭐ 5 ESTRELAS</button>
+                <button onclick="abrirLobby('Aposta', 10)" style="padding: 12px; background: rgba(212,175,55,0.1); color: var(--dourado); border: 1px solid var(--dourado); border-radius: 5px; cursor: pointer; font-weight: bold;">⭐ 10 ESTRELAS</button>
+            </div>
+        </div>
+
+        <!-- 3. Lobby de Espera (Busca de Oponentes) -->
+        <div id="lobby-espera" class="hidden">
+            <h3 id="titulo-sala" style="color: var(--dourado); font-size: 1rem; margin-bottom: 10px;">Buscando Duelistas...</h3>
+            <div id="lista-disponiveis" style="min-height: 100px; max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 5px; margin-bottom: 15px;">
+                <!-- Oponentes aparecem aqui via JS -->
+            </div>
+            <button onclick="sairDaFila()" style="padding: 10px; width: 100%; background: #555; color: white; border: none; border-radius: 5px; cursor: pointer;">CANCELAR BUSCA</button>
+        </div>
+
+        <!-- 4. Painel de Resultado (Aparece após Aceitar Duelo) -->
+        <div id="painel-resultado" class="hidden">
+            <p style="color: white; margin-bottom: 10px;">Duelo contra: <br><strong id="oponente-nome" style="color:var(--dourado-brilho); font-size: 1.2rem;">---</strong></p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                <button onclick="enviarResultado('Vitoria')" style="padding: 15px; background: #2ecc71; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">GANHEI</button>
+                <button onclick="enviarResultado('Derrota')" style="padding: 15px; background: #e74c3c; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">PERDI</button>
+                <button onclick="enviarResultado('Empate')" style="grid-column: span 2; padding: 12px; background: #95a5a6; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">EMPATE</button>
+            </div>
+            <p id="msg-aguardo" style="font-size: 0.7rem; color: #888; margin-top: 15px;">Aguardando confirmação dos duelistas...</p>
+        </div>
+
     </div> <!-- Fim da caixa de conteúdo -->
 </div> <!-- Fim do fundo escuro -->
 
-    <!-- Seleção de Modo -->
-    <div id="selecao-modo">
-        <button onclick="abrirLobby('Normal', 0)" class="btn-lobby">Duelo Normal</button>
-        <div style="margin: 10px 0; font-size: 0.7rem; color: var(--dourado);">--- SALAS DE APOSTA ---</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-            <button onclick="abrirLobby('Aposta', 1)" class="btn-aposta">⭐ 1 Estrela</button>
-            <button onclick="abrirLobby('Aposta', 3)" class="btn-aposta">⭐ 3 Estrelas</button>
-            <button onclick="abrirLobby('Aposta', 5)" class="btn-aposta">⭐ 5 Estrelas</button>
-            <button onclick="abrirLobby('Aposta', 10)" class="btn-aposta">⭐ 10 Estrelas</button>
-        </div>
-    </div>
-
-    <!-- Lista de Jogadores na Sala -->
-    <div id="lobby-espera" class="hidden">
-        <h3 id="titulo-sala" style="font-size: 0.9rem; color: var(--dourado);">Sala: Normal</h3>
-        
-        <div id="lista-disponiveis" class="ranking-scroll" style="height: 180px; border: 1px solid #333; margin: 10px 0;">
-            <!-- Jogadores aparecem aqui -->
-        </div>
-
-        <!-- O BOTÃO DE CANCELAR DEVE ESTAR AQUI -->
-        <button onclick="sairDaFila()" style="background: #444; color: white; border: 1px solid #888; padding: 10px; width: 100%; cursor: pointer; border-radius: 5px; font-weight: bold;">
-            CANCELAR BUSCA
-        </button>
-    </div>
-
-    <!-- Painel de Confirmação de Resultado (Aparece quando pareia) -->
-    <div id="painel-resultado" class="hidden">
-    <p>Duelo contra: <strong id="oponente-nome">---</strong></p>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <button onclick="enviarResultado('Vitoria')" style="background:green">GANHEI</button>
-        <button onclick="enviarResultado('Derrota')" style="background:red">PERDI</button>
-        <button onclick="enviarResultado('Empate')" style="grid-column: span 2; background:gray">EMPATE</button>
-    </div>
-</div>
 <div id="custom-notification" class="hidden">
     <div class="notif-content">
         <span id="notif-icon">⚠️</span>
@@ -686,9 +678,19 @@ async function carregarRanking() {
 // 4. LÓGICA DA ARENA
 function abrirModulo(tipo) {
     if (tipo === 'registrar-duelo') {
-        document.getElementById('arena-modal').classList.remove('hidden');
-        document.getElementById('arena-modal').style.display = 'flex';
-        document.getElementById('selecao-modo').classList.remove('hidden');
+        const modal = document.getElementById('arena-modal');
+        const selecao = document.getElementById('selecao-modo');
+
+        // 1. Liga o fundo escuro e centraliza o pop-up
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+
+        // 2. Garante que a tela de salas apareça e as outras fiquem escondidas
+        if (selecao) {
+            selecao.classList.remove('hidden');
+            selecao.style.display = 'block'; // As telas internas são 'block'
+        }
+        
         document.getElementById('lobby-espera').classList.add('hidden');
         document.getElementById('painel-resultado').classList.add('hidden');
     }
@@ -816,13 +818,19 @@ async function enviarResultado(res) {
 }
 
 function fecharArena() {
-    document.getElementById('arena-modal').classList.add('hidden');
-    document.getElementById('arena-modal').style.display = 'none';
+    const modal = document.getElementById('arena-modal');
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
     
+    // Para o cronômetro de busca de oponentes
     if (loopArena) {
         clearInterval(loopArena);
         loopArena = null;
     }
+
+    // Tira o seu nome da planilha para não bugar a fila
+    sairDaFila();
+} // <-- Faltava fechar essa chave!
     
     // Avisa o servidor para tirar o nome da lista
     const user = JSON.parse(localStorage.getItem('duelista'));
