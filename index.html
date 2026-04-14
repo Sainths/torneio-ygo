@@ -474,10 +474,15 @@
 
     <script>
 // CONFIGURAÇÃO INICIAL
-const URL_API = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; // Certifique-se de que o link está entre aspas
+// --- CONFIGURAÇÃO ---
+const URL_API = "https://script.google.com/macros/s/AKfycbxC0XhER6BfC_RBcRhCDtTGu6EJtJk81ycieIsHz3_3xSKaCxWmse2IhVQ1lk7RLjleHw/exec"; // Cole aqui o link da NOVA IMPLANTAÇÃO do Google
 
-// 1. AO CARREGAR A PÁGINA
-window.onload = function() {
+let loopArena = null;
+let dueloAtivoID = null;
+let oponenteAtual = null;
+
+// 1. INICIALIZAÇÃO (Memory Card)
+window.onload = () => {
     const userLogado = localStorage.getItem('duelista');
     if (userLogado) {
         mostrarArena(JSON.parse(userLogado));
@@ -491,305 +496,148 @@ async function entrarNaArena() {
     const deck = document.getElementById('deck') ? document.getElementById('deck').value : "";
     const status = document.getElementById('status');
 
-    if (!nome || !senha) {
-        alert("Duelista, informe seu Nome e Senha!");
-        return;
-    }
-
+    if (!nome || !senha) { alert("Informe Nome e Senha!"); return; }
     if (status) status.innerText = "Conectando ao Reino...";
 
     try {
-        const response = await fetch(URL_API);
-        const jogadores = await response.json();
-
-        // Procura se o duelista já existe
+        const resp = await fetch(URL_API, { method: 'GET', redirect: 'follow' });
+        const jogadores = await resp.json();
         const duelista = jogadores.find(j => j.nome.toLowerCase() === nome.toLowerCase());
 
         if (duelista) {
-            // LOGIN: Existe, checa a senha
             if (duelista.senha == senha) {
                 localStorage.setItem('duelista', JSON.stringify(duelista));
                 mostrarArena(duelista);
-            } else {
-                if (status) status.innerText = "Senha incorreta!";
-            }
+            } else { status.innerText = "Senha incorreta!"; }
         } else {
-            // REGISTRO: Não existe, mostra campo de deck
             const registroExtra = document.getElementById('registro-extra');
             if (registroExtra && registroExtra.classList.contains('hidden')) {
                 registroExtra.classList.remove('hidden');
-                if (status) status.innerText = "Duelista novo! Informe o Deck e clique novamente.";
+                status.innerText = "Novo Duelista! Informe o Deck e entre novamente.";
             } else {
-                if (!deck) { alert("Informe o Deck para o registro!"); return; }
-                if (status) status.innerText = "Registrando na Planilha...";
-                
-                const novo = { action: "registrar", nome: nome, deck: deck, senha: senha };
-                await fetch(URL_API, { method: 'POST', body: JSON.stringify(novo) });
-                
+                status.innerText = "Registrando...";
+                await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "registrar", nome, deck, senha }) });
                 const dadosFinais = { nome, deck, vitorias: 0, derrotas: 0, pontos: 0 };
                 localStorage.setItem('duelista', JSON.stringify(dadosFinais));
                 mostrarArena(dadosFinais);
             }
         }
-    } catch (e) {
-        if (status) status.innerText = "Erro ao conectar. Verifique a URL do Google.";
-        console.error(e);
-    }
+    } catch (e) { status.innerText = "Erro de rede. Verifique o link do Google."; }
 }
 
-// 3. MOSTRAR O DASHBOARD
+// 3. MOSTRAR DASHBOARD E CARREGAR RANKING
 function mostrarArena(dados) {
-    const auth = document.getElementById('auth-screen');
-    const main = document.getElementById('main-screen');
-    const arena = document.getElementById('arena-modal');
-
-    if (auth) auth.classList.add('hidden');
-    if (arena) arena.classList.add('hidden');
-    if (main) main.classList.remove('hidden');
-
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('arena-modal').classList.add('hidden');
+    document.getElementById('main-screen').classList.remove('hidden');
+    
     const userDisplay = document.getElementById('user-name');
-    if (userDisplay && dados) userDisplay.innerText = dados.nome;
-
-    // Tenta carregar o ranking se a função existir
-    if (typeof carregarRanking === "function") {
-        carregarRanking();
-    }
+    if (userDisplay) userDisplay.innerText = dados.nome;
+    
+    carregarRanking();
 }
 
 async function carregarRanking() {
     const listaGeral = document.getElementById('lista-ranking-geral');
-    if (!listaGeral) return;
-
     try {
-	// Na função carregarRanking do seu Bloco de Notas:
-	const response = await fetch(URL_API, {
-    	method: 'GET',
-  		mode: 'cors', // Adicione isso
-	    headers: { 'Content-Type': 'text/plain' } // Engana o CORS
-	});
-
-        const jogadores = await response.json();
-
-        // 1. Ordena por Estrelas (Pontos)
+        const resp = await fetch(URL_API, { method: 'GET', redirect: 'follow' });
+        const jogadores = await resp.json();
         jogadores.sort((a, b) => (parseInt(b.pontos) || 0) - (parseInt(a.pontos) || 0));
 
-        // 2. Preenche o TOP 3 (Os cards de cima)
-        if (jogadores[0]) preencherCardTop(jogadores[0], 'top1');
-        if (jogadores[1]) preencherCardTop(jogadores[1], 'top2');
-        if (jogadores[2]) preencherCardTop(jogadores[2], 'top3');
+        // Preenche TOP 3
+        const preencher = (j, id) => {
+            if(jogadores[j]) {
+                document.getElementById(`${id}-nome`).innerText = jogadores[j].nome;
+                document.getElementById(`${id}-deck`).innerText = jogadores[j].deck;
+                document.getElementById(`${id}-estrelas`).innerText = jogadores[j].pontos;
+            }
+        };
+        preencher(0, 'top1'); preencher(1, 'top2'); preencher(2, 'top3');
 
-        // 3. Preenche a Lista Geral (Do 1º ao último)
-        listaGeral.innerHTML = ""; 
-        jogadores.forEach((j, index) => {
-            const totalDuelos = (parseInt(j.vitorias) || 0) + (parseInt(j.derrotas) || 0);
-            const winrate = totalDuelos > 0 ? ((parseInt(j.vitorias) / totalDuelos) * 100).toFixed(0) : 0;
-            const streakIcon = parseInt(j.streak) > 2 ? `<span class="win-streak">🔥 ${j.streak}x</span>` : "";
-
-            listaGeral.innerHTML += `
-                <div class="ranking-row-item">
-                    <div class="ranking-info">
-                        <span class="rank-number">${index + 1}º</span>
-                        <span style="font-weight:bold">${j.nome}</span>
-                        <div class="rank-stats-row">
-                            <span class="stat-tag">V:${j.vitorias} D:${j.derrotas}</span>
-                            <span class="stat-tag">${winrate}% WR</span>
-                            ${streakIcon}
-                        </div>
-                    </div>
-                    <div style="color: var(--dourado-brilho); font-weight: bold;">⭐ ${j.pontos}</div>
+        // Preenche Lista Geral
+        if(listaGeral) {
+            listaGeral.innerHTML = "";
+            jogadores.forEach((j, i) => {
+                const total = (parseInt(j.vitorias)||0) + (parseInt(j.derrotas)||0);
+                const wr = total > 0 ? ((parseInt(j.vitorias)/total)*100).toFixed(0) : 0;
+                listaGeral.innerHTML += `<div class="ranking-row-item">
+                    <span>${i+1}º ${j.nome} <br><small>${j.deck} | WR: ${wr}%</small></span>
+                    <span style="color:var(--dourado)">⭐ ${j.pontos}</span>
                 </div>`;
-        });
-    } catch (error) {
-        console.error("Erro ao carregar ranking:", error);
-    }
+            });
+        }
+    } catch (e) { console.warn("Erro ao carregar ranking."); }
 }
 
-function preencherCardTop(j, prefixo) {
-    if (document.getElementById(`${prefixo}-nome`)) document.getElementById(`${prefixo}-nome`).innerText = j.nome;
-    if (document.getElementById(`${prefixo}-deck`)) document.getElementById(`${prefixo}-deck`).innerText = j.deck;
-    if (document.getElementById(`${prefixo}-estrelas`)) document.getElementById(`${prefixo}-estrelas`).innerText = j.pontos;
-}
-
-function logout() {
-    localStorage.removeItem('duelista');
-    location.reload();
-}
-
+// 4. LÓGICA DA ARENA
 function abrirModulo(tipo) {
     if (tipo === 'registrar-duelo') {
-        const modal = document.getElementById('arena-modal');
-        modal.classList.remove('hidden');
-        modal.style.display = 'block';
-        
-        // Reseta para a tela de escolha de salas
+        document.getElementById('arena-modal').classList.remove('hidden');
+        document.getElementById('arena-modal').style.display = 'block';
         document.getElementById('selecao-modo').classList.remove('hidden');
         document.getElementById('lobby-espera').classList.add('hidden');
         document.getElementById('painel-resultado').classList.add('hidden');
     }
 }
 
-// Função para alternar entre Notificações e Regras
-function verInfo(aba) {
-    const display = document.getElementById('display-info');
-    if (aba === 'notificacoes') {
-        display.innerHTML = `<p id="msg-juiz">Aguardando ordens do Juiz...</p>`;
-    } else if (aba === 'regras') {
-        display.innerHTML = `
-            <ul style="padding-left: 15px; margin: 0;">
-                <li>Duelos de 8000 LP.</li>
-                <li>Vitória simples concede estrelas.</li>
-                <li>Conflitos serão resolvidos pelo Juiz.</li>
-            </ul>`;
-    }
-    // Remove classe ativa de todos e coloca no clicado
-    document.querySelectorAll('.tab-buttons button').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-}
-
-// Função para entrar nas salas (Duelo Normal ou Apostas)
 async function abrirLobby(modo, valor) {
-    const userStr = localStorage.getItem('duelista');
-    if (!userStr) return;
-    const user = JSON.parse(userStr);
-
-    // 1. Visual: Esconde seleção e mostra lobby
+    const user = JSON.parse(localStorage.getItem('duelista'));
     document.getElementById('selecao-modo').classList.add('hidden');
     document.getElementById('lobby-espera').classList.remove('hidden');
     document.getElementById('titulo-sala').innerText = `Sala: ${modo} (${valor > 0 ? valor + ' ⭐' : 'Normal'})`;
     
-    // 2. Banco de Dados: Avisa a planilha que você está na fila
-    try {
-        await fetch(URL_API, { 
-            method: 'POST', 
-            body: JSON.stringify({ action: "entrarNaFila", nome: user.nome, modo: modo, valor: valor }) 
-        });
-        
-        // 3. Loop: Começa a procurar oponentes
-        if (typeof loopArena !== 'undefined') clearInterval(loopArena);
-        loopArena = setInterval(() => atualizarListaFila(modo, valor), 4000);
-    } catch (e) {
-        console.error("Erro ao entrar na fila:", e);
-    }
+    await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "entrarNaFila", nome: user.nome, modo, valor }) });
+    loopArena = setInterval(() => atualizarListaFila(modo, valor), 4000);
 }
-		
+
 async function atualizarListaFila(modo, valor) {
     const listaDiv = document.getElementById('lista-disponiveis');
-    const userStr = localStorage.getItem('duelista');
-    if (!userStr) return;
-    const user = JSON.parse(userStr);
-
-    try {
-        // 1. CHECAGEM DE SEGURANÇA: Alguém já me desafiou?
-        const respCheck = await fetch(`${URL_API}?action=statusDuelo&nome=${user.nome}`);
-        const statusDuelo = await respCheck.json();
-
-        if (statusDuelo && statusDuelo.emAndamento) {
-            clearInterval(loopArena);
-            dueloAtivoID = statusDuelo.idDuelo;
-            abrirPainelResultado(statusDuelo.oponente);
-            return; // Sai da fila e vai para o duelo
-        }
-
-        // 2. Pergunta ao Google quem está na fila
-        const response = await fetch(`${URL_API}?action=lerFila`);
-        const fila = await response.json();
-
-        // 3. Filtra para mostrar apenas OPONENTES na mesma sala e valor
-        const oponentes = fila.filter(f => f.modo === modo && f.valor == valor && f.nome !== user.nome);
-
-        listaDiv.innerHTML = "";
-        
-        if (oponentes.length === 0) {
-            listaDiv.innerHTML = "<p style='padding:10px; font-size:0.7rem;'>Aguardando duelistas na rede...</p>";
-            return;
-        }
-
-        // 4. Cria o botão de DESAFIAR para cada oponente encontrado
-        oponentes.forEach(op => {
-            listaDiv.innerHTML += `
-                <div class="ranking-row-item" style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #333;">
-                    <span>${op.nome}</span>
-                    <button onclick="desafiar('${op.nome}', '${modo}', ${valor})" 
-                            style="padding:5px 10px; background:var(--dourado); color:black; font-size:0.7rem; font-weight:bold; border:none; cursor:pointer;">
-                        DESAFIAR
-                    </button>
-                </div>`;
-        });
-
-    } catch (e) {
-        console.warn("Erro ao atualizar fila ou checar desafio:", e);
-    }
-}
-
-async function enviarResultado(meuResultado) {
-    const statusMsg = document.getElementById('msg-aguardo');
-    if (statusMsg) statusMsg.innerText = "Registrando... Aguarde o oponente.";
-
-    const dados = {
-        action: "confirmarDuelo",
-        idDuelo: dueloAtivoID,
-        jogador: JSON.parse(localStorage.getItem('duelista')).nome,
-        resultado: meuResultado
-    };
-
-    try {
-        const response = await fetch(URL_API, { method: 'POST', body: JSON.stringify(dados) });
-        if (response.ok) {
-            setTimeout(() => {
-                alert("Resultado enviado! O ranking atualizará em breve.");
-                location.reload();
-            }, 2000);
-        }
-    } catch (e) {
-        alert("Erro ao conectar com o Reino dos Duelistas.");
-        console.error(e);
-    }
-}
-
-function fecharArena() {
-    const modal = document.getElementById('arena-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-    }
-    if (typeof loopArena !== 'undefined' && loopArena) {
-        clearInterval(loopArena);
-        loopArena = null;
-    }
-    sairDaFila();
-}
-		
-// FUNÇÃO QUE É CHAMADA QUANDO VOCÊ CLICA EM "DESAFIAR"
-async function desafiar(nomeOponente, modo, valor) {
     const user = JSON.parse(localStorage.getItem('duelista'));
-    // O ID deve ser fixo para os dois: vamos usar os nomes em ordem alfabética + um identificador
-    const nomes = [user.nome, nomeOponente].sort();
-    const idDuelo = "D-" + nomes[0] + "-" + nomes[1]; 
-
-    dueloAtivoID = idDuelo; 
-
-    const dados = {
-        action: "iniciarDuelo",
-        idDuelo: idDuelo,
-        jogador1: user.nome,
-        jogador2: nomeOponente,
-        tipo: modo,
-        valor: valor
-    };
 
     try {
-        await fetch(URL_API, { method: 'POST', body: JSON.stringify(dados) });
-        abrirPainelResultado(nomeOponente);
-    } catch (e) { alert("Erro ao iniciar duelo."); }
+        const respFila = await fetch(`${URL_API}?action=lerFila`, { redirect: 'follow' });
+        const fila = await respFila.json();
+        
+        // Matchmaking
+        const oponentes = fila.filter(f => f.modo === modo && f.valor == valor && f.nome !== user.nome);
+        listaDiv.innerHTML = oponentes.length === 0 ? "<p>Aguardando...</p>" : "";
+        oponentes.forEach(op => {
+            listaDiv.innerHTML += `<div class="ranking-row-item"><span>${op.nome}</span>
+                <button onclick="desafiar('${op.nome}','${modo}',${valor})" style="background:var(--dourado); color:black; border:none; padding:5px; cursor:pointer;">DESAFIAR</button></div>`;
+        });
+    } catch (e) { console.warn("Erro na fila"); }
 }
 
-// FUNÇÃO PARA MUDAR A TELA
+async function desafiar(nomeOp, modo, valor) {
+    const user = JSON.parse(localStorage.getItem('duelista'));
+    const idDuelo = "D-" + [user.nome, nomeOp].sort().join("-");
+    dueloAtivoID = idDuelo;
+    
+    await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "iniciarDuelo", idDuelo, jogador1: user.nome, jogador2: nomeOp, tipo: modo, valor }) });
+    abrirPainelResultado(nomeOp);
+}
+
 function abrirPainelResultado(oponente) {
     if (loopArena) clearInterval(loopArena);
     document.getElementById('lobby-espera').classList.add('hidden');
     document.getElementById('painel-resultado').classList.remove('hidden');
     document.getElementById('oponente-nome').innerText = oponente;
 }
+
+async function enviarResultado(res) {
+    const user = JSON.parse(localStorage.getItem('duelista'));
+    await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "confirmarDuelo", idDuelo: dueloAtivoID, jogador: user.nome, resultado: res }) });
+    alert("Resultado enviado! O ranking será atualizado.");
+    location.reload();
+}
+
+function fecharArena() {
+    document.getElementById('arena-modal').classList.add('hidden');
+    document.getElementById('arena-modal').style.display = 'none';
+    if (loopArena) clearInterval(loopArena);
+}
+
+function logout() { localStorage.removeItem('duelista'); location.reload(); }
 
     </script>
 </body>
