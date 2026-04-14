@@ -346,31 +346,28 @@
 	.btn-aposta { background: #1a1a1a; color: var(--dourado); border: 1px solid #444; padding: 10px; cursor: pointer; font-size: 0.8rem; }
 	.btn-aposta:hover { border-color: var(--dourado); background: var(--roxo); }
 
-#arena-modal {
-    position: fixed; /* Fixa o modal na tela, ignorando o scroll */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9); /* Fundo preto semi-transparente */
-    z-index: 999; /* Garante que fique em cima de tudo */
-    display: none; /* Começa escondido */
+/* Fundo fixo para qualquer modal que abrir */
+#arena-modal, #modal-convite {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+    display: none; /* O JS vai mudar para 'flex' */
     align-items: center;
     justify-content: center;
-    overflow-y: auto; /* Permite rolar apenas dentro do modal se necessário */
 }
 
-/* Essa classe garante que o conteúdo interno do modal fique centralizado e bonito */
-.arena-content {
+/* Caixa interna dos modais */
+.arena-content, .convite-content {
     background: linear-gradient(145deg, #1a0533, #2a0a4d);
     border: 2px solid var(--dourado);
     width: 90%;
-    max-width: 400px;
+    max-width: 350px;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
-    position: relative;
-    margin: auto;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
 }
 
         #status {
@@ -543,13 +540,14 @@
     </div>
 </div>
 	
-<div id="modal-convite" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; display:flex; align-items:center; justify-content:center;">
-    <div style="background: linear-gradient(145deg, #2a0a4d, #1a0533); border: 2px solid var(--dourado); padding: 25px; border-radius: 10px; text-align: center; max-width: 300px; box-shadow: 0 0 20px var(--dourado);">
-        <h3 style="color:var(--dourado); margin-bottom: 15px;">NOVO DESAFIO!</h3>
-        <p id="texto-convite" style="color:white; margin-bottom: 20px; font-size: 0.9rem;">Duelista X te desafiou!</p>
+<div id="modal-convite">
+    <div class="convite-content">
+        <h3 style="color:var(--dourado);">NOVO DESAFIO!</h3>
+        <!-- O ID abaixo é onde o nome vai entrar -->
+        <p id="texto-convite" style="color:white; margin: 15px 0;"></p>
         <div style="display: flex; gap: 10px;">
-            <button id="btn-aceitar" style="flex:1; padding:10px; background:var(--dourado); color:black; font-weight:bold; border:none; border-radius:5px; cursor:pointer;">ACEITAR</button>
-            <button id="btn-recusar" style="flex:1; padding:10px; background:#444; color:white; font-weight:bold; border:none; border-radius:5px; cursor:pointer;">RECUSAR</button>
+            <button id="btn-aceitar" style="flex:1; padding:12px; background:var(--dourado); color:black; font-weight:bold; border:none; cursor:pointer;">ACEITAR</button>
+            <button id="btn-recusar" style="flex:1; padding:12px; background:#444; color:white; font-weight:bold; border:none; cursor:pointer;">RECUSAR</button>
         </div>
     </div>
 </div>
