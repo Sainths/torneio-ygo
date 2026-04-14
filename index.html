@@ -622,13 +622,6 @@ function abrirModulo(tipo) {
     }
 }
 
-function fecharArena() {
-    const modal = document.getElementById('arena-modal');
-    modal.classList.add('hidden');
-    modal.style.display = 'none';
-    if (typeof loopArena !== 'undefined' && loopArena) clearInterval(loopArena);
-}
-
 // Função para alternar entre Notificações e Regras
 function verInfo(aba) {
     const display = document.getElementById('display-info');
@@ -746,7 +739,20 @@ async function enviarResultado(meuResultado) {
     } catch (e) {
         alert("Erro ao conectar com o Reino dos Duelistas.");
         console.error(e);
-    } // Aqui estava o erro: certifique-se de que o catch fecha assim.
+    }
+}
+
+function fecharArena() {
+    const modal = document.getElementById('arena-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+    if (typeof loopArena !== 'undefined' && loopArena) {
+        clearInterval(loopArena);
+        loopArena = null;
+    }
+    sairDaFila();
 }
 		
 // FUNÇÃO QUE É CHAMADA QUANDO VOCÊ CLICA EM "DESAFIAR"
