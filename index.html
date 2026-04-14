@@ -628,12 +628,22 @@ function abrirModulo(tipo) {
 }
 
 async function abrirLobby(modo, valor) {
-    const user = JSON.parse(localStorage.getItem('duelista'));
+    const userStr = localStorage.getItem('duelista');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+    const nomeLimpo = user.nome.trim(); // Limpa espaços extras
+
     document.getElementById('selecao-modo').classList.add('hidden');
     document.getElementById('lobby-espera').classList.remove('hidden');
     document.getElementById('titulo-sala').innerText = `Sala: ${modo} (${valor > 0 ? valor + ' ⭐' : 'Normal'})`;
     
-    await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "entrarNaFila", nome: user.nome, modo, valor }) });
+    await fetch(URL_API, { 
+        method: 'POST', 
+        mode: 'no-cors', 
+        body: JSON.stringify({ action: "entrarNaFila", nome: nomeLimpo, modo, valor }) 
+    });
+    
+    if(loopArena) clearInterval(loopArena);
     loopArena = setInterval(() => atualizarListaFila(modo, valor), 4000);
 }
 
@@ -702,7 +712,19 @@ async function enviarResultado(res) {
 function fecharArena() {
     document.getElementById('arena-modal').classList.add('hidden');
     document.getElementById('arena-modal').style.display = 'none';
-    if (loopArena) clearInterval(loopArena);
+    
+    if (loopArena) {
+        clearInterval(loopArena);
+        loopArena = null;
+    }
+    
+    // Avisa o servidor para tirar o nome da lista
+    const user = JSON.parse(localStorage.getItem('duelista'));
+    fetch(URL_API, { 
+        method: 'POST', 
+        mode: 'no-cors', 
+        body: JSON.stringify({ action: "removerDaFila", nome: user.nome }) 
+    });
 }
 
 function logout() { localStorage.removeItem('duelista'); location.reload(); }
