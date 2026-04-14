@@ -667,31 +667,28 @@ async function abrirLobby(modo, valor) {
 }
 		
 async function atualizarListaFila(modo, valor) {
-    const user = JSON.parse(localStorage.getItem('duelista'));
-
-    // CHECAGEM DE SEGURANÇA: Alguém já me desafiou?
-    const respCheck = await fetch(`${URL_API}?action=statusDuelo&nome=${user.nome}`);
-    const status = await respCheck.json();
-
-    if (status && status.emAndamento) {
-        clearInterval(loopArena);
-        dueloAtivoID = status.idDuelo;
-        abrirPainelResultado(status.oponente);
-        return; // Ele sai da fila e não consegue desafiar mais ninguém
-    }
-} catch (e) { console.log("Buscando desafios..."); 
-
-}
-
     const listaDiv = document.getElementById('lista-disponiveis');
-    const user = JSON.parse(localStorage.getItem('duelista'));
+    const userStr = localStorage.getItem('duelista');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
 
     try {
-        // 1. Pergunta ao Google quem está na fila
+        // 1. CHECAGEM DE SEGURANÇA: Alguém já me desafiou?
+        const respCheck = await fetch(`${URL_API}?action=statusDuelo&nome=${user.nome}`);
+        const statusDuelo = await respCheck.json();
+
+        if (statusDuelo && statusDuelo.emAndamento) {
+            clearInterval(loopArena);
+            dueloAtivoID = statusDuelo.idDuelo;
+            abrirPainelResultado(statusDuelo.oponente);
+            return; // Sai da fila e vai para o duelo
+        }
+
+        // 2. Pergunta ao Google quem está na fila
         const response = await fetch(`${URL_API}?action=lerFila`);
         const fila = await response.json();
 
-        // 2. Filtra para mostrar apenas OPONENTES na mesma sala e valor
+        // 3. Filtra para mostrar apenas OPONENTES na mesma sala e valor
         const oponentes = fila.filter(f => f.modo === modo && f.valor == valor && f.nome !== user.nome);
 
         listaDiv.innerHTML = "";
@@ -701,7 +698,7 @@ async function atualizarListaFila(modo, valor) {
             return;
         }
 
-        // 3. Cria o botão de DESAFIAR para cada oponente encontrado
+        // 4. Cria o botão de DESAFIAR para cada oponente encontrado
         oponentes.forEach(op => {
             listaDiv.innerHTML += `
                 <div class="ranking-row-item" style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #333;">
@@ -712,8 +709,9 @@ async function atualizarListaFila(modo, valor) {
                     </button>
                 </div>`;
         });
+
     } catch (e) {
-        console.warn("Erro ao atualizar fila.");
+        console.warn("Erro ao atualizar fila ou checar desafio:", e);
     }
 }
 
