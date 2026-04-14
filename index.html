@@ -417,6 +417,24 @@
       		  <button onclick="limparFilaGeral()" style="background: #2980b9; color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer;">LIMPAR FILA</button>
   		</div>
     	<p style="font-size: 0.6rem; color: #888; margin-top: 10px;">* O Reset apaga pontos, vitórias e o histórico de duelos.</p>
+		<hr style="border: 0; border-top: 1px solid rgba(212,175,55,0.2); margin: 15px 0;">
+
+		<!-- Campo de Notificações -->
+		<div style="margin-bottom: 15px;">
+ 		   <label style="color: #ccc; font-size: 0.7rem; display: block; margin-bottom: 5px;">NOTIFICAR TODOS OS DUELISTAS:</label>
+   		   <div style="display: flex; gap: 5px;">
+      		    <input type="text" id="input-global-notif" placeholder="Ex: Torneio Pausado para Almoço" style="flex: 1; background: #111; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; font-size: 0.8rem;">
+      			<button onclick="enviarAvisoGlobal()" style="background: var(--dourado); color: black; border: none; padding: 0 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">ENVIAR</button>
+  		  </div>
+		</div>
+
+		<!-- Lista de Conflitos -->
+		<div id="lista-conflitos-admin">
+		    <label style="color: #ccc; font-size: 0.7rem; display: block; margin-bottom: 5px;">DUELOS EM CONFLITO (Aguardando Veredito):</label>
+		    <div id="container-conflitos" style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 5px; padding: 5px; font-size: 0.75rem;">
+		        <p style="color:#666; padding: 10px;">Nenhum conflito detectado.</p>
+		    </div>
+		</div>
  	</div>
 
     <!-- DASHBOARD SUPERIOR (TOP 3) -->
@@ -628,6 +646,14 @@ function mostrarArena(dados) {
 }
 
 async function carregarRanking() {
+		// Exemplo de como usar o aviso no index.html (dentro do carregarRanking)
+	if (jogadores.length > 0 && jogadores[0].avisoGlobal) {
+   		 const textoAviso = jogadores[0].avisoGlobal;
+ 		 if (textoAviso.trim() !== "") {
+       		 avisarReino(textoAviso, "📢");
+ 		 }
+	}
+
     const listaGeral = document.getElementById('lista-ranking-geral');
     if (!listaGeral) return;
 
@@ -953,6 +979,52 @@ async function resetarTorneio() {
 async function limparFilaGeral() {
     await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "limparFilaGeral" }) });
     alert("Fila de espera limpa!");
+}
+		
+// 1. ENVIAR AVISO PARA TODOS
+async function enviarAvisoGlobal() {
+    const texto = document.getElementById('input-global-notif').value;
+    if (!texto) return;
+    
+    await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "postarAviso", mensagem: texto }) });
+    alert("Aviso enviado ao Reino!");
+    document.getElementById('input-global-notif').value = "";
+}
+
+// 2. BUSCAR CONFLITOS NA PLANILHA
+async function carregarConflitos() {
+    const container = document.getElementById('container-conflitos');
+    if (!container || document.getElementById('painel-admin').classList.contains('hidden')) return;
+
+    try {
+        const resp = await fetch(`${URL_API}?action=lerConflitos`, { redirect: 'follow' });
+        const conflitos = await resp.json();
+
+        if (conflitos.length === 0) {
+            container.innerHTML = `<p style="color:#666; padding: 10px;">Nenhum conflito no momento.</p>`;
+            return;
+        }
+
+        container.innerHTML = "";
+        conflitos.forEach(c => {
+            container.innerHTML += `
+                <div style="background: rgba(192, 57, 43, 0.1); border: 1px solid #c0392b; padding: 8px; margin-bottom: 5px; border-radius: 4px;">
+                    <p style="color:white; margin-bottom: 5px;">${c.j1} vs ${c.j2} (${c.valor}⭐)</p>
+                    <div style="display: flex; gap: 5px;">
+                        <button onclick="resolverConflito('${c.id}', '${c.j1}')" style="flex:1; background:#27ae60; color:white; border:none; border-radius:3px; font-size:0.6rem; padding:4px;">VITÓRIA ${c.j1}</button>
+                        <button onclick="resolverConflito('${c.id}', '${c.j2}')" style="flex:1; background:#27ae60; color:white; border:none; border-radius:3px; font-size:0.6rem; padding:4px;">VITÓRIA ${c.j2}</button>
+                    </div>
+                </div>`;
+        });
+    } catch (e) { console.warn("Erro ao buscar conflitos."); }
+}
+
+async function resolverConflito(id, vencedor) {
+    if (confirm(`Confirmar vitória de ${vencedor}?`)) {
+        await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "resolverConflito", idDuelo: id, vencedor: vencedor }) });
+        alert("Conflito resolvido!");
+        carregarRanking();
+    }
 }
 
 function logout() {
