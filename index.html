@@ -539,34 +539,67 @@ function mostrarArena(dados) {
 
 async function carregarRanking() {
     const listaGeral = document.getElementById('lista-ranking-geral');
+    if (!listaGeral) return;
+
     try {
         const resp = await fetch(URL_API, { method: 'GET', redirect: 'follow' });
         const jogadores = await resp.json();
+        
+        // 1. Ordena por Estrelas (Pontos)
         jogadores.sort((a, b) => (parseInt(b.pontos) || 0) - (parseInt(a.pontos) || 0));
 
-        // Preenche TOP 3
-        const preencher = (j, id) => {
-            if(jogadores[j]) {
-                document.getElementById(`${id}-nome`).innerText = jogadores[j].nome;
-                document.getElementById(`${id}-deck`).innerText = jogadores[j].deck;
-                document.getElementById(`${id}-estrelas`).innerText = jogadores[j].pontos;
+        // 2. Preenche o TOP 3 (Cards Superiores)
+        const preencherTop = (index, id) => {
+            if (jogadores[index]) {
+                document.getElementById(`${id}-nome`).innerText = jogadores[index].nome;
+                document.getElementById(`${id}-deck`).innerText = jogadores[index].deck;
+                document.getElementById(`${id}-estrelas`).innerText = jogadores[index].pontos;
             }
         };
-        preencher(0, 'top1'); preencher(1, 'top2'); preencher(2, 'top3');
+        preencherTop(0, 'top1'); preencherTop(1, 'top2'); preencherTop(2, 'top3');
 
-        // Preenche Lista Geral
-        if(listaGeral) {
-            listaGeral.innerHTML = "";
-            jogadores.forEach((j, i) => {
-                const total = (parseInt(j.vitorias)||0) + (parseInt(j.derrotas)||0);
-                const wr = total > 0 ? ((parseInt(j.vitorias)/total)*100).toFixed(0) : 0;
-                listaGeral.innerHTML += `<div class="ranking-row-item">
-                    <span>${i+1}º ${j.nome} <br><small>${j.deck} | WR: ${wr}%</small></span>
-                    <span style="color:var(--dourado)">⭐ ${j.pontos}</span>
+        // 3. Preenche a Lista Geral com todas as informações
+        listaGeral.innerHTML = "";
+        jogadores.forEach((j, i) => {
+            const v = parseInt(j.vitorias) || 0;
+            const d = parseInt(j.derrotas) || 0;
+            const e = parseInt(j.empates) || 0;
+            const pts = parseInt(j.pontos) || 0;
+            const streak = parseInt(j.streak) || 0;
+            
+            const totalDuelos = v + d + e;
+            const wr = totalDuelos > 0 ? ((v / totalDuelos) * 100).toFixed(0) : 0;
+            const streakIcon = streak >= 3 ? `<span style="color:#f9e295; font-weight:bold; text-shadow: 0 0 5px #d4af37;">🔥 ${streak}x</span>` : "";
+
+            listaGeral.innerHTML += `
+                <div class="ranking-row-item" style="flex-direction: column; align-items: flex-start; padding: 12px 15px; border-bottom: 1px solid rgba(212,175,55,0.1);">
+                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                        <div style="text-align: left;">
+                            <span style="color:var(--dourado); font-weight:bold;">${i + 1}º</span>
+                            <span style="font-weight:bold; color:white; margin-left:5px;">${j.nome}</span>
+                        </div>
+                        <div style="color: var(--dourado-brilho); font-weight: bold;">⭐ ${pts}</div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap;">
+                        <span class="stat-tag">V:${v} E:${e} D:${d}</span>
+                        <span class="stat-tag">${wr}% WR</span>
+                        <span class="stat-tag">Duelos: ${totalDuelos}</span>
+                        ${streakIcon}
+                    </div>
+                    <div style="font-size: 0.65rem; color: #777; margin-top: 3px; font-style: italic;">Deck: ${j.deck}</div>
                 </div>`;
-            });
+        });
+
+        // Atualiza as estatísticas globais do Dashboard (se os IDs existirem)
+        if(document.getElementById('total-estrelas')) {
+            const totalE = jogadores.reduce((acc, j) => acc + (parseInt(j.pontos) || 0), 0);
+            document.getElementById('total-estrelas').innerText = totalE;
         }
-    } catch (e) { console.warn("Erro ao carregar ranking."); }
+
+    } catch (e) {
+        console.warn("Erro ao processar ranking detalhado:", e);
+    }
 }
 
 // 4. LÓGICA DA ARENA
