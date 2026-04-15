@@ -572,15 +572,21 @@
         <span id="notif-text">Mensagem do Reino...</span>
     </div>
 </div>
-	
-<div id="modal-convite">
-    <div class="convite-content">
-        <h3 style="color:var(--dourado);">NOVO DESAFIO!</h3>
-        <!-- O ID abaixo é onde o nome vai entrar -->
-        <p id="texto-convite" style="color:white; margin: 15px 0;"></p>
+
+<!-- Fundo escuro que cobre a tela toda -->
+<div id="modal-convite" class="hidden" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:11000; align-items:center; justify-content:center;">
+    
+    <!-- Caixa de convite centralizada -->
+    <div class="convite-content" style="background: linear-gradient(145deg, #1a0533, #2a0a4d); border: 2px solid var(--dourado); width: 85%; max-width: 320px; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);">
+        
+        <h3 style="color:var(--dourado); margin-top: 0;">NOVO DESAFIO!</h3>
+        
+        <!-- Onde o nome do oponente aparecerá -->
+        <p id="texto-convite" style="color:white; margin: 20px 0; font-size: 0.9rem; line-height: 1.4;"></p>
+        
         <div style="display: flex; gap: 10px;">
-            <button id="btn-aceitar" style="flex:1; padding:12px; background:var(--dourado); color:black; font-weight:bold; border:none; cursor:pointer;">ACEITAR</button>
-            <button id="btn-recusar" style="flex:1; padding:12px; background:#444; color:white; font-weight:bold; border:none; cursor:pointer;">RECUSAR</button>
+            <button id="btn-aceitar" style="flex:1; padding:12px; background:var(--dourado); color:black; font-weight:bold; border:none; border-radius:5px; cursor:pointer;">ACEITAR</button>
+            <button id="btn-recusar" style="flex:1; padding:12px; background:#444; color:white; font-weight:bold; border:none; border-radius:5px; cursor:pointer;">RECUSAR</button>
         </div>
     </div>
 </div>
@@ -770,15 +776,19 @@ async function atualizarListaFila(modo, valor) {
         const respCheck = await fetch(`${URL_API}?action=statusDuelo&nome=${user.nome}`, { redirect: 'follow' });
         const statusD = await respCheck.json();
 
+        // Log para depuração: Caso precise ver o que o Google respondeu, aperte F12
+        console.log("Status Recebido:", statusD);
+
         if (statusD && statusD.emAndamento) {
-            // CASO: VOCÊ RECEBEU UM CONVITE (Aparece o Modal Estiloso em vez do confirm)
+            // CASO: VOCÊ É O DESAFIADO (Aparece o Modal)
             if (statusD.subStatus === "PENDENTE" && statusD.souDesafiado) {
-                if (document.getElementById('modal-convite').classList.contains('hidden')) {
+                const modal = document.getElementById('modal-convite');
+                if (modal && (modal.classList.contains('hidden') || modal.style.display === 'none')) {
                     mostrarConviteEstiloso(statusD.oponente, statusD.modo, statusD.idDuelo);
                 }
                 return;
             } 
-            // CASO: SEU DESAFIO FOI ACEITO (Vai para a Arena)
+            // CASO: SEU DESAFIO FOI ACEITO (Abre a Arena)
             else if (statusD.subStatus === "ACEITO") {
                 dueloAtivoID = statusD.idDuelo;
                 abrirPainelResultado(statusD.oponente);
@@ -796,13 +806,15 @@ async function atualizarListaFila(modo, valor) {
             document.getElementById('painel-resultado').classList.add('hidden');
             document.getElementById('selecao-modo').classList.remove('hidden');
             
-            // Fecha o modal de convite por segurança
-            document.getElementById('modal-convite').classList.add('hidden');
-            document.getElementById('modal-convite').style.display = 'none';
+            const modal = document.getElementById('modal-convite');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
             return;
         }
 
-        // 2. BUSCA DE OPONENTES NA FILA
+        // 2. BUSCA DE OPONENTES NA FILA (Exibe quem está na sala)
         const respFila = await fetch(`${URL_API}?action=lerFila`, { redirect: 'follow' });
         const fila = await respFila.json();
         
