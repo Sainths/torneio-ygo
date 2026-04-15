@@ -698,15 +698,10 @@ async function carregarRanking() {
         // O SHARK: Quem tem mais estrelas
 		const rankingShark = [...jogadores].sort((a, b) => (Number(b.pontos) || 0) - (Number(a.pontos) || 0));
 		const cardShark = document.getElementById('shark-nome');
-
-		if (cardShark && rankingShark.length > 0) {
-  			  const topDuelista = rankingShark[0]; // Pega o primeiro da lista
-  			  if (Number(topDuelista.pontos) > 0) {
-     			  cardShark.innerText = `${topDuelista.nome} (${topDuelista.pontos}⭐)`;
-   				  cardShark.style.color = "var(--dourado-brilho)";
- 			  } else {
-    		     cardShark.innerText = "Ninguém";
-    		  }
+		if (cardShark && rankingShark.length > 0 && Number(rankingShark[0].pontos) > 0) {
+  			cardShark.innerText = `${rankingShark[0].nome} (${rankingShark[0].pontos}⭐)`;
+		} else {
+   			 cardShark.innerText = "Ninguém";
 		}
 		
         // --- 3. ORDENAÇÃO E PREENCHIMENTO DO RANKING ---
@@ -1154,7 +1149,7 @@ async function resolverConflito(id, vencedor) {
             setTimeout(async () => {
                 await carregarRanking();
                 if (typeof carregarConflitos === "function") await carregarConflitos();
-            }, 3000);
+            }, 3500);
             
         } catch (e) {
             console.error("Erro ao resolver conflito.");
