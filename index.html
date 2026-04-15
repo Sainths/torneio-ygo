@@ -868,10 +868,33 @@ async function desafiar(nomeOp, modo, valor) {
 }
 
 function abrirPainelResultado(oponente) {
-    if (loopArena) clearInterval(loopArena);
-    document.getElementById('lobby-espera').classList.add('hidden');
-    document.getElementById('painel-resultado').classList.remove('hidden');
-    document.getElementById('oponente-nome').innerText = oponente;
+    // 1. Para o cronômetro de busca imediatamente
+    if (loopArena) {
+        clearInterval(loopArena);
+        loopArena = null;
+    }
+
+    // 2. Localiza os elementos
+    const lobby = document.getElementById('lobby-espera');
+    const painel = document.getElementById('painel-resultado');
+    const nomeTxt = document.getElementById('oponente-nome');
+
+    // 3. Troca as telas dentro da Arena
+    if (lobby) {
+        lobby.classList.add('hidden');
+        lobby.style.display = 'none';
+    }
+
+    if (painel) {
+        painel.classList.remove('hidden');
+        painel.style.display = 'block'; // Garante que o painel fique visível
+    }
+
+    if (nomeTxt) {
+        nomeTxt.innerText = oponente;
+    }
+
+    console.log("Arena de Duelo iniciada contra: " + oponente);
 }
 
 async function enviarResultado(res) {
@@ -949,22 +972,43 @@ function mostrarConviteEstiloso(oponente, modo, idDuelo) {
     const btnAceitar = document.getElementById('btn-aceitar');
     const btnRecusar = document.getElementById('btn-recusar');
 
-    texto.innerText = `O duelista ${oponente} te desafiou para um duelo ${modo}! Aceita?`;
+    // 1. Preenche o texto com o nome do oponente
+    texto.innerHTML = `O duelista <b style="color:var(--dourado)">${oponente}</b> te desafiou para um duelo <b>${modo}</b>! Aceita?`;
+    
+    // 2. Exibe o modal centralizado
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
 
+    // 3. Ação ao ACEITAR
     btnAceitar.onclick = async () => {
+        // Fecha o modal de convite
         modal.classList.add('hidden');
-        modal.style.display = 'flex';
-        await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "aceitarDuelo", idDuelo: idDuelo }) });
-        dueloAtivoID = idDuelo;
-        abrirPainelResultado(oponente);
+        modal.style.display = 'none';
+
+        // Avisa o Google que você aceitou
+        await fetch(URL_API, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({ action: "aceitarDuelo", idDuelo: idDuelo }) 
+        });
+
+        // ATENÇÃO: Esta é a parte que estava faltando para você:
+        dueloAtivoID = idDuelo; // Grava o ID do duelo atual
+        abrirPainelResultado(oponente); // Manda VOCÊ para a tela de GANHEI/PERDI
     };
 
+    // 4. Ação ao RECUSAR
     btnRecusar.onclick = async () => {
         modal.classList.add('hidden');
-        modal.style.display = 'flex';
-        await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "recusarDuelo", idDuelo: idDuelo }) });
+        modal.style.display = 'none';
+        
+        await fetch(URL_API, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({ action: "recusarDuelo", idDuelo: idDuelo }) 
+        });
+        
+        // O loop de 'atualizarListaFila' continuará rodando e voltará a mostrar os oponentes
     };
 }
 		
