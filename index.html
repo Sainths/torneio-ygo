@@ -827,18 +827,32 @@ async function atualizarListaFila(modo, valor) {
 		
 async function desafiar(nomeOp, modo, valor) {
     const user = JSON.parse(localStorage.getItem('duelista'));
-    const nomes = [user.nome, nomeOp].sort();
-    const idDuelo = "D-" + nomes[0] + "-" + nomes[1] + "-" + Date.now();
+    // Criamos um ID fixo baseado na ordem alfabética dos nomes
+    const nomesOrdenados = [user.nome, nomeOp].sort();
+    const idDueloFixo = "D-" + nomesOrdenados[0] + "-" + nomesOrdenados[1];
     
-    dueloAtivoID = idDuelo;
+    dueloAtivoID = idDueloFixo;
+    
     const listaDiv = document.getElementById('lista-disponiveis');
-    if (listaDiv) listaDiv.innerHTML = `<p style="color:var(--dourado)">Enviando desafio para ${nomeOp}...<br>Aguarde a resposta.</p>`;
+    if (listaDiv) listaDiv.innerHTML = `<p style="color:var(--dourado); padding:20px;">Enviando desafio...<br>Aguarde o oponente aceitar.</p>`;
 
-    await fetch(URL_API, { 
-        method: 'POST', 
-        mode: 'no-cors', 
-        body: JSON.stringify({ action: "iniciarDuelo", idDuelo, jogador1: user.nome, jogador2: nomeOp, tipo: modo, valor }) 
-    });
+    try {
+        await fetch(URL_API, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({ 
+                action: "iniciarDuelo", 
+                idDuelo: idDueloFixo, 
+                jogador1: user.nome, 
+                jogador2: nomeOp, 
+                tipo: modo, 
+                valor: valor 
+            }) 
+        });
+        // O desafiante fica no loop de 3 segundos até o status virar 'ACEITO'
+    } catch (e) {
+        console.error("Falha ao enviar desafio.");
+    }
 }
 
 function abrirPainelResultado(oponente) {
