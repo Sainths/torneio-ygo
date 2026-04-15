@@ -1092,11 +1092,15 @@ async function carregarConflitos() {
         container.innerHTML = "";
         conflitos.forEach(c => {
             container.innerHTML += `
-                <div style="background: rgba(192, 57, 43, 0.1); border: 1px solid #c0392b; padding: 8px; margin-bottom: 5px; border-radius: 4px;">
-                    <p style="color:white; margin-bottom: 5px;">${c.j1} vs ${c.j2} (${c.valor}⭐)</p>
-                    <div style="display: flex; gap: 5px;">
-                        <button onclick="resolverConflito('${c.id}', '${c.j1}')" style="flex:1; background:#27ae60; color:white; border:none; border-radius:3px; font-size:0.6rem; padding:4px;">VITÓRIA ${c.j1}</button>
-                        <button onclick="resolverConflito('${c.id}', '${c.j2}')" style="flex:1; background:#27ae60; color:white; border:none; border-radius:3px; font-size:0.6rem; padding:4px;">VITÓRIA ${c.j2}</button>
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--dourado); padding: 10px; margin-bottom: 10px; border-radius: 8px;">
+                    <p style="color:white; margin-bottom: 8px; font-size:0.8rem;">
+                        <b style="color:var(--dourado)">${c.j1}</b> vs <b style="color:var(--dourado)">${c.j2}</b><br>
+                        Aposta: <span style="color:var(--dourado-brilho)">${c.valor == 0 ? "Normal" : c.valor + " ⭐"}</span>
+                    </p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                        <button onclick="resolverConflito('${c.id}', '${c.j1}')" style="background:#27ae60; color:white; border:none; padding:6px; border-radius:3px; cursor:pointer; font-size:0.6rem;">VITÓRIA ${c.j1}</button>
+                        <button onclick="resolverConflito('${c.id}', '${c.j2}')" style="background:#27ae60; color:white; border:none; padding:6px; border-radius:3px; cursor:pointer; font-size:0.6rem;">VITÓRIA ${c.j2}</button>
+                        <button onclick="resolverConflito('${c.id}', 'CANCELAR')" style="grid-column: span 2; background:#555; color:white; border:none; padding:6px; border-radius:3px; cursor:pointer; font-size:0.6rem; margin-top:2px;">CANCELAR DUELO (Ninguém pontua)</button>
                     </div>
                 </div>`;
         });
