@@ -419,14 +419,20 @@
     	<p style="font-size: 0.6rem; color: #888; margin-top: 10px;">* O Reset apaga pontos, vitórias e o histórico de duelos.</p>
 		<hr style="border: 0; border-top: 1px solid rgba(212,175,55,0.2); margin: 15px 0;">
 
-		<!-- Campo de Notificações -->
-		<div style="margin-bottom: 15px;">
- 		   <label style="color: #ccc; font-size: 0.7rem; display: block; margin-bottom: 5px;">NOTIFICAR TODOS OS DUELISTAS:</label>
-   		   <div style="display: flex; gap: 5px;">
-      		    <input type="text" id="input-global-notif" placeholder="Ex: Torneio Pausado para Almoço" style="flex: 1; background: #111; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; font-size: 0.8rem;">
-      			<button onclick="enviarAvisoGlobal()" style="background: var(--dourado); color: black; border: none; padding: 0 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">ENVIAR</button>
-  		  </div>
-		</div>
+		<!-- Campo de Notificações (Corrigido) -->
+		<div style="margin-bottom: 20px; width: 100%;">
+  			  <label style="color: #ccc; font-size: 0.75rem; display: block; margin-bottom: 8px; text-align: left;">
+     			   NOTIFICAR TODOS OS DUELISTAS:
+			  </label>
+ 		      <div style="display: flex; flex-direction: column; gap: 10px;">
+      			  <input type="text" id="input-global-notif" placeholder="Digite o aviso do Reino..." 
+           			    style="width: 100%; background: #111; border: 1px solid var(--dourado); color: white; padding: 12px; border-radius: 5px; font-size: 0.9rem; box-sizing: border-box;">
+       			  <button onclick="enviarAvisoGlobal()" 
+              			  style="width: 100%; background: var(--dourado); color: black; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase;">
+          			   PUBLICAR AVISO
+       			  </button>
+   			  </div>
+		 </div>
 
 		<!-- Lista de Conflitos -->
 		<div id="lista-conflitos-admin">
