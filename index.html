@@ -663,20 +663,27 @@ async function carregarRanking() {
 
     try {
         const resp = await fetch(URL_API, { method: 'GET', redirect: 'follow' });
-        const jogadores = await resp.json(); // A variável é criada aqui
+        const jogadores = await resp.json();
 
-        // 1. Mostrar Aviso do Juiz (se houver)
+        // --- LÓGICA DE NOTIFICAÇÃO DO JUIZ ---
         if (jogadores.length > 0 && jogadores[0].avisoGlobal) {
-            const msg = jogadores[0].avisoGlobal;
-            if (msg.trim() !== "" && typeof avisarReino === "function") {
-                avisarReino(msg, "📢");
+            const novaMsg = jogadores[0].avisoGlobal.trim();
+            
+            // 1. Guarda a mensagem para ser usada na aba de Notificações
+            window.ultimaMensagemJuiz = novaMsg; 
+
+            // 2. Só mostra o Pop-up se for uma mensagem nova que o usuário ainda não viu
+            if (novaMsg !== "" && novaMsg !== localStorage.getItem('ultimo_aviso_visto')) {
+                if (typeof avisarReino === "function") {
+                    avisarReino(novaMsg, "📢");
+                    localStorage.setItem('ultimo_aviso_visto', novaMsg); // Marca como lida
+                }
             }
         }
 
-        // 2. Ordenação por pontos
+        // --- RESTANTE DO RANKING (PRESERVA TUDO) ---
         jogadores.sort((a, b) => (parseInt(b.pontos) || 0) - (parseInt(a.pontos) || 0));
 
-        // 3. Preencher TOP 3
         const preencherTop = (index, id) => {
             const j = jogadores[index];
             if (j) {
@@ -689,7 +696,6 @@ async function carregarRanking() {
         preencherTop(1, 'top2'); 
         preencherTop(2, 'top3');
 
-        // 4. Preencher Lista Geral
         listaGeral.innerHTML = "";
         jogadores.forEach((j, i) => {
             const v = parseInt(j.vitorias) || 0;
@@ -713,10 +719,7 @@ async function carregarRanking() {
                 </div>`;
         });
 
-        // 5. Se você for o Juiz, carrega os conflitos
-        if (typeof carregarConflitos === "function") {
-            carregarConflitos();
-        }
+        if (typeof carregarConflitos === "function") carregarConflitos();
 
     } catch (error) {
         console.error("Erro ao carregar o ranking:", error);
@@ -1018,7 +1021,13 @@ function verInfo(aba) {
     if (!display) return;
 
     if (aba === 'notificacoes') {
-        display.innerHTML = `<p style="color:#888; font-size:0.8rem;">📢 Nenhuma nova ordem do Reino.</p>`;
+        // Pega a mensagem salva globalmente ou exibe o padrão
+        const msg = window.ultimaMensagemJuiz || "Nenhuma nova ordem do Reino.";
+        display.innerHTML = `
+            <div style="padding:10px; border-left: 3px solid var(--dourado); background: rgba(255,255,255,0.05);">
+                <p style="color:var(--dourado-brilho); font-size:0.85rem; font-weight:bold; margin-bottom:5px;">📢 MENSAGEM DO JUIZ:</p>
+                <p style="color:#ccc; font-size:0.8rem; line-height:1.4;">${msg}</p>
+            </div>`;
     } else if (aba === 'regras') {
         display.innerHTML = `
             <ul style="color: #ccc; font-size: 0.75rem; text-align: left; padding-left: 20px; line-height: 1.4;">
