@@ -646,27 +646,25 @@ function mostrarArena(dados) {
 }
 
 async function carregarRanking() {
-		// Exemplo de como usar o aviso no index.html (dentro do carregarRanking)
-	if (jogadores.length > 0 && jogadores[0].avisoGlobal) {
-   		 const textoAviso = jogadores[0].avisoGlobal;
- 		 if (textoAviso.trim() !== "") {
-       		 avisarReino(textoAviso, "📢");
- 		 }
-	}
-
     const listaGeral = document.getElementById('lista-ranking-geral');
     if (!listaGeral) return;
 
     try {
         const resp = await fetch(URL_API, { method: 'GET', redirect: 'follow' });
-        const jogadores = await resp.json();
-        
-        console.log("Dados recebidos do Google:", jogadores); // Para depuração
+        const jogadores = await resp.json(); // A variável é criada aqui
 
-        // 1. Ordenação
+        // 1. Mostrar Aviso do Juiz (se houver)
+        if (jogadores.length > 0 && jogadores[0].avisoGlobal) {
+            const msg = jogadores[0].avisoGlobal;
+            if (msg.trim() !== "" && typeof avisarReino === "function") {
+                avisarReino(msg, "📢");
+            }
+        }
+
+        // 2. Ordenação por pontos
         jogadores.sort((a, b) => (parseInt(b.pontos) || 0) - (parseInt(a.pontos) || 0));
 
-        // 2. Preencher TOP 3
+        // 3. Preencher TOP 3
         const preencherTop = (index, id) => {
             const j = jogadores[index];
             if (j) {
@@ -675,21 +673,20 @@ async function carregarRanking() {
                 document.getElementById(`${id}-estrelas`).innerText = j.pontos || "0";
             }
         };
-        preencherTop(0, 'top1'); preencherTop(1, 'top2'); preencherTop(2, 'top3');
+        preencherTop(0, 'top1'); 
+        preencherTop(1, 'top2'); 
+        preencherTop(2, 'top3');
 
-        // 3. Preencher Lista Geral
+        // 4. Preencher Lista Geral
         listaGeral.innerHTML = "";
         jogadores.forEach((j, i) => {
             const v = parseInt(j.vitorias) || 0;
             const d = parseInt(j.derrotas) || 0;
             const e = parseInt(j.empates) || 0;
             const pts = parseInt(j.pontos) || 0;
-            const streak = parseInt(j.streak) || 0;
             const total = v + d + e;
             const wr = total > 0 ? ((v / total) * 100).toFixed(0) : 0;
             
-            const streakIcon = streak >= 3 ? `<span style="color:#f9e295">🔥 ${streak}x</span>` : "";
-
             listaGeral.innerHTML += `
                 <div class="ranking-row-item">
                     <div style="display: flex; justify-content: space-between; width: 100%;">
@@ -699,16 +696,18 @@ async function carregarRanking() {
                     <div style="display: flex; margin-top: 6px; flex-wrap: wrap; gap: 4px;">
                         <span class="stat-tag">V:${v} E:${e} D:${d}</span>
                         <span class="stat-tag">${wr}% WR</span>
-                        <span class="stat-tag">Duelos: ${total}</span>
-                        ${streakIcon}
                     </div>
                     <div style="font-size: 0.65rem; color: #888; margin-top: 4px;">Deck: ${j.deck}</div>
                 </div>`;
         });
 
+        // 5. Se você for o Juiz, carrega os conflitos
+        if (typeof carregarConflitos === "function") {
+            carregarConflitos();
+        }
+
     } catch (error) {
         console.error("Erro ao carregar o ranking:", error);
-        listaGeral.innerHTML = "<p style='color:red'>Erro ao carregar dados.</p>";
     }
 }
 
