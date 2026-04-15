@@ -1154,7 +1154,7 @@ async function resolverConflito(id, vencedor) {
             setTimeout(async () => {
                 await carregarRanking();
                 if (typeof carregarConflitos === "function") await carregarConflitos();
-            }, 2000);
+            }, 3000);
             
         } catch (e) {
             console.error("Erro ao resolver conflito.");
