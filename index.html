@@ -1108,10 +1108,27 @@ async function carregarConflitos() {
 }
 
 async function resolverConflito(id, vencedor) {
-    if (confirm(`Confirmar vitória de ${vencedor}?`)) {
-        await fetch(URL_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: "resolverConflito", idDuelo: id, vencedor: vencedor }) });
-        alert("Conflito resolvido!");
-        carregarRanking();
+    let acao = vencedor === "CANCELAR" ? "Cancelar este duelo?" : `Confirmar vitória de ${vencedor}?`;
+    
+    if (confirm(acao)) {
+        try {
+            await fetch(URL_API, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: JSON.stringify({ action: "resolverConflito", idDuelo: id, vencedor: vencedor }) 
+            });
+            
+            avisarReino("Conflito processado pelo Juiz!", "⚖️");
+            
+            // O SEGREDO: Aguarda 1 segundo e recarrega a lista e o ranking
+            setTimeout(() => {
+                carregarConflitos(); // Limpa o card da tela do juiz
+                carregarRanking();   // Atualiza os pontos de todos
+            }, 1500);
+            
+        } catch (e) {
+            alert("Erro ao conectar com o servidor.");
+        }
     }
 }
 
