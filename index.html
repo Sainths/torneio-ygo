@@ -665,23 +665,52 @@ async function carregarRanking() {
         const resp = await fetch(URL_API, { method: 'GET', redirect: 'follow' });
         const jogadores = await resp.json();
 
-        // --- LÓGICA DE NOTIFICAÇÃO DO JUIZ ---
+        // --- 1. LÓGICA DE NOTIFICAÇÃO DO JUIZ ---
         if (jogadores.length > 0 && jogadores[0].avisoGlobal) {
             const novaMsg = jogadores[0].avisoGlobal.trim();
-            
-            // 1. Guarda a mensagem para ser usada na aba de Notificações
             window.ultimaMensagemJuiz = novaMsg; 
 
-            // 2. Só mostra o Pop-up se for uma mensagem nova que o usuário ainda não viu
             if (novaMsg !== "" && novaMsg !== localStorage.getItem('ultimo_aviso_visto')) {
                 if (typeof avisarReino === "function") {
                     avisarReino(novaMsg, "📢");
-                    localStorage.setItem('ultimo_aviso_visto', novaMsg); // Marca como lida
+                    localStorage.setItem('ultimo_aviso_visto', novaMsg);
                 }
             }
         }
 
-        // --- RESTANTE DO RANKING (PRESERVA TUDO) ---
+        // --- 2. CÁLCULO DOS CARDS DO DASHBOARD ---
+        
+        // Medalhas Totais
+        const estrelasTotais = jogadores.reduce((acc, j) => acc + (parseInt(j.pontos) || 0), 0);
+        if (document.getElementById('total-estrelas')) {
+            document.getElementById('total-estrelas').innerText = estrelasTotais;
+        }
+
+        // Duelos Totais (Dividido por 2 para contagem real)
+        const somaPartidas = jogadores.reduce((acc, j) => {
+            return acc + (parseInt(j.vitorias) || 0) + (parseInt(j.derrotas) || 0) + (parseInt(j.empates) || 0);
+        }, 0);
+        const duelosTotais = Math.floor(somaPartidas / 2);
+        if (document.getElementById('total-duelos')) {
+            document.getElementById('total-duelos').innerText = duelosTotais;
+        }
+
+        // --- O NOVO SHARK: O MAIOR ACUMULADOR DE ESTRELAS ---
+        // Ordenamos uma cópia por pontos para achar o maior saldo
+        const rankingPontos = [...jogadores].sort((a, b) => (parseInt(b.pontos) || 0) - (parseInt(a.pontos) || 0));
+        const cardShark = document.getElementById('shark-nome');
+        
+        if (cardShark) {
+            if (rankingPontos.length > 0 && (parseInt(rankingPontos[0].pontos) || 0) > 0) {
+                // O Shark é o primeiro da lista ordenada por estrelas
+                cardShark.innerText = `${rankingPontos[0].nome} (${rankingPontos[0].pontos}⭐)`;
+                cardShark.style.color = "var(--dourado-brilho)";
+            } else {
+                cardShark.innerText = "Ninguém";
+            }
+        }
+
+        // --- 3. ORDENAÇÃO E PREENCHIMENTO DO RANKING ---
         jogadores.sort((a, b) => (parseInt(b.pontos) || 0) - (parseInt(a.pontos) || 0));
 
         const preencherTop = (index, id) => {
@@ -702,13 +731,16 @@ async function carregarRanking() {
             const d = parseInt(j.derrotas) || 0;
             const e = parseInt(j.empates) || 0;
             const pts = parseInt(j.pontos) || 0;
+            const streak = parseInt(j.streak) || 0;
             const total = v + d + e;
             const wr = total > 0 ? ((v / total) * 100).toFixed(0) : 0;
             
+            const fogo = streak >= 3 ? `<span style="color:#f9e295"> 🔥${streak}</span>` : "";
+
             listaGeral.innerHTML += `
                 <div class="ranking-row-item">
                     <div style="display: flex; justify-content: space-between; width: 100%;">
-                        <span><b style="color:var(--dourado)">${i + 1}º</b> ${j.nome}</span>
+                        <span><b style="color:var(--dourado)">${i + 1}º</b> ${j.nome}${fogo}</span>
                         <span style="color:var(--dourado-brilho); font-weight:bold;">⭐ ${pts}</span>
                     </div>
                     <div style="display: flex; margin-top: 6px; flex-wrap: wrap; gap: 4px;">
@@ -725,7 +757,7 @@ async function carregarRanking() {
         console.error("Erro ao carregar o ranking:", error);
     }
 }
-
+		
 // 4. LÓGICA DA ARENA
 function abrirModulo(tipo) {
     if (tipo === 'registrar-duelo') {
@@ -950,10 +982,6 @@ async function sairDaFila() {
     }
 }
 
-function logout() {
-    localStorage.removeItem('duelista');
-    location.reload();
-}
 // CERTIFIQUE-SE DE QUE NÃO HÁ CHAVES } SOBRANDO ABAIXO DESTA LINHA
 		
 function avisarReino(msg, icone = "📢") {
@@ -1108,26 +1136,29 @@ async function carregarConflitos() {
 }
 
 async function resolverConflito(id, vencedor) {
-    let acao = vencedor === "CANCELAR" ? "Cancelar este duelo?" : `Confirmar vitória de ${vencedor}?`;
-    
-    if (confirm(acao)) {
+    if (confirm(vencedor === "CANCELAR" ? "Cancelar este duelo?" : `Confirmar vitória de ${vencedor}?`)) {
         try {
+            // 1. Avisa o Google
             await fetch(URL_API, { 
                 method: 'POST', 
                 mode: 'no-cors', 
                 body: JSON.stringify({ action: "resolverConflito", idDuelo: id, vencedor: vencedor }) 
             });
             
-            avisarReino("Conflito processado pelo Juiz!", "⚖️");
+            avisarReino("Justiça feita! O Reino foi atualizado.", "⚖️");
             
-            // O SEGREDO: Aguarda 1 segundo e recarrega a lista e o ranking
-            setTimeout(() => {
-                carregarConflitos(); // Limpa o card da tela do juiz
-                carregarRanking();   // Atualiza os pontos de todos
-            }, 1500);
+            // 2. Limpa o card da tela IMEDIATAMENTE (sem esperar o Google)
+            const container = document.getElementById('container-conflitos');
+            container.innerHTML = `<p style="color:var(--dourado)">Atualizando veredito...</p>`;
+            
+            // 3. Atualiza tudo após um pequeno delay para o Google processar
+            setTimeout(async () => {
+                await carregarRanking();
+                if (typeof carregarConflitos === "function") await carregarConflitos();
+            }, 2000);
             
         } catch (e) {
-            alert("Erro ao conectar com o servidor.");
+            console.error("Erro ao resolver conflito.");
         }
     }
 }
