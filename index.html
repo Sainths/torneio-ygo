@@ -686,7 +686,7 @@ async function carregarRanking() {
             document.getElementById('total-estrelas').innerText = estrelasTotais;
         }
 
-        // Duelos Totais (Dividido por 2 para contagem real)
+        // Duelos Totais (Soma todas as partidas de todos e divide por 2)
         const somaPartidas = jogadores.reduce((acc, j) => {
             return acc + (parseInt(j.vitorias) || 0) + (parseInt(j.derrotas) || 0) + (parseInt(j.empates) || 0);
         }, 0);
@@ -696,14 +696,13 @@ async function carregarRanking() {
         }
 
         // --- O NOVO SHARK: O MAIOR ACUMULADOR DE ESTRELAS ---
-        // Ordenamos uma cópia por pontos para achar o maior saldo
-        const rankingPontos = [...jogadores].sort((a, b) => (parseInt(b.pontos) || 0) - (parseInt(a.pontos) || 0));
+        const rankingParaShark = [...jogadores].sort((a, b) => (parseInt(b.pontos) || 0) - (parseInt(a.pontos) || 0));
         const cardShark = document.getElementById('shark-nome');
         
         if (cardShark) {
-            if (rankingPontos.length > 0 && (parseInt(rankingPontos[0].pontos) || 0) > 0) {
-                // O Shark é o primeiro da lista ordenada por estrelas
-                cardShark.innerText = `${rankingPontos[0].nome} (${rankingPontos[0].pontos}⭐)`;
+            if (rankingParaShark.length > 0 && (parseInt(rankingParaShark[0].pontos) || 0) > 0) {
+                // Shark é o primeiro da lista ordenada por pontos
+                cardShark.innerText = `${rankingParaShark[0].nome} (${rankingParaShark[0].pontos}⭐)`;
                 cardShark.style.color = "var(--dourado-brilho)";
             } else {
                 cardShark.innerText = "Ninguém";
