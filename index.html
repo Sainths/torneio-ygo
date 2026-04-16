@@ -665,59 +665,65 @@ async function carregarRanking() {
         const resp = await fetch(URL_API, { method: 'GET', redirect: 'follow' });
         const jogadores = await resp.json();
 
-        // --- 1. AVISO DO JUIZ ---
+        // --- 1. LÓGICA DE NOTIFICAÇÃO DO JUIZ ---
         if (jogadores.length > 0 && jogadores[0].avisoGlobal) {
-            const msg = jogadores[0].avisoGlobal.trim();
-            window.ultimaMensagemJuiz = msg; 
-            if (msg !== "" && msg !== localStorage.getItem('ultimo_aviso_visto')) {
+            const novaMsg = jogadores[0].avisoGlobal.trim();
+            window.ultimaMensagemJuiz = novaMsg; 
+
+            if (novaMsg !== "" && novaMsg !== localStorage.getItem('ultimo_aviso_visto')) {
                 if (typeof avisarReino === "function") {
-                    avisarReino(msg, "📢");
-                    localStorage.setItem('ultimo_aviso_visto', msg);
+                    avisarReino(novaMsg, "📢");
+                    localStorage.setItem('ultimo_aviso_visto', novaMsg);
                 }
             }
         }
 
-        // --- 2. CÁLCULO DOS WIDGETS (IDs: total-duelos, total-estrelas, shark-player) ---
+        // --- 2. CÁLCULO DOS CARDS DO DASHBOARD ---
         
-        // Estrelas Totais
+        // Medalhas Totais (Soma de todos os pontos atuais)
         const estrelasTotais = jogadores.reduce((acc, j) => acc + (parseInt(j.pontos) || 0), 0);
-        const cardEstrelas = document.getElementById('total-estrelas');
-        if (cardEstrelas) cardEstrelas.innerText = estrelasTotais;
+        if (document.getElementById('total-estrelas')) {
+            document.getElementById('total-estrelas').innerText = estrelasTotais;
+        }
 
-        // Duelos Totais
+        // Duelos Totais (Dividido por 2 para contagem real de partidas)
         const somaPartidas = jogadores.reduce((acc, j) => {
             return acc + (parseInt(j.vitorias) || 0) + (parseInt(j.derrotas) || 0) + (parseInt(j.empates) || 0);
         }, 0);
-        const cardDuelos = document.getElementById('total-duelos');
-        if (cardDuelos) cardDuelos.innerText = Math.floor(somaPartidas / 2);
+        const duelosTotais = Math.floor(somaPartidas / 2);
+        if (document.getElementById('total-duelos')) {
+            document.getElementById('total-duelos').innerText = duelosTotais;
+        }
 
-        // SHARK (O jogador com mais estrelas)
-        const rankingShark = [...jogadores].sort((a, b) => (parseInt(b.pontos) || 0) - (parseInt(a.pontos) || 0));
-        const cardShark = document.getElementById('shark-player'); // <--- ID CORRIGIDO AQUI
+        // --- O NOVO SHARK: QUEM MAIS LUCROU EM APOSTAS (Coluna I) ---
+        const listaParaShark = [...jogadores].sort((a, b) => (parseInt(b.lucroAposta) || 0) - (parseInt(a.lucroAposta) || 0));
+        const cardShark = document.getElementById('shark-player');
         
         if (cardShark) {
-            if (rankingShark.length > 0 && (parseInt(rankingShark[0].pontos) || 0) > 0) {
-                cardShark.innerText = `${rankingShark[0].nome} (${rankingShark[0].pontos}⭐)`;
+            if (listaParaShark.length > 0 && (parseInt(listaParaShark[0].lucroAposta) || 0) > 0) {
+                // Shark é o primeiro da lista ordenada pelo lucro de apostas
+                cardShark.innerText = `${listaParaShark[0].nome} (${listaParaShark[0].lucroAposta}⭐)`;
+                cardShark.style.color = "var(--dourado-brilho)";
             } else {
                 cardShark.innerText = "Ninguém";
+                cardShark.style.color = "#888";
             }
         }
 
-        // --- 3. RANKING GERAL ---
+        // --- 3. ORDENAÇÃO E PREENCHIMENTO DO RANKING GERAL ---
         jogadores.sort((a, b) => (parseInt(b.pontos) || 0) - (parseInt(a.pontos) || 0));
 
         const preencherTop = (index, id) => {
             const j = jogadores[index];
             if (j) {
-                const nomeEl = document.getElementById(`${id}-nome`);
-                const deckEl = document.getElementById(`${id}-deck`);
-                const estrelaEl = document.getElementById(`${id}-estrelas`);
-                if (nomeEl) nomeEl.innerText = j.nome || "---";
-                if (deckEl) deckEl.innerText = j.deck || "---";
-                if (estrelaEl) estrelaEl.innerText = j.pontos || "0";
+                document.getElementById(`${id}-nome`).innerText = j.nome || "---";
+                document.getElementById(`${id}-deck`).innerText = j.deck || "---";
+                document.getElementById(`${id}-estrelas`).innerText = j.pontos || "0";
             }
         };
-        preencherTop(0, 'top1'); preencherTop(1, 'top2'); preencherTop(2, 'top3');
+        preencherTop(0, 'top1'); 
+        preencherTop(1, 'top2'); 
+        preencherTop(2, 'top3');
 
         listaGeral.innerHTML = "";
         jogadores.forEach((j, i) => {
@@ -725,13 +731,16 @@ async function carregarRanking() {
             const d = parseInt(j.derrotas) || 0;
             const e = parseInt(j.empates) || 0;
             const pts = parseInt(j.pontos) || 0;
+            const streak = parseInt(j.streak) || 0;
             const total = v + d + e;
             const wr = total > 0 ? ((v / total) * 100).toFixed(0) : 0;
             
+            const fogo = streak >= 3 ? `<span style="color:#f9e295"> 🔥${streak}</span>` : "";
+
             listaGeral.innerHTML += `
                 <div class="ranking-row-item">
                     <div style="display: flex; justify-content: space-between; width: 100%;">
-                        <span><b style="color:var(--dourado)">${i + 1}º</b> ${j.nome}</span>
+                        <span><b style="color:var(--dourado)">${i + 1}º</b> ${j.nome}${fogo}</span>
                         <span style="color:var(--dourado-brilho); font-weight:bold;">⭐ ${pts}</span>
                     </div>
                     <div style="display: flex; margin-top: 6px; flex-wrap: wrap; gap: 4px;">
@@ -742,6 +751,7 @@ async function carregarRanking() {
                 </div>`;
         });
 
+        // Carrega conflitos se for o Admin
         if (typeof carregarConflitos === "function") carregarConflitos();
 
     } catch (error) {
