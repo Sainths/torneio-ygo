@@ -738,11 +738,13 @@ async function carregarRanking() {
                         <span><b style="color:var(--dourado)">${i + 1}º</b> ${j.nome}${fogo}</span>
                         <span style="color:var(--dourado-brilho); font-weight:bold;">⭐ ${pts}</span>
                     </div>
+                    <!-- LINHA DE ESTATÍSTICAS CORRIGIDA -->
                     <div style="display: flex; margin-top: 6px; flex-wrap: wrap; gap: 4px; align-items: center;">
-                        <span class="stat-tag">Duelos: ${totalDuelos}</span>
-                        <span class="stat-tag" style="background: rgba(46, 204, 113, 0.2);">V:${v}</span>
-                        <span class="stat-tag" style="background: rgba(231, 76, 60, 0.2);">D:${d}</span>
-                        <span class="stat-tag">${wr}% WR</span>
+                        <span class="stat-tag" style="border: 1px solid var(--dourado);">Rodadas: ${totalDuelos}</span>
+                        <span class="stat-tag" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">V:${v}</span>
+                        <span class="stat-tag" style="background: rgba(149, 165, 166, 0.2); color: #ecf0f1;">E:${e}</span>
+                        <span class="stat-tag" style="background: rgba(231, 76, 60, 0.2); color: #e74c3c;">D:${d}</span>
+                        <span class="stat-tag" style="margin-left: auto;">${wr}% WR</span>
                     </div>
                     <div style="font-size: 0.65rem; color: #888; margin-top: 4px;">Deck: ${j.deck}</div>
                 </div>`;
