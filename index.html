@@ -679,14 +679,11 @@ async function carregarRanking() {
         }
 
         // --- 2. CÁLCULO DOS CARDS DO DASHBOARD ---
-        
-        // Medalhas Totais (Soma de todos os pontos atuais)
         const estrelasTotais = jogadores.reduce((acc, j) => acc + (parseInt(j.pontos) || 0), 0);
         if (document.getElementById('total-estrelas')) {
             document.getElementById('total-estrelas').innerText = estrelasTotais;
         }
 
-        // Duelos Totais (Dividido por 2 para contagem real de partidas)
         const somaPartidas = jogadores.reduce((acc, j) => {
             return acc + (parseInt(j.vitorias) || 0) + (parseInt(j.derrotas) || 0) + (parseInt(j.empates) || 0);
         }, 0);
@@ -695,13 +692,11 @@ async function carregarRanking() {
             document.getElementById('total-duelos').innerText = duelosTotais;
         }
 
-        // --- O NOVO SHARK: QUEM MAIS LUCROU EM APOSTAS (Coluna I) ---
         const listaParaShark = [...jogadores].sort((a, b) => (parseInt(b.lucroAposta) || 0) - (parseInt(a.lucroAposta) || 0));
         const cardShark = document.getElementById('shark-player');
         
         if (cardShark) {
             if (listaParaShark.length > 0 && (parseInt(listaParaShark[0].lucroAposta) || 0) > 0) {
-                // Shark é o primeiro da lista ordenada pelo lucro de apostas
                 cardShark.innerText = `${listaParaShark[0].nome} (${listaParaShark[0].lucroAposta}⭐)`;
                 cardShark.style.color = "var(--dourado-brilho)";
             } else {
@@ -732,7 +727,7 @@ async function carregarRanking() {
             const e = parseInt(j.empates) || 0;
             const pts = parseInt(j.pontos) || 0;
             const streak = parseInt(j.streak) || 0;
-            const totalDuelos = v + d + e; // <--- Contador de rodadas individual
+            const totalDuelos = v + d + e; 
             const wr = totalDuelos > 0 ? ((v / totalDuelos) * 100).toFixed(0) : 0;
             
             const fogo = streak >= 3 ? `<span style="color:#f9e295"> 🔥${streak}</span>` : "";
@@ -744,16 +739,22 @@ async function carregarRanking() {
                         <span style="color:var(--dourado-brilho); font-weight:bold;">⭐ ${pts}</span>
                     </div>
                     <div style="display: flex; margin-top: 6px; flex-wrap: wrap; gap: 4px; align-items: center;">
-                        <span class="stat-tag">Duelos: ${totalDuelos}</span> <!-- Mostra as rodadas -->
+                        <span class="stat-tag">Duelos: ${totalDuelos}</span>
                         <span class="stat-tag" style="background: rgba(46, 204, 113, 0.2);">V:${v}</span>
                         <span class="stat-tag" style="background: rgba(231, 76, 60, 0.2);">D:${d}</span>
                         <span class="stat-tag">${wr}% WR</span>
                     </div>
                     <div style="font-size: 0.65rem; color: #888; margin-top: 4px;">Deck: ${j.deck}</div>
                 </div>`;
-        });
+        }); // Fim do forEach
 
-		
+        if (typeof carregarConflitos === "function") carregarConflitos();
+
+    } catch (error) {
+        console.error("Erro ao carregar o ranking:", error);
+    }
+}
+	
 // 4. LÓGICA DA ARENA
 function abrirModulo(tipo) {
     if (tipo === 'registrar-duelo') {
@@ -1191,6 +1192,6 @@ setInterval(() => {
     }
 }, 30000);
 
-</script>
+	</script>
 </body>
 </html>
