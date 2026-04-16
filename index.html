@@ -1182,13 +1182,14 @@ function logout() {
 
 // Sincronização Automática (A cada 30 segundos)
 setInterval(() => {
-    const arenaAberta = !document.getElementById('arena-modal').classList.contains('hidden');
-    if (!arenaAberta) {
-        carregarRanking();
+    const modalArena = document.getElementById('arena-modal');
+    if (modalArena) {
+        const arenaAberta = !modalArena.classList.contains('hidden') && modalArena.style.display !== 'none';
+        if (!arenaAberta) {
+            carregarRanking();
+        }
     }
 }, 30000);
-
-// FECHE SEU SCRIPT SEMPRE COM ESSAS DUAS LINHAS ABAIXO
 
     </script>
 </body>
