@@ -732,8 +732,8 @@ async function carregarRanking() {
             const e = parseInt(j.empates) || 0;
             const pts = parseInt(j.pontos) || 0;
             const streak = parseInt(j.streak) || 0;
-            const total = v + d + e;
-            const wr = total > 0 ? ((v / total) * 100).toFixed(0) : 0;
+            const totalDuelos = v + d + e; // <--- Contador de rodadas individual
+            const wr = totalDuelos > 0 ? ((v / totalDuelos) * 100).toFixed(0) : 0;
             
             const fogo = streak >= 3 ? `<span style="color:#f9e295"> 🔥${streak}</span>` : "";
 
@@ -743,21 +743,16 @@ async function carregarRanking() {
                         <span><b style="color:var(--dourado)">${i + 1}º</b> ${j.nome}${fogo}</span>
                         <span style="color:var(--dourado-brilho); font-weight:bold;">⭐ ${pts}</span>
                     </div>
-                    <div style="display: flex; margin-top: 6px; flex-wrap: wrap; gap: 4px;">
-                        <span class="stat-tag">V:${v} E:${e} D:${d}</span>
+                    <div style="display: flex; margin-top: 6px; flex-wrap: wrap; gap: 4px; align-items: center;">
+                        <span class="stat-tag">Duelos: ${totalDuelos}</span> <!-- Mostra as rodadas -->
+                        <span class="stat-tag" style="background: rgba(46, 204, 113, 0.2);">V:${v}</span>
+                        <span class="stat-tag" style="background: rgba(231, 76, 60, 0.2);">D:${d}</span>
                         <span class="stat-tag">${wr}% WR</span>
                     </div>
                     <div style="font-size: 0.65rem; color: #888; margin-top: 4px;">Deck: ${j.deck}</div>
                 </div>`;
         });
 
-        // Carrega conflitos se for o Admin
-        if (typeof carregarConflitos === "function") carregarConflitos();
-
-    } catch (error) {
-        console.error("Erro ao carregar o ranking:", error);
-    }
-}
 		
 // 4. LÓGICA DA ARENA
 function abrirModulo(tipo) {
@@ -783,9 +778,23 @@ function abrirModulo(tipo) {
 async function abrirLobby(modo, valor) {
     const userStr = localStorage.getItem('duelista');
     if (!userStr) return;
-    const user = JSON.parse(userStr);
-    const nomeLimpo = user.nome.trim();
+    
+    // 1. Pega os dados mais recentes do ranking para checar o saldo real
+    const respRanking = await fetch(`${URL_API}`, { redirect: 'follow' });
+    const jogadores = await respRanking.json();
+    const userLocal = JSON.parse(userStr);
+    
+    // Busca o saldo atualizado do jogador na lista vinda do servidor
+    const duelistaAtualizado = jogadores.find(j => j.nome === userLocal.nome);
+    const saldoAtual = duelistaAtualizado ? parseInt(duelistaAtualizado.pontos) : 0;
 
+    // 2. TRAVA DE SALDO: Se for aposta e o saldo for insuficiente, bloqueia
+    if (modo === 'Aposta' && saldoAtual < valor) {
+        avisarReino(`Saldo insuficiente! Você tem ⭐${saldoAtual} e precisa de ⭐${valor}.`, "🚫");
+        return;
+    }
+
+    // 3. Se tiver saldo, segue o processo normal
     document.getElementById('selecao-modo').classList.add('hidden');
     document.getElementById('lobby-espera').classList.remove('hidden');
     document.getElementById('titulo-sala').innerText = `Sala: ${modo} (${valor > 0 ? valor + ' ⭐' : 'Normal'})`;
@@ -793,7 +802,7 @@ async function abrirLobby(modo, valor) {
     await fetch(URL_API, { 
         method: 'POST', 
         mode: 'no-cors', 
-        body: JSON.stringify({ action: "entrarNaFila", nome: nomeLimpo, modo, valor }) 
+        body: JSON.stringify({ action: "entrarNaFila", nome: userLocal.nome, modo, valor }) 
     });
     
     if(loopArena) clearInterval(loopArena);
