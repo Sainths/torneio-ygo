@@ -775,39 +775,41 @@ function abrirModulo(tipo) {
     }
 }
 
+// --- FUNÇÃO ABRIR LOBBY COM TRAVA DE SALDO ---
 async function abrirLobby(modo, valor) {
     const userStr = localStorage.getItem('duelista');
     if (!userStr) return;
-    
-    // 1. Pega os dados mais recentes do ranking para checar o saldo real
-    const respRanking = await fetch(`${URL_API}`, { redirect: 'follow' });
-    const jogadores = await respRanking.json();
     const userLocal = JSON.parse(userStr);
-    
-    // Busca o saldo atualizado do jogador na lista vinda do servidor
-    const duelistaAtualizado = jogadores.find(j => j.nome === userLocal.nome);
-    const saldoAtual = duelistaAtualizado ? parseInt(duelistaAtualizado.pontos) : 0;
 
-    // 2. TRAVA DE SALDO: Se for aposta e o saldo for insuficiente, bloqueia
-    if (modo === 'Aposta' && saldoAtual < valor) {
-        avisarReino(`Saldo insuficiente! Você tem ⭐${saldoAtual} e precisa de ⭐${valor}.`, "🚫");
-        return;
+    try {
+        // Busca saldo atualizado no servidor
+        const respRanking = await fetch(URL_API, { redirect: 'follow' });
+        const jogadores = await respRanking.json();
+        const duelistaAtivo = jogadores.find(j => j.nome === userLocal.nome);
+        const saldoAtual = duelistaAtivo ? parseInt(duelistaAtivo.pontos) : 0;
+
+        // Trava de saldo
+        if (modo === 'Aposta' && saldoAtual < valor) {
+            avisarReino(`Saldo insuficiente! Você tem ⭐${saldoAtual} e precisa de ⭐${valor}.`, "🚫");
+            return;
+        }
+
+        document.getElementById('selecao-modo').classList.add('hidden');
+        document.getElementById('lobby-espera').classList.remove('hidden');
+        document.getElementById('titulo-sala').innerText = `Sala: ${modo} (${valor > 0 ? valor + ' ⭐' : 'Normal'})`;
+        
+        await fetch(URL_API, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify({ action: "entrarNaFila", nome: userLocal.nome, modo, valor }) 
+        });
+        
+        if(loopArena) clearInterval(loopArena);
+        loopArena = setInterval(() => atualizarListaFila(modo, valor), 4000);
+    } catch (e) {
+        console.error("Erro ao entrar no lobby:", e);
     }
-
-    // 3. Se tiver saldo, segue o processo normal
-    document.getElementById('selecao-modo').classList.add('hidden');
-    document.getElementById('lobby-espera').classList.remove('hidden');
-    document.getElementById('titulo-sala').innerText = `Sala: ${modo} (${valor > 0 ? valor + ' ⭐' : 'Normal'})`;
-    
-    await fetch(URL_API, { 
-        method: 'POST', 
-        mode: 'no-cors', 
-        body: JSON.stringify({ action: "entrarNaFila", nome: userLocal.nome, modo, valor }) 
-    });
-    
-    if(loopArena) clearInterval(loopArena);
-    loopArena = setInterval(() => atualizarListaFila(modo, valor), 4000);
-}
+} // Fechamento da função abrirLobby
 
 // O segredo está nesta primeira linha: ASYNC FUNCTION
 async function atualizarListaFila(modo, valor) {
@@ -1177,19 +1179,17 @@ function logout() {
     localStorage.removeItem('duelista');
     location.reload();
 }
-// CERTIFIQUE-SE DE QUE NÃO HÁ CHAVES } SOBRANDO ABAIXO DESTA LINHA
-	// Este trecho fica "solto" no final do script para rodar sozinho
+
+// Sincronização Automática (A cada 30 segundos)
 setInterval(() => {
-    // Só atualiza se o jogador estiver no Dashboard (Arena fechada)
-    // Isso evita que o ranking atualize e mude a tela durante um duelo
     const arenaAberta = !document.getElementById('arena-modal').classList.contains('hidden');
-    
     if (!arenaAberta) {
-        console.log("Sincronizando dados com o Reino...");
         carregarRanking();
     }
-}, 30000); // 30000 ms = 30 segundos
-	
+}, 30000);
+
+// FECHE SEU SCRIPT SEMPRE COM ESSAS DUAS LINHAS ABAIXO
+
     </script>
 </body>
 </html>
