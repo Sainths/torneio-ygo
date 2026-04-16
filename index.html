@@ -1173,23 +1173,23 @@ async function resolverConflito(id, vencedor) {
             console.error("Erro ao resolver conflito.");
         }
     }
+} //
+
+function logout() {
+    localStorage.removeItem('duelista');
+    location.reload();
 }
 
-	function logout() {
-   		 localStorage.removeItem('duelista');
-  		 location.reload();
-	}
-
-	// Sincronização Automática (A cada 30 segundos)
-	setInterval(() => {
-  		  const modalArena = document.getElementById('arena-modal');
-   	 	  if (modalArena) {
-       		   const arenaAberta = !modalArena.classList.contains('hidden') && modalArena.style.display !== 'none';
-         	   if (!arenaAberta) {
-           			 carregarRanking();
-       	 	   }
-  		}
-	}, 30000);
+// Sincronização Automática (A cada 30 segundos)
+setInterval(() => {
+    const modalArena = document.getElementById('arena-modal');
+    if (modalArena) {
+        const arenaAberta = !modalArena.classList.contains('hidden') && modalArena.style.display !== 'none';
+        if (!arenaAberta) {
+            carregarRanking();
+        }
+    }
+}, 30000);
 
     </script>
 </body>
