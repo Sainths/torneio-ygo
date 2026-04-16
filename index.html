@@ -1169,7 +1169,18 @@ function logout() {
     location.reload();
 }
 // CERTIFIQUE-SE DE QUE NÃO HÁ CHAVES } SOBRANDO ABAIXO DESTA LINHA
-		
+	// Este trecho fica "solto" no final do script para rodar sozinho
+setInterval(() => {
+    // Só atualiza se o jogador estiver no Dashboard (Arena fechada)
+    // Isso evita que o ranking atualize e mude a tela durante um duelo
+    const arenaAberta = !document.getElementById('arena-modal').classList.contains('hidden');
+    
+    if (!arenaAberta) {
+        console.log("Sincronizando dados com o Reino...");
+        carregarRanking();
+    }
+}, 30000); // 30000 ms = 30 segundos
+	
     </script>
 </body>
 </html>
