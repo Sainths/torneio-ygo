@@ -1078,13 +1078,14 @@ function verInfo(aba) {
                 <li>Duelos de aposta: O vencedor leva o valor total da sala.</li>
                 <li>Em caso de conflito, o Juiz dará o veredito final.</li>
                 <li>Desconexão durante o duelo conta como derrota.</li>
+				<li>Banlist própria do torneio.</li>
             </ul>`;
     }
 }
 
 // 2. LOGICA PARA EXIBIR O PAINEL DO JUIZ
 function verificarAdmin(nome) {
-    const ADMIN_NOME = "Jaden"; // SUBSTITUA PELO SEU NOME EXATO NA PLANILHA
+    const ADMIN_NOME = "Sainths"; // SUBSTITUA PELO SEU NOME EXATO NA PLANILHA
     const painel = document.getElementById('painel-admin');
     if (nome === ADMIN_NOME && painel) {
         painel.classList.remove('hidden');
