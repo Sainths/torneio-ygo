@@ -220,20 +220,29 @@
         <button id="btn-aba-juiz" style="display:none;" onclick="mudarAba('aba-juiz', this)">⚖️ Juiz</button>
     </nav>
 
-    <!-- CONEXÃO COM O SERVIDOR DO FIREBASE -->
+    <!-- SEÇÃO CORRIGIDA DE CONEXÃO COM O SERVIDOR -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
 
     <script>
-        // Banco de dados em tempo real ativo e configurado para o seu torneio
-        const firebaseConfig = {
-            databaseURL: "https://firebaseio.com"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
+        let db;
         let usuarioLogado = null;
+
+        // Força o app a esperar o carregamento total das bibliotecas do Google antes de iniciar
+        window.onload = function() {
+            const firebaseConfig = {
+                databaseURL: "https://firebaseio.com"
+            };
+            
+            // Inicialização segura
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                console.log("Conectado com sucesso ao Reino dos Duelistas!");
+            } else {
+                alert("Erro crítico: As regras do Reino não foram carregadas pela rede. Atualize a página.");
+            }
+        };
 
         function mudarAba(idAba, botao) {
             if (!usuarioLogado) return;
@@ -247,6 +256,11 @@
             let nome = document.getElementById('reg-nome').value.trim();
             let senha = document.getElementById('reg-senha').value.trim();
             let deck = document.getElementById('reg-deck').value.trim();
+
+            if (!db) {
+                alert("Aguardando conexão com o servidor... Tente novamente em 2 segundos.");
+                return;
+            }
 
             if (nome === "" || senha === "" || deck === "") {
                 alert("Preencha todos os campos para criar sua conta.");
@@ -279,6 +293,11 @@
         function fazerLogin() {
             let nome = document.getElementById('login-nome').value.trim();
             let senha = document.getElementById('login-senha').value.trim();
+
+            if (!db) {
+                alert("Aguardando conexão com o servidor... Tente novamente em 2 segundos.");
+                return;
+            }
 
             if (nome === "" || senha === "") {
                 alert("Por favor, preencha nome e senha.");
@@ -327,3 +346,4 @@
     </script>
 </body>
 </html>
+
