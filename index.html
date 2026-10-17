@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reino dos Duelistas</title>
+    <style>
+        :root {
+            --bg-principal: #0d0614;
+            --bg-card: #1a0f29;
+            --dourado: #d4af37;
+            --roxo-neon: #8a2be2;
+            --texto: #f5f0fa;
+        }
+
+        body {
+            background-color: var(--bg-principal);
+            color: var(--texto);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1f0b35, #0d0614);
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 3px solid var(--dourado);
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .logo-app {
+            width: 24px;
+            height: 24px;
+            background: var(--dourado);
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+            box-shadow: 0 0 8px var(--dourado);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+            color: var(--dourado);
+            text-shadow: 0 0 10px var(--dourado);
+            letter-spacing: 2px;
+        }
+
+        nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--bg-card);
+            border-top: 2px solid var(--dourado);
+            display: none;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: var(--texto);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        nav button.active {
+            color: var(--dourado);
+            text-shadow: 0 0 5px var(--dourado);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: 20px 0 80px 0;
+            display: none;
+        }
+
+        .container.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--roxo-neon);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .podio-rei {
+            text-align: center;
+            background: linear-gradient(180deg, #2d1b4e, #1a0f29);
+            border: 2px solid var(--dourado);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            color: var(--dourado);
+            margin-top: 0;
+            border-bottom: 1px solid var(--roxo-neon);
+            padding-bottom: 5px;
+            font-size: 17px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            background-color: #0d0614;
+            border: 1px solid var(--dourado);
+            color: var(--texto);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button.btn-ygo {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #8a2be2, #4b0082);
+            border: 1px solid var(--dourado);
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <div class="logo-app"></div>
+            <h1>⚡ REINO DOS DUELISTAS ⚡</h1>
+        </div>
+    </header>
+    <!-- TELA INICIAL: LOGIN / CADASTRO -->
+    <div id="aba-auth" class="container active">
+        <div class="card">
+            <h2>🔑 Entrar no Reino</h2>
+            <input type="text" id="login-nome" placeholder="Nome do Duelista">
+            <input type="password" id="login-senha" placeholder="Senha">
+            <button class="btn-ygo" onclick="fazerLogin()">Acessar Conta</button>
+        </div>
+
+        <div class="card">
+            <h2>📝 Novo Registro (+2 Estrelas)</h2>
+            <input type="text" id="reg-nome" placeholder="Nome do Duelista">
+            <input type="password" id="reg-senha" placeholder="Senha Secreta">
+            <input type="text" id="reg-deck" placeholder="Seu Deck Principal">
+            <button class="btn-ygo" onclick="criarConta()">Registrar e Iniciar</button>
+        </div>
+    </div>
+
+    <!-- ABA 1: RANKING -->
+    <div id="aba-ranking" class="container">
+        <div class="podio-rei">
+            <h2 style="border:none; margin:0;">👑 REI DOS JOGOS 👑</h2>
+            <div id="rei-nome" style="font-size: 22px; font-weight: bold; color: var(--dourado); margin-top: 5px;">Aguardando Duelos...</div>
+            <div id="rei-deck" style="font-size: 14px; color: #aaa;"></div>
+        </div>
+        
+        <div class="card">
+            <h2>📊 Classificação Geral</h2>
+            <div id="lista-ranking">
+                <p style="text-align: center; color: #aaa;">Nenhum duelo registrado ainda.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA 2: PERFIL -->
+    <div id="aba-perfil" class="container">
+        <div class="card">
+            <h2>👤 Seu Perfil de Duelista</h2>
+            <div id="dados-perfil"></div>
+        </div>
+    </div>
+
+    <!-- ABA 3: ARENA -->
+    <div id="aba-arena" class="container">
+        <div class="card">
+            <h2>⚔️ Arena de Desafios</h2>
+            <p style="font-size: 13px; color: #aaa;">Os oponentes disponíveis e apostas de estrelas aparecerão aqui.</p>
+        </div>
+    </div>
+
+    <!-- ABA 4: SALA DO JUIZ -->
+    <div id="aba-juiz" class="container">
+        <div class="card">
+            <h2>⚖️ Painel de Controle do Juiz</h2>
+            <p style="font-size: 13px; color: #aaa;">Área reservada para o administrador resolver conflitos de resultados.</p>
+        </div>
+    </div>
+
+    <!-- BARRA DE MENU INFERIOR -->
+    <nav id="menu-principal">
+        <button class="active" onclick="mudarAba('aba-ranking', this)">⭐ Rank</button>
+        <button onclick="mudarAba('aba-perfil', this)">👤 Perfil</button>
+        <button onclick="mudarAba('aba-arena', this)">⚔️ Arena</button>
+        <button id="btn-aba-juiz" style="display:none;" onclick="mudarAba('aba-juiz', this)">⚖️ Juiz</button>
+    </nav>
+
+    <!-- CONEXÃO COM O SERVIDOR DO FIREBASE -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+
+    <script>
+        // Banco de dados em tempo real ativo e configurado para o seu torneio
+        const firebaseConfig = {
+            databaseURL: "https://firebaseio.com"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let usuarioLogado = null;
+
+        function mudarAba(idAba, botao) {
+            if (!usuarioLogado) return;
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(idAba).classList.add('active');
+            botao.classList.add('active');
+        }
+
+        function criarConta() {
+            let nome = document.getElementById('reg-nome').value.trim();
+            let senha = document.getElementById('reg-senha').value.trim();
+            let deck = document.getElementById('reg-deck').value.trim();
+
+            if (nome === "" || senha === "" || deck === "") {
+                alert("Preencha todos os campos para criar sua conta.");
+                return;
+            }
+
+            db.ref('duelistas/' + nome).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    alert("Este nome de duelista já foi registrado!");
+                } else {
+                    db.ref('duelistas/' + nome).set({
+                        senha: senha,
+                        deck: deck,
+                        estrelas: 2,
+                        vitorias: 0,
+                        derrotas: 0,
+                        empates: 0,
+                        duelos: 0,
+                        winrate: 0
+                    }).then(() => {
+                        alert("Conta criada! Você ganhou 2 Estrelas Iniciais.");
+                        autenticarUsuario(nome);
+                    });
+                }
+            }).catch((error) => {
+                alert("Erro: " + error.message);
+            });
+        }
+
+        function fazerLogin() {
+            let nome = document.getElementById('login-nome').value.trim();
+            let senha = document.getElementById('login-senha').value.trim();
+
+            if (nome === "" || senha === "") {
+                alert("Por favor, preencha nome e senha.");
+                return;
+            }
+
+            db.ref('duelistas/' + nome).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    let dados = snapshot.val();
+                    if (dados.senha === senha) {
+                        autenticarUsuario(nome);
+                    } else {
+                        alert("Senha incorreta!");
+                    }
+                } else {
+                    alert("Duelista não encontrado! Crie uma conta abaixo.");
+                }
+            }).catch((error) => {
+                alert("Erro: " + error.message);
+            });
+        }
+
+        function autenticarUsuario(nome) {
+            usuarioLogado = nome;
+            
+            document.getElementById('aba-auth').classList.remove('active');
+            document.getElementById('aba-ranking').classList.add('active');
+            document.getElementById('menu-principal').style.display = 'flex';
+            
+            if (nome.toLowerCase() === 'juiz') {
+                document.getElementById('btn-aba-juiz').style.display = 'flex';
+            }
+            
+            db.ref('duelistas/' + nome).on('value', (snapshot) => {
+                let dados = snapshot.val();
+                if(dados) {
+                    document.getElementById('dados-perfil').innerHTML = `
+                        <p><strong>Duelista:</strong> ${nome}</p>
+                        <p><strong>Deck Atual:</strong> ${dados.deck}</p>
+                        <p><strong>Saldo de Estrelas:</strong> ⭐ ${dados.estrelas}</p>
+                        <p><strong>Histórico:</strong> ${dados.vitorias}V / ${dados.derrotas}D / ${dados.empates}E</p>
+                    `;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
