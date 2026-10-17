@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reino dos Duelistas</title>
+    <title>Reino dos Duelistas Online</title>
     <style>
         :root {
             --bg-principal: #0d0614;
@@ -31,21 +31,6 @@
             padding: 15px 0;
             border-bottom: 3px solid var(--dourado);
             box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
-        }
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .logo-app {
-            width: 24px;
-            height: 24px;
-            background: var(--dourado);
-            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
-            box-shadow: 0 0 8px var(--dourado);
         }
 
         header h1 {
@@ -149,11 +134,9 @@
 <body>
 
     <header>
-        <div class="header-content">
-            <div class="logo-app"></div>
-            <h1>⚡ REINO DOS DUELISTAS ⚡</h1>
-        </div>
+        <h1>⚡ REINO DOS DUELISTAS ONLINE ⚡</h1>
     </header>
+
     <!-- TELA INICIAL: LOGIN / CADASTRO -->
     <div id="aba-auth" class="container active">
         <div class="card">
@@ -171,7 +154,6 @@
             <button class="btn-ygo" onclick="criarConta()">Registrar e Iniciar</button>
         </div>
     </div>
-
     <!-- ABA 1: RANKING -->
     <div id="aba-ranking" class="container">
         <div class="podio-rei">
@@ -183,7 +165,7 @@
         <div class="card">
             <h2>📊 Classificação Geral</h2>
             <div id="lista-ranking">
-                <p style="text-align: center; color: #aaa;">Nenhum duelo registrado ainda.</p>
+                <p style="text-align: center; color: #aaa;">Sincronizando banco de dados online...</p>
             </div>
         </div>
     </div>
@@ -220,91 +202,76 @@
         <button id="btn-aba-juiz" style="display:none;" onclick="mudarAba('aba-juiz', this)">⚖️ Juiz</button>
     </nav>
 
-    <!-- SEÇÃO CORRIGIDA DE CONEXÃO COM O SERVIDOR -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
+    <!-- MOTORES MODERNOS DO FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://gstatic.com";
+        import { getDatabase, ref, set, get, onValue } from "https://gstatic.com";
 
-    <script>
-        let db;
-        let usuarioLogado = null;
-
-        // Força o app a esperar o carregamento total das bibliotecas do Google antes de iniciar
-        window.onload = function() {
-            const firebaseConfig = {
-                databaseURL: "https://firebaseio.com"
-            };
-            
-            // Inicialização segura
-            if (typeof firebase !== 'undefined') {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
-                console.log("Conectado com sucesso ao Reino dos Duelistas!");
-            } else {
-                alert("Erro crítico: As regras do Reino não foram carregadas pela rede. Atualize a página.");
-            }
+        // Suas chaves de acesso oficiais vinculadas com segurança
+        const firebaseConfig = {
+            apiKey: "AIzaSyARfuyGYEDya2PmD46vlW17a_CQTSPiFTE",
+            authDomain: "://firebaseapp.com",
+            projectId: "torneio-ygo-95b34",
+            storageBucket: "torneio-ygo-95b34.firebasestorage.app",
+            messagingSenderId: "237931092742",
+            appId: "1:237931092742:web:9129c4a4273143ab39dc87",
+            databaseURL: "https://firebaseio.com"
         };
 
-        function mudarAba(idAba, botao) {
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let usuarioLogado = null;
+
+        window.mudarAba = (idAba, botao) => {
             if (!usuarioLogado) return;
             document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
             document.getElementById(idAba).classList.add('active');
             botao.classList.add('active');
-        }
+        };
 
-        function criarConta() {
+        window.criarConta = () => {
             let nome = document.getElementById('reg-nome').value.trim();
             let senha = document.getElementById('reg-senha').value.trim();
             let deck = document.getElementById('reg-deck').value.trim();
 
-            if (!db) {
-                alert("Aguardando conexão com o servidor... Tente novamente em 2 segundos.");
-                return;
-            }
-
             if (nome === "" || senha === "" || deck === "") {
-                alert("Preencha todos os campos para criar sua conta.");
+                alert("Preencha todos os campos.");
                 return;
             }
 
-            db.ref('duelistas/' + nome).once('value').then((snapshot) => {
+            const playerRef = ref(db, 'duelistas/' + nome);
+            get(playerRef).then((snapshot) => {
                 if (snapshot.exists()) {
-                    alert("Este nome de duelista já foi registrado!");
+                    alert("Este nome de duelista já existe!");
                 } else {
-                    db.ref('duelistas/' + nome).set({
+                    set(playerRef, {
                         senha: senha,
                         deck: deck,
                         estrelas: 2,
                         vitorias: 0,
                         derrotas: 0,
                         empates: 0,
-                        duelos: 0,
-                        winrate: 0
+                        duelos: 0
                     }).then(() => {
-                        alert("Conta criada! Você ganhou 2 Estrelas Iniciais.");
+                        alert("Conta criada com 2 estrelas!");
                         autenticarUsuario(nome);
                     });
                 }
-            }).catch((error) => {
-                alert("Erro: " + error.message);
             });
-        }
+        };
 
-        function fazerLogin() {
+        window.fazerLogin = () => {
             let nome = document.getElementById('login-nome').value.trim();
             let senha = document.getElementById('login-senha').value.trim();
 
-            if (!db) {
-                alert("Aguardando conexão com o servidor... Tente novamente em 2 segundos.");
-                return;
-            }
-
             if (nome === "" || senha === "") {
-                alert("Por favor, preencha nome e senha.");
+                alert("Preencha nome e senha.");
                 return;
             }
 
-            db.ref('duelistas/' + nome).once('value').then((snapshot) => {
+            get(ref(db, 'duelistas/' + nome)).then((snapshot) => {
                 if (snapshot.exists()) {
                     let dados = snapshot.val();
                     if (dados.senha === senha) {
@@ -313,16 +280,13 @@
                         alert("Senha incorreta!");
                     }
                 } else {
-                    alert("Duelista não encontrado! Crie uma conta abaixo.");
+                    alert("Duelista não encontrado!");
                 }
-            }).catch((error) => {
-                alert("Erro: " + error.message);
             });
-        }
+        };
 
         function autenticarUsuario(nome) {
             usuarioLogado = nome;
-            
             document.getElementById('aba-auth').classList.remove('active');
             document.getElementById('aba-ranking').classList.add('active');
             document.getElementById('menu-principal').style.display = 'flex';
@@ -330,8 +294,8 @@
             if (nome.toLowerCase() === 'juiz') {
                 document.getElementById('btn-aba-juiz').style.display = 'flex';
             }
-            
-            db.ref('duelistas/' + nome).on('value', (snapshot) => {
+
+            onValue(ref(db, 'duelistas/' + nome), (snapshot) => {
                 let dados = snapshot.val();
                 if(dados) {
                     document.getElementById('dados-perfil').innerHTML = `
@@ -346,4 +310,3 @@
     </script>
 </body>
 </html>
-
