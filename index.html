@@ -202,28 +202,36 @@
         <button id="btn-aba-juiz" style="display:none;" onclick="mudarAba('aba-juiz', this)">⚖️ Juiz</button>
     </nav>
 
-    <!-- MOTORES MODERNOS DO FIREBASE -->
-    <script type="module">
-        import { initializeApp } from "https://gstatic.com";
-        import { getDatabase, ref, set, get, onValue } from "https://gstatic.com";
+    <!-- MOTORES DO FIREBASE VIA REDE GLOBAL UNIFICADA (IMUNE A ERROS DE CORS) -->
+    <script src="https://cloudflare.com"></script>
+    <script src="https://cloudflare.com"></script>
 
-        // Suas chaves de acesso oficiais vinculadas com segurança
-        const firebaseConfig = {
-            apiKey: "AIzaSyARfuyGYEDya2PmD46vlW17a_CQTSPiFTE",
-            authDomain: "://firebaseapp.com",
-            projectId: "torneio-ygo-95b34",
-            storageBucket: "torneio-ygo-95b34.firebasestorage.app",
-            messagingSenderId: "237931092742",
-            appId: "1:237931092742:web:9129c4a4273143ab39dc87",
-            databaseURL: "https://firebaseio.com"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
+    <script>
+        let db;
         let usuarioLogado = null;
 
-        window.mudarAba = (idAba, botao) => {
+        // Aguarda a biblioteca carregar completamente no ProBook para evitar erros
+        window.onload = function() {
+            const firebaseConfig = {
+                apiKey: "AIzaSyARfuyGYEDya2PmD46vlW17a_CQTSPiFTE",
+                authDomain: "://firebaseapp.com",
+                projectId: "torneio-ygo-95b34",
+                storageBucket: "torneio-ygo-95b34.firebasestorage.app",
+                messagingSenderId: "237931092742",
+                appId: "1:237931092742:web:9129c4a4273143ab39dc87",
+                databaseURL: "https://firebaseio.com"
+            };
+
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                console.log("Reino dos Duelistas conectado online com sucesso!");
+            } else {
+                alert("Erro de conexão com o servidor. Recarregue a página.");
+            }
+        };
+
+        window.mudarAba = function(idAba, botao) {
             if (!usuarioLogado) return;
             document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -231,22 +239,19 @@
             botao.classList.add('active');
         };
 
-        window.criarConta = () => {
+        window.criarConta = function() {
             let nome = document.getElementById('reg-nome').value.trim();
             let senha = document.getElementById('reg-senha').value.trim();
             let deck = document.getElementById('reg-deck').value.trim();
 
-            if (nome === "" || senha === "" || deck === "") {
-                alert("Preencha todos os campos.");
-                return;
-            }
+            if (!db) return alert("Aguardando o servidor...");
+            if (nome === "" || senha === "" || deck === "") return alert("Preencha todos os campos.");
 
-            const playerRef = ref(db, 'duelistas/' + nome);
-            get(playerRef).then((snapshot) => {
+            db.ref('duelistas/' + nome).once('value').then((snapshot) => {
                 if (snapshot.exists()) {
                     alert("Este nome de duelista já existe!");
                 } else {
-                    set(playerRef, {
+                    db.ref('duelistas/' + nome).set({
                         senha: senha,
                         deck: deck,
                         estrelas: 2,
@@ -262,16 +267,14 @@
             });
         };
 
-        window.fazerLogin = () => {
+        window.fazerLogin = function() {
             let nome = document.getElementById('login-nome').value.trim();
             let senha = document.getElementById('login-senha').value.trim();
 
-            if (nome === "" || senha === "") {
-                alert("Preencha nome e senha.");
-                return;
-            }
+            if (!db) return alert("Aguardando o servidor...");
+            if (nome === "" || senha === "") return alert("Preencha nome e senha.");
 
-            get(ref(db, 'duelistas/' + nome)).then((snapshot) => {
+            db.ref('duelistas/' + nome).once('value').then((snapshot) => {
                 if (snapshot.exists()) {
                     let dados = snapshot.val();
                     if (dados.senha === senha) {
@@ -295,7 +298,7 @@
                 document.getElementById('btn-aba-juiz').style.display = 'flex';
             }
 
-            onValue(ref(db, 'duelistas/' + nome), (snapshot) => {
+            db.ref('duelistas/' + nome).on('value', (snapshot) => {
                 let dados = snapshot.val();
                 if(dados) {
                     document.getElementById('dados-perfil').innerHTML = `
@@ -310,3 +313,4 @@
     </script>
 </body>
 </html>
+
