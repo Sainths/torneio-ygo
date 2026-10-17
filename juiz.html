@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Juiz</title>
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #150929 0%, #2c1a13 100%); color: #f0e6d2; margin: 0; padding: 20px; text-align: center; }
+        h2, h3 { color: #ffcc00; text-shadow: 0 0 8px rgba(255,204,0,0.4); }
+        .bloco-admin { background: rgba(44, 26, 19, 0.9); border: 2px solid #5a3d28; padding: 20px; border-radius: 8px; max-width: 480px; margin: 20px auto; text-align: left; }
+        textarea, input, select { width: 92%; padding: 10px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #5a3d28; background: #150929; color: white; }
+        button { width: 100%; padding: 12px; background: #ffcc00; color: #150929; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; font-size: 15px; }
+        button:hover { background: #e6b800; }
+        .btn-vitoria { background-color: #00ff66; color: black; margin-top: 5px; font-size: 13px; padding: 6px; }
+        .chave-partida { background: #221430; border-left: 4px solid #ff3333; padding: 10px; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <h2>⚖️ CONTROLADOR DO TORNEIO</h2>
+
+    <!-- SEÇÃO 1: MURAL DE AVISOS -->
+    <div class="bloco-admin">
+        <h3>📢 Enviar Aviso Geral</h3>
+        <textarea id="textoAviso" placeholder="Digite uma mensagem para todos os duelistas (Ex: Rodada 2 liberada!)..."></textarea>
+        <button onclick="enviarAviso()">Disparar Alerta</button>
+    </div>
+
+    <!-- SEÇÃO 2: GERENCIADOR MATA-MATA -->
+    <div class="bloco-admin">
+        <h3>🏆 Campeonato Mata-Mata</h3>
+        <p style="font-size:13px; color:#aaa;">Crie e avance as rodadas do torneio de eliminação direta.</p>
+        <button style="background:#00ff66; color:black; margin-bottom:15px;" onclick="gerarChavesMataMata()">🔒 Fechar Inscrições e Criar Chaves</button>
+        
+        <h4>Partidas Atuais:</h4>
+        <div id="containerChaves">
+            <p style="color:#aaa; font-size:14px;">Nenhuma chave gerada para a rodada atual.</p>
+        </div>
+    </div>
+
+    <!-- O link para o motor lógico do juiz -->
+    <script src="funcoes_juiz.js"></script>
+</body>
+</html>

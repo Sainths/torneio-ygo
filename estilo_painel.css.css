@@ -1,0 +1,24 @@
+body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #150929 0%, #2c1a13 100%); color: #f0e6d2; margin: 0; padding: 15px; text-align: center; }
+nav { display: flex; justify-content: space-around; background: rgba(44, 26, 19, 0.9); padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #5a3d28; }
+nav button { background: none; border: none; color: #aaa; font-size: 15px; cursor: pointer; font-weight: bold; }
+nav button.ativo { color: #ffcc00; border-bottom: 2px solid #ffcc00; text-shadow: 0 0 5px #ffcc00; }
+.aba { display: none; padding: 10px; }
+.aba.ativa { display: block; }
+.podio-container { display: flex; justify-content: center; align-items: flex-end; gap: 12px; margin: 20px auto; max-width: 450px; }
+.podio-lugar { background: rgba(44, 26, 19, 0.85); border: 2px solid #5a3d28; border-radius: 8px; padding: 12px; text-align: center; flex: 1; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+.top1 { order: 2; border: 3px solid #ffcc00; box-shadow: 0 0 20px rgba(255, 204, 0, 0.4); transform: scale(1.08); background: linear-gradient(180deg, #2b114c 0%, #2c1a13 100%); }
+.top2 { order: 1; border: 2px solid #cccccc; }
+.top3 { order: 3; border: 2px solid #cd7f32; }
+.podio-avatar { width: 55px; height: 55px; border-radius: 50%; border: 2px solid #ffcc00; object-fit: cover; background: #333; }
+.top1 .podio-avatar { width: 70px; height: 70px; }
+.titulo-rei { background: #ffcc00; color: #150929; font-weight: bold; font-size: 10px; padding: 2px 5px; border-radius: 4px; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
+.tabela-container { width: 100%; overflow-x: auto; border: 1px solid #5a3d28; border-radius: 8px; background-color: rgba(31, 20, 40, 0.9); max-width: 550px; margin: 0 auto; }
+table { width: 100%; border-collapse: collapse; min-width: 450px; }
+th, td { padding: 12px; text-align: center; border-bottom: 1px solid #3d251c; font-size: 14px; }
+th { background-color: #1a0b36; color: #ffcc00; }
+.avatar-tabela { width: 30px; height: 30px; border-radius: 50%; vertical-align: middle; margin-right: 8px; }
+.card-box { background: rgba(44, 26, 19, 0.9); border: 2px solid #5a3d28; padding: 20px; border-radius: 8px; max-width: 450px; margin: 15px auto; }
+input, select { width: 90%; padding: 10px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #5a3d28; background: #150929; color: white; }
+.btn-salvar { background-color: #ffcc00; color: #150929; border: none; padding: 10px 20px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 95%; }
+.card-duelista { background-color: #1f1f1f; border: 1px solid #333; padding: 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.btn-desafiar { background-color: #ff3333; color: white; border: none; padding: 8px 12px; font-weight: bold; border-radius: 4px; cursor: pointer; }
