@@ -115,7 +115,7 @@
   </div>
   <script>
     // IMPORTANTE: Insira aqui a URL gerada na Nova Implantação do seu Google Apps Script
-    const API_URL = "https://script.google.com/macros/s/AKfycbwZycRQP98akriCiaugSvru0dPqbrJN3wtjK7mCHdzmB0LURu8341YxpxtXs2EDmf0T/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzuoapGqQebv9swdVCGkvu5KbLpDeEXh2S36jG8kAnQ81YSY0wjAk-HB9eR_c838qo/exec";
 
     window.onload = function() {
       verificarSessaoSalva();
@@ -182,22 +182,25 @@
       }
     }
 
-    async function verificarSessaoSalva() {
+        async function verificarSessaoSalva() {
       const tokenSalvo = localStorage.getItem('ygo_token');
       if(!tokenSalvo) return;
 
       const resultado = await consumirAPI({ action: "autologin", token: tokenSalvo });
 
       if(resultado.status === "sucesso") {
+        // Força sumir as duas telas de autenticação imediatamente
         document.getElementById('loginSection').classList.add('hidden');
         document.getElementById('cadastroSection').classList.add('hidden');
+        
+        // Exibe o painel principal do aplicativo
         document.getElementById('appSection').classList.remove('hidden');
         
+        // Preenche as informações na tela
         document.getElementById('userNome').innerText = resultado.nome;
         document.getElementById('userDeck').innerText = "Deck: " + resultado.deck;
         document.getElementById('userEstrelas').innerText = "⭐ ".repeat(resultado.estrelas || 2);
         
-        // Preenche os campos de edição com os dados atuais
         document.getElementById('editNome').value = resultado.nome;
         document.getElementById('editDeck').value = resultado.deck;
         document.getElementById('editSenha').value = "";
