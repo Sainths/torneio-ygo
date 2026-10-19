@@ -82,12 +82,23 @@
       <div class="toggle-link" onclick="alternarTelas(true)">Já tem conta? Fazer Login</div>
     </div>
 
-    <!-- TELA POPUP DE CONVITE RECEBIDO -->
+     <!-- TELA POPUP DE CONVITE RECEBIDO (ATUALIZADA) -->
     <div id="convitePopup" class="popup-box hidden">
       <h3 style="margin-bottom: 5px;">⚠️ Desafio Recebido!</h3>
-      <p id="conviteTexto" style="margin: 5px 0 15px 0; font-size: 15px;"></p>
+      <p id="conviteTexto" style="margin: 5px 0 5px 0; font-size: 15px;"></p>
+      <p id="conviteAposta" style="margin: 0 0 15px 0; font-size: 14px; font-weight: bold; color: #ffd700;"></p>
       <button class="btn-accept" id="btnAceitar">Aceitar</button>
       <button class="btn-deny" id="btnRecusar">Recusar</button>
+    </div>
+
+    <!-- TELA DE DUELO ATIVO (VERSUS) -->
+    <div id="versusSection" class="versus-arena hidden">
+      <div class="versus-title">💥 DUELO ATIVO 💥</div>
+      <h3 id="versusJogadores" style="color: #fff; margin: 15px 0;">Você VS Oponente</h3>
+      <p id="versusModo" style="color: #ffd700; font-weight: bold; font-size: 14px; margin-bottom: 15px;"></p>
+      <button class="duel-btn-vitoria" onclick="votarDuelo('Vitoria')">Ganhei</button>
+      <button class="duel-btn-empate" onclick="votarDuelo('Empate')">Empate</button>
+      <button class="duel-btn-derrota" onclick="votarDuelo('Derrota')">Perdi</button>
     </div>
 
     <!-- TELA DE DUELO ATIVO (VERSUS) -->
@@ -131,21 +142,27 @@
           <div class="podium-spot" id="podium1" style="order: 2; margin-bottom: 10px;"><div class="podium-crown">👑</div><div class="podium-name" style="color:#ffd700;">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
           <div class="podium-spot" id="podium3" style="order: 3;"><div class="podium-crown">🥉</div><div class="podium-name">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
         </div>
+        <!-- TABELA DE RANKING COM ESPAÇO PARA APOSTA -->
         <div class="table-container">
           <table>
-            <thead><tr><th>#</th><th>Nome</th><th>Deck</th><th>⭐</th><th>D</th><th>V</th><th>D</th><th>E</th><th>Ação</th></tr></thead>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Deck</th>
+                <th>⭐</th>
+                <th>V/D/E</th>
+                <th>Apostar ⭐</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
             <tbody id="rankingBody"></tbody>
           </table>
         </div>
-      </div>
-    </div>
 
-    <div id="statusMsg" class="status-msg"></div>
-  </div>
-  
   <script>
     // IMPORTANTE: Insira aqui a URL gerada na Nova Implantação do seu Google Apps Script
-    const API_URL = "https://script.google.com/macros/s/AKfycbzA_-YIQ-LRwzy6zKvoSHh6L6KYP-rOMuMmwbn5HghMUXj8TJJwqUHanvtkn-4hV1P0/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbx_EET7_mEhvkEtLp4j8OCEzIMMREAf0zPiICLBCFGvL5Bm0PdCBwb5kjNtBQnye91S/exec";
 
     let MEU_NOME = "";
     let ID_DUELO_ATIVO = null;
@@ -265,7 +282,7 @@
       if(aba === 'ranking') carregarRanking();
     }
 
-    async function carregarRanking() {
+        async function carregarRanking() {
       const res = await consumirAPI({ action: "obterRanking" });
       if(res.status === "sucesso") {
         const ranking = res.ranking;
@@ -278,18 +295,21 @@
         ranking.forEach((player, index) => {
           const row = document.createElement('tr');
           const eMeuPerfil = player.nome === MEU_NOME;
+          
+          // Se for o próprio perfil, desabilita a aposta. Se for oponente, mostra o seletor.
+          const inputApostaHtml = eMeuPerfil ? `<span style="color:#666;">-</span>` : 
+            `<input type="number" id="aposta_${player.nome}" value="0" min="0" style="width:50px; padding:4px; font-size:12px; text-align:center;">`;
+          
           const btnHtml = eMeuPerfil ? `<span style="color:#666;">Você</span>` : 
-            `<button class="btn-duel" onclick="enviarDesafio('${player.nome}')">Desafiar</button>`;
+            `<button class="btn-duel" onclick="prepararDesafio('${player.nome}')">Desafiar</button>`;
 
           row.innerHTML = `
             <td><strong>${index + 1}º</strong></td>
             <td class="col-name" style="${eMeuPerfil?'color:#ff8c00; font-weight:bold;':''}">${player.nome}</td>
             <td class="col-name" style="color: #aaa;">${player.deck}</td>
             <td style="color: #ffd700; font-weight: bold;">${player.estrelas}</td>
-            <td>${player.duelos}</td>
-            <td style="color: #55ff55;">${player.vitorias}</td>
-            <td style="color: #ff5555;">${player.derrotas}</td>
-            <td style="color: #ffff55;">${player.empates}</td>
+            <td><span style="color:#55ff55;">${player.vitorias}</span>/<span style="color:#ff5555;">${player.derrotas}</span>/<span style="color:#ffff55;">${player.empates}</span></td>
+            <td>${inputApostaHtml}</td>
             <td>${btnHtml}</td>
           `;
           tbody.appendChild(row);
@@ -297,26 +317,24 @@
       }
     }
 
-    function atualizarCardPodium(id, player, titulo) {
-      const card = document.getElementById(id);
-      if(player) {
-        card.querySelector('.podium-crown').innerText = id === "podium1" ? "👑" : titulo.split(" ")[0];
-        card.querySelector('.podium-name').innerText = player.nome;
-        card.querySelector('.podium-deck').innerText = player.deck;
-        card.querySelector('.podium-stars').innerText = "⭐ " + player.estrelas;
-      } else {
-        card.querySelector('.podium-crown').innerText = "-";
-        card.querySelector('.podium-name').innerText = "Vazio";
-        card.querySelector('.podium-deck').innerText = "-";
-        card.querySelector('.podium-stars').innerText = "-";
-      }
-    }
-
-    async function enviarDesafio(nomeOponente) {
-      exibirMensagem(`Desafiando ${nomeOponente}... Enviando convite.`);
-      const res = await consumirAPI({ action: "enviarDesafio", desafiante: MEU_NOME, oponente: nomeOponente });
-      if(res.status === "sucesso") {
-        exibirMensagem("Convite enviado! Aguardando oponente...", false);
+    async function prepararDesafio(nomeOponente) {
+      const input = document.getElementById(`aposta_${nomeOponente}`);
+      const valorAposta = parseInt(input.value) || 0;
+      
+      if(valorAposta < 0) return exibirMensagem("A aposta não pode ser negativa!");
+      
+      let msgConfirmacao = valorAposta === 0 ? 
+        `Deseja enviar um Duelo Tradicional para ${nomeOponente}?` : 
+        `Deseja desafiar ${nomeOponente} apostando ${valorAposta} Estrela(s)?`;
+        
+      if(confirm(msgConfirmacao)) {
+        exibirMensagem(`Enviando desafio para ${nomeOponente}...`);
+        const res = await consumirAPI({ action: "enviarDesafio", desafiante: MEU_NOME, oponente: nomeOponente, aposta: valorAposta });
+        if(res.status === "sucesso") {
+          exibirMensagem("Desafio enviado! Aguardando oponente...", false);
+        } else {
+          exibirMensagem(res.message);
+        }
       }
     }
 
@@ -326,7 +344,15 @@
       
       if(res.status === "convite") {
         ID_DUELO_ATIVO = res.dueloId;
-        document.getElementById('conviteTexto').innerText = `${res.desafiante} está te desafiando! Aceita?`;
+        document.getElementById('conviteTexto').innerText = `${res.desafiante} está te desafiando!`;
+        
+        // Distingue visualmente no popup o tipo de duelo recebido
+        if(res.aposta > 0) {
+          document.getElementById('conviteAposta').innerText = `⚔️ MODALIDADE: APOSTA VALENDO ${res.aposta} ESTRELAS!`;
+        } else {
+          document.getElementById('conviteAposta').innerText = `📜 MODALIDADE: Duelo Tradicional (Normal)`;
+        }
+        
         document.getElementById('convitePopup').classList.remove('hidden');
         document.getElementById('btnAceitar').onclick = () => responderConvite("Aceito");
         document.getElementById('btnRecusar').onclick = () => responderConvite("Recusado");
@@ -346,9 +372,14 @@
     async function responderConvite(resposta) {
       document.getElementById('convitePopup').classList.add('hidden');
       if(!ID_DUELO_ATIVO) return;
-      const res = await consumirAPI({ action: "responderDesafio", dueloId: ID_DUELO_ATIVO, resposta: resposta });
+      
+      // Envia o meuNome para o servidor validar o saldo de estrelas caso eu esteja aceitando uma aposta
+      const res = await consumirAPI({ action: "responderDesafio", dueloId: ID_DUELO_ATIVO, meuNome: MEU_NOME, resposta: resposta });
       if(res.status === "sucesso" && resposta === "Aceito") {
         entrarNaArenaVersus("Em Combate!");
+      } else if (res.status === "erro") {
+        exibirMensagem(res.message); // Exibe erro se o oponente não tiver estrelas para cobrir a aposta
+        ID_DUELO_ATIVO = null;
       } else {
         ID_DUELO_ATIVO = null;
       }
@@ -381,7 +412,22 @@
       ID_DUELO_ATIVO = null;
       document.getElementById('versusSection').classList.add('hidden');
       document.getElementById('appSection').classList.remove('hidden');
-      verificarSessaoSalva();
+      verificarSessaoSalva(); // Atualiza as estrelas atuais na tela do perfil
+    }
+
+    function atualizarCardPodium(id, player, titulo) {
+      const card = document.getElementById(id);
+      if(player) {
+        card.querySelector('.podium-crown').innerText = id === "podium1" ? "👑" : titulo.split(" ")[0];
+        card.querySelector('.podium-name').innerText = player.nome;
+        card.querySelector('.podium-deck').innerText = player.deck;
+        card.querySelector('.podium-stars').innerText = "⭐ " + player.estrelas;
+      } else {
+        card.querySelector('.podium-crown').innerText = "-";
+        card.querySelector('.podium-name').innerText = "Vazio";
+        card.querySelector('.podium-deck').innerText = "-";
+        card.querySelector('.podium-stars').innerText = "-";
+      }
     }
 
     function fazerLogout() {
