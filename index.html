@@ -8,7 +8,7 @@
   <style>
     body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #fff; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; }
     .container { width: 100%; max-width: 450px; background: #1e1e1e; padding: 15px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); border: 1px solid #2a2a2a; align-self: flex-start; }
-    h2, h3 { text-align: center; color: #ff8c00; margin-top: 0; }
+    h2, h3, h4 { text-align: center; color: #ff8c00; margin-top: 0; }
     .form-group { margin-bottom: 12px; }
     label { display: block; margin-bottom: 4px; color: #b3b3b3; font-size: 13px; }
     input { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 6px; color: #fff; box-sizing: border-box; font-size: 15px; }
@@ -18,16 +18,16 @@
     .toggle-link { text-align: center; margin-top: 12px; color: #ff8c00; cursor: pointer; font-size: 13px; }
     .hidden { display: none !important; }
     
-    /* ABAS DE NAVEGAÇÃO */
+    /* ABAS */
     .tabs { display: flex; margin-bottom: 15px; background: #252525; border-radius: 6px; padding: 3px; }
     .tab-btn { flex: 1; padding: 8px; text-align: center; background: none; border: none; color: #aaa; cursor: pointer; font-size: 14px; font-weight: bold; border-radius: 4px; }
     .tab-btn.active { background: #ff8c00; color: #fff; }
 
-    /* CENTRAL DO DUELISTA */
+    /* PERFIL */
     .profile-card { text-align: center; background: #252525; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px; }
     .stars { color: #ffd700; font-size: 20px; margin: 8px 0; }
 
-    /* PODIO DE DESTAQUES (TOP 3) */
+    /* PODIO TOP 3 */
     .podium { display: flex; justify-content: space-around; align-items: flex-end; margin-bottom: 20px; background: #252525; padding: 10px; border-radius: 8px; border: 1px solid #333; min-height: 120px; }
     .podium-spot { text-align: center; width: 30%; font-size: 12px; }
     .podium-crown { font-size: 22px; line-height: 1; margin-bottom: -2px; animation: float 2s infinite ease-in-out; }
@@ -36,13 +36,26 @@
     .podium-deck { color: #aaa; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .podium-stars { color: #ffd700; font-weight: bold; font-size: 11px; }
 
-    /* TABELA DE RANKING */
+    /* RANKING & BOTOES DESAFIAR */
     .table-container { width: 100%; overflow-x: auto; background: #1e1e1e; }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
-    th, td { padding: 8px 6px; border-bottom: 1px solid #2a2a2a; white-space: nowrap; }
+    th, td { padding: 8px 6px; border-bottom: 1px solid #2a2a2a; white-space: nowrap; vertical-align: middle; }
     th { background: #252525; color: #ff8c00; font-weight: bold; }
     tr:hover { background: #252525; }
-    .col-name { max-width: 80px; overflow: hidden; text-overflow: ellipsis; }
+    .col-name { max-width: 75px; overflow: hidden; text-overflow: ellipsis; }
+    .btn-duel { padding: 4px 8px; font-size: 11px; background: #ff8c00; border-radius: 4px; margin: 0; width: auto; display: inline-block; }
+
+    /* POPUP DE CONVITE */
+    .popup-box { background: #292929; border: 2px solid #ff8c00; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 15px; }
+    .btn-accept { background: #22c55e; margin-right: 5px; width: 45%; display: inline-block; }
+    .btn-deny { background: #ef4444; width: 45%; display: inline-block; }
+
+    /* TELA VERSUS FACE A FACE */
+    .versus-arena { text-align: center; padding: 20px; background: radial-gradient(circle, #2a1f10 0%, #1a1a1a 100%); border: 2px solid #ff8c00; border-radius: 12px; }
+    .versus-title { font-size: 28px; font-weight: bold; color: #ff8c00; margin: 10px 0; text-shadow: 0 0 10px rgba(255,140,0,0.5); }
+    .duel-btn-vitoria { background: #22c55e; margin-top: 15px; }
+    .duel-btn-empate { background: #eab308; margin-top: 10px; }
+    .duel-btn-derrota { background: #ef4444; margin-top: 10px; }
 
     .status-msg { text-align: center; color: #ff5555; margin-top: 10px; font-size: 13px; min-height: 18px; }
   </style>
@@ -69,7 +82,25 @@
       <div class="toggle-link" onclick="alternarTelas(true)">Já tem conta? Fazer Login</div>
     </div>
 
-    <!-- APP PRINCIPAL (SÓ APARECE PÓS-LOGIN) -->
+    <!-- TELA POPUP DE CONVITE RECEBIDO -->
+    <div id="convitePopup" class="popup-box hidden">
+      <h3 style="margin-bottom: 5px;">⚠️ Desafio Recebido!</h3>
+      <p id="conviteTexto" style="margin: 5px 0 15px 0; font-size: 15px;"></p>
+      <button class="btn-accept" id="btnAceitar">Aceitar</button>
+      <button class="btn-deny" id="btnRecusar">Recusar</button>
+    </div>
+
+    <!-- TELA DE DUELO ATIVO (VERSUS) -->
+    <div id="versusSection" class="versus-arena hidden">
+      <div class="versus-title">💥 DUELO ATIVO 💥</div>
+      <h3 id="versusJogadores" style="color: #fff; margin: 15px 0;">Você VS Oponente</h3>
+      <p style="color: #aaa; font-size: 14px;">Selecione o seu resultado honesto:</p>
+      <button class="duel-btn-vitoria" onclick="votarDuelo('Vitoria')">Ganhei (+3 ⭐)</button>
+      <button class="duel-btn-empate" onclick="votarDuelo('Empate')">Empate (+1 ⭐)</button>
+      <button class="duel-btn-derrota" onclick="votarDuelo('Derrota')">Perdi (+1 ⭐)</button>
+    </div>
+
+    <!-- APP PRINCIPAL (SÓ APARECE PÓS-LOGIN E SE NÃO ESTIVER EM VERSUS) -->
     <div id="appSection" class="hidden">
       <div class="tabs">
         <button class="tab-btn active" id="btnTabPerfil" onclick="mudarAba('perfil')">Meu Perfil</button>
@@ -84,7 +115,7 @@
           <div class="stars" id="userEstrelas"></div>
         </div>
         <div style="background: #252525; padding: 12px; border-radius: 8px; border: 1px solid #333;">
-          <h4 style="margin: 0 0 10px 0; color: #ff8c00; text-align: center;">Editar Dados</h4>
+          <h4>Editar Dados</h4>
           <div class="form-group"><label>Alterar Nome</label><input type="text" id="editNome"></div>
           <div class="form-group"><label>Alterar Deck</label><input type="text" id="editDeck"></div>
           <div class="form-group"><label>Alterar Senha</label><input type="password" id="editSenha" placeholder="Nova senha"></div>
@@ -95,16 +126,14 @@
 
       <!-- ABA RANKING GERAL -->
       <div id="tabRanking" class="hidden">
-        <!-- PÓDIO TOP 3 -->
         <div class="podium">
           <div class="podium-spot" id="podium2" style="order: 1;"><div class="podium-crown">🥈</div><div class="podium-name">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
           <div class="podium-spot" id="podium1" style="order: 2; margin-bottom: 10px;"><div class="podium-crown">👑</div><div class="podium-name" style="color:#ffd700;">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
           <div class="podium-spot" id="podium3" style="order: 3;"><div class="podium-crown">🥉</div><div class="podium-name">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
         </div>
-        <!-- TABELA DE RANKING -->
         <div class="table-container">
           <table>
-            <thead><tr><th>#</th><th>Nome</th><th>Deck</th><th>⭐</th><th>D</th><th>V</th><th>D</th><th>E</th><th>WR</th></tr></thead>
+            <thead><tr><th>#</th><th>Nome</th><th>Deck</th><th>⭐</th><th>D</th><th>V</th><th>D</th><th>E</th><th>Ação</th></tr></thead>
             <tbody id="rankingBody"></tbody>
           </table>
         </div>
@@ -113,9 +142,14 @@
 
     <div id="statusMsg" class="status-msg"></div>
   </div>
+  
   <script>
     // IMPORTANTE: Insira aqui a URL gerada na Nova Implantação do seu Google Apps Script
-    const API_URL = "https://script.google.com/macros/s/AKfycbzuoapGqQebv9swdVCGkvu5KbLpDeEXh2S36jG8kAnQ81YSY0wjAk-HB9eR_c838qo/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzA_-YIQ-LRwzy6zKvoSHh6L6KYP-rOMuMmwbn5HghMUXj8TJJwqUHanvtkn-4hV1P0/exec";
+
+    let MEU_NOME = "";
+    let ID_DUELO_ATIVO = null;
+    let LOOP_DESAFIOS = null;
 
     window.onload = function() {
       verificarSessaoSalva();
@@ -134,7 +168,6 @@
     }
 
     async function consumirAPI(dados) {
-      exibirMensagem("Acessando o servidor...");
       try {
         const resposta = await fetch(API_URL, {
           method: 'POST',
@@ -151,143 +184,126 @@
       const nome = document.getElementById('cadNome').value.trim();
       const senha = document.getElementById('cadSenha').value.trim();
       const deck = document.getElementById('cadDeck').value.trim();
-
       if(!nome || !senha || !deck) return exibirMensagem("Preencha todos os campos!");
-
-      const resultado = await consumirAPI({ action: "registrar", nome, senha, deck });
-      
-      if(resultado.status === "sucesso") {
-        localStorage.setItem('ygo_token', resultado.token);
-        exibirMensagem("Cadastro realizado com sucesso!", false);
+      exibirMensagem("Acessando o servidor...");
+      const res = await consumirAPI({ action: "registrar", nome, senha, deck });
+      if(res.status === "sucesso") {
+        localStorage.setItem('ygo_token', res.token);
+        exibirMensagem("Cadastro realizado!", false);
         verificarSessaoSalva();
       } else {
-        exibirMensagem(resultado.message);
+        exibirMensagem(res.message);
       }
     }
 
     async function fazerLogin() {
       const nome = document.getElementById('loginNome').value.trim();
       const senha = document.getElementById('loginSenha').value.trim();
-
       if(!nome || !senha) return exibirMensagem("Preencha usuário e senha!");
-
-      const resultado = await consumirAPI({ action: "login", nome, senha });
-
-      if(resultado.status === "sucesso") {
-        localStorage.setItem('ygo_token', resultado.token);
+      exibirMensagem("Acessando o servidor...");
+      const res = await consumirAPI({ action: "login", nome, senha });
+      if(res.status === "sucesso") {
+        localStorage.setItem('ygo_token', res.token);
         exibirMensagem("Login efetuado!", false);
         verificarSessaoSalva();
       } else {
-        exibirMensagem(resultado.message);
+        exibirMensagem(res.message);
       }
     }
 
-        async function verificarSessaoSalva() {
+    async function verificarSessaoSalva() {
       const tokenSalvo = localStorage.getItem('ygo_token');
       if(!tokenSalvo) return;
-
-      const resultado = await consumirAPI({ action: "autologin", token: tokenSalvo });
-
-      if(resultado.status === "sucesso") {
-        // Força sumir as duas telas de autenticação imediatamente
+      const res = await consumirAPI({ action: "autologin", token: tokenSalvo });
+      if(res.status === "sucesso") {
+        MEU_NOME = res.nome;
         document.getElementById('loginSection').classList.add('hidden');
         document.getElementById('cadastroSection').classList.add('hidden');
-        
-        // Exibe o painel principal do aplicativo
         document.getElementById('appSection').classList.remove('hidden');
         
-        // Preenche as informações na tela
-        document.getElementById('userNome').innerText = resultado.nome;
-        document.getElementById('userDeck').innerText = "Deck: " + resultado.deck;
-        document.getElementById('userEstrelas').innerText = "⭐ ".repeat(resultado.estrelas || 2);
+        document.getElementById('userNome').innerText = res.nome;
+        document.getElementById('userDeck').innerText = "Deck: " + res.deck;
+        document.getElementById('userEstrelas').innerText = "⭐ ".repeat(res.estrelas || 2);
         
-        document.getElementById('editNome').value = resultado.nome;
-        document.getElementById('editDeck').value = resultado.deck;
+        document.getElementById('editNome').value = res.nome;
+        document.getElementById('editDeck').value = res.deck;
         document.getElementById('editSenha').value = "";
-        
         exibirMensagem("");
+
+        if(!LOOP_DESAFIOS) {
+          LOOP_DESAFIOS = setInterval(checarEventosTempoReal, 4000);
+        }
       } else {
         localStorage.removeItem('ygo_token');
       }
     }
-
+    
     async function salvarPerfil() {
       const tokenSalvo = localStorage.getItem('ygo_token');
       const novoNome = document.getElementById('editNome').value.trim();
       const novoDeck = document.getElementById('editDeck').value.trim();
       const novaSenha = document.getElementById('editSenha').value.trim();
-
-      if(!novoNome || !novoDeck) return exibirMensagem("Nome e Deck não podem ficar vazios!");
-
+      if(!novoNome || !novoDeck) return exibirMensagem("Campos vazios não permitidos!");
+      exibirMensagem("Salvando dados...");
       const dados = { action: "editarPerfil", token: tokenSalvo, novoNome, novoDeck };
       if(novaSenha) dados.novaSenha = novaSenha;
-
-      const resultado = await consumirAPI(dados);
-
-      if(resultado.status === "sucesso") {
-        exibirMensagem(resultado.message, false);
-        verificarSessaoSalva(); // Atualiza a tela com as novas informações
+      const res = await consumirAPI(dados);
+      if(res.status === "sucesso") {
+        exibirMensagem(res.message, false);
+        verificarSessaoSalva();
       } else {
-        exibirMensagem(resultado.message);
+        exibirMensagem(res.message);
       }
     }
 
     function mudarAba(aba) {
       document.getElementById('tabPerfil').classList.toggle('hidden', aba !== 'perfil');
       document.getElementById('tabRanking').classList.toggle('hidden', aba !== 'ranking');
-      
       document.getElementById('btnTabPerfil').classList.toggle('active', aba === 'perfil');
       document.getElementById('btnTabRanking').classList.toggle('active', aba === 'ranking');
-      
       exibirMensagem("");
-      if(aba === 'ranking') {
-        carregarRanking();
-      }
+      if(aba === 'ranking') carregarRanking();
     }
 
     async function carregarRanking() {
-      const resultado = await consumirAPI({ action: "obterRanking" });
-
-      if(resultado.status === "sucesso") {
-        const ranking = resultado.ranking;
-        exibirMensagem("", false);
-
-        // 1. ATUALIZAR O PÓDIO (TOP 3)
+      const res = await consumirAPI({ action: "obterRanking" });
+      if(res.status === "sucesso") {
+        const ranking = res.ranking;
         atualizarCardPodium("podium1", ranking[0], "👑 Rei dos Jogos");
         atualizarCardPodium("podium2", ranking[1], "🥈 2º Lugar");
         atualizarCardPodium("podium3", ranking[2], "🥉 3º Lugar");
 
-        // 2. ATUALIZAR A TABELA DO RANKING GERAL
         const tbody = document.getElementById('rankingBody');
         tbody.innerHTML = "";
-
         ranking.forEach((player, index) => {
           const row = document.createElement('tr');
+          const eMeuPerfil = player.nome === MEU_NOME;
+          const btnHtml = eMeuPerfil ? `<span style="color:#666;">Você</span>` : 
+            `<button class="btn-duel" onclick="enviarDesafio('${player.nome}')">Desafiar</button>`;
+
           row.innerHTML = `
             <td><strong>${index + 1}º</strong></td>
-            <td class="col-name">${player.nome}</td>
+            <td class="col-name" style="${eMeuPerfil?'color:#ff8c00; font-weight:bold;':''}">${player.nome}</td>
             <td class="col-name" style="color: #aaa;">${player.deck}</td>
             <td style="color: #ffd700; font-weight: bold;">${player.estrelas}</td>
             <td>${player.duelos}</td>
             <td style="color: #55ff55;">${player.vitorias}</td>
             <td style="color: #ff5555;">${player.derrotas}</td>
             <td style="color: #ffff55;">${player.empates}</td>
-            <td>${player.winrate}</td>
+            <td>${btnHtml}</td>
           `;
           tbody.appendChild(row);
         });
-      } else {
-        exibirMensagem(resultado.message);
       }
     }
 
-    function atualizarCardPodium(idElemento, dadosJogador, coroaPadrao) {
-      const card = document.getElementById(idElemento);
-      if(dadosJogador) {
-        card.querySelector('.podium-crown').innerText = idElemento === "podium1" ? "👑" : coroaPadrao.split(" ")[0];
-        card.querySelector('.podium-name').innerText = dadosJogador.nome;
-        card.querySelector('.podium-deck').innerText = dadosJogador.deck;
-        card.querySelector('.podium-stars').innerText = "⭐ " + dadosJogador.estrelas;
+    function atualizarCardPodium(id, player, titulo) {
+      const card = document.getElementById(id);
+      if(player) {
+        card.querySelector('.podium-crown').innerText = id === "podium1" ? "👑" : titulo.split(" ")[0];
+        card.querySelector('.podium-name').innerText = player.nome;
+        card.querySelector('.podium-deck').innerText = player.deck;
+        card.querySelector('.podium-stars').innerText = "⭐ " + player.estrelas;
       } else {
         card.querySelector('.podium-crown').innerText = "-";
         card.querySelector('.podium-name').innerText = "Vazio";
@@ -296,9 +312,84 @@
       }
     }
 
+    async function enviarDesafio(nomeOponente) {
+      exibirMensagem(`Desafiando ${nomeOponente}... Enviando convite.`);
+      const res = await consumirAPI({ action: "enviarDesafio", desafiante: MEU_NOME, oponente: nomeOponente });
+      if(res.status === "sucesso") {
+        exibirMensagem("Convite enviado! Aguardando oponente...", false);
+      }
+    }
+
+    async function checarEventosTempoReal() {
+      if(!MEU_NOME) return;
+      const res = await consumirAPI({ action: "checarDesafios", meuNome: MEU_NOME });
+      
+      if(res.status === "convite") {
+        ID_DUELO_ATIVO = res.dueloId;
+        document.getElementById('conviteTexto').innerText = `${res.desafiante} está te desafiando! Aceita?`;
+        document.getElementById('convitePopup').classList.remove('hidden');
+        document.getElementById('btnAceitar').onclick = () => responderConvite("Aceito");
+        document.getElementById('btnRecusar').onclick = () => responderConvite("Recusado");
+      }
+      
+      if(res.status === "iniciarVersus") {
+        ID_DUELO_ATIVO = res.dueloId;
+        entrarNaArenaVersus(`Contra: ${res.oponente}`);
+      }
+
+      if(res.status === "recusado") {
+        exibirMensagem(`O duelo foi recusado pelo oponente.`, true);
+        ID_DUELO_ATIVO = null;
+      }
+    }
+
+    async function responderConvite(resposta) {
+      document.getElementById('convitePopup').classList.add('hidden');
+      if(!ID_DUELO_ATIVO) return;
+      const res = await consumirAPI({ action: "responderDesafio", dueloId: ID_DUELO_ATIVO, resposta: resposta });
+      if(res.status === "sucesso" && resposta === "Aceito") {
+        entrarNaArenaVersus("Em Combate!");
+      } else {
+        ID_DUELO_ATIVO = null;
+      }
+    }
+
+    function entrarNaArenaVersus(textoLayout) {
+      document.getElementById('appSection').classList.add('hidden');
+      document.getElementById('versusSection').classList.remove('hidden');
+      document.getElementById('versusJogadores').innerText = textoLayout;
+      exibirMensagem("Arena Versus carregada. Reporte ao final!", false);
+    }
+
+    async function votarDuelo(meuVoto) {
+      if(!ID_DUELO_ATIVO) return;
+      exibirMensagem("Enviando voto...");
+      const res = await consumirAPI({ action: "votarResultado", dueloId: ID_DUELO_ATIVO, meuNome: MEU_NOME, voto: meuVoto });
+      
+      if(res.status === "sucesso") {
+        exibirMensagem("Voto registrado! Aguardando oponente...", false);
+      } else if (res.status === "conflito") {
+        exibirMensagem("🚨 Conflito de relatórios! Enviado para análise dos ADMs.");
+        finalizarArenaVersus();
+      } else if (res.status === "finalizado") {
+        exibirMensagem("🎉 Duelo concluído com consenso!", false);
+        finalizarArenaVersus();
+      }
+    }
+
+    function finalizarArenaVersus() {
+      ID_DUELO_ATIVO = null;
+      document.getElementById('versusSection').classList.add('hidden');
+      document.getElementById('appSection').classList.remove('hidden');
+      verificarSessaoSalva();
+    }
+
     function fazerLogout() {
       localStorage.removeItem('ygo_token');
+      if(LOOP_DESAFIOS) clearInterval(LOOP_DESAFIOS);
+      MEU_NOME = "";
       document.getElementById('appSection').classList.add('hidden');
+      document.getElementById('versusSection').classList.add('hidden');
       document.getElementById('loginSection').classList.remove('hidden');
       exibirMensagem("Sessão encerrada.", false);
     }
