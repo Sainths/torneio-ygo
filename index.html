@@ -142,23 +142,27 @@
           <div class="podium-spot" id="podium1" style="order: 2; margin-bottom: 10px;"><div class="podium-crown">👑</div><div class="podium-name" style="color:#ffd700;">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
           <div class="podium-spot" id="podium3" style="order: 3;"><div class="podium-crown">🥉</div><div class="podium-name">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
         </div>
-        <!-- TABELA DE RANKING COM ESPAÇO PARA APOSTA -->
+            <!-- ABA RANKING GERAL -->
+      <div id="tabRanking" class="hidden">
+        <div class="podium">
+          <div class="podium-spot" id="podium2" style="order: 1;"><div class="podium-crown">🥈</div><div class="podium-name">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
+          <div class="podium-spot" id="podium1" style="order: 2; margin-bottom: 10px;"><div class="podium-crown">👑</div><div class="podium-name" style="color:#ffd700;">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
+          <div class="podium-spot" id="podium3" style="order: 3;"><div class="podium-crown">🥉</div><div class="podium-name">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
+        </div>
+        
         <div class="table-container">
           <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Nome</th>
-                <th>Deck</th>
-                <th>⭐</th>
-                <th>V/D/E</th>
-                <th>Apostar ⭐</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
+            <thead><tr><th>#</th><th>Nome</th><th>Deck</th><th>⭐</th><th>V/D/E</th><th>Apostar ⭐</th><th>Ação</th></tr></thead>
             <tbody id="rankingBody"></tbody>
           </table>
         </div>
+      </div>
+    </div> <!-- FIM DO appSection -->
+
+    <!-- === ESTA É A LINHA QUE ESTAVA FALTANDO OU COM NOME ERRADO === -->
+    <div id="statusMsg" class="status-msg"></div>
+
+  </div> <!-- FIM DO container -->
 
   <script>
     // IMPORTANTE: Insira aqui a URL gerada na Nova Implantação do seu Google Apps Script
