@@ -314,8 +314,6 @@
           const empates = player.empates !== undefined ? player.empates : 0;
           
           const totalDuelos = vitorias + derrotas + empates;
-          
-          // Garante que o Winrate seja exibido corretamente (puxa o dado já calculado do banco)
           const winrateExibir = player.winrate || "0%";
           
           const inputApostaHtml = eMeuPerfil ? `<span style="color:#666;">-</span>` : 
@@ -324,11 +322,14 @@
           const btnHtml = eMeuPerfil ? `<span style="color:#666;">Você</span>` : 
             `<button class="btn-duel" onclick="prepararDesafio('${player.nome}')">Desafiar</button>`;
 
-          // LINHA ATUALIZADA: Agora o Winrate aparece junto com o nome do Deck para economizar espaço
+          // AJUSTE CIRÚRGICO: O winrate agora fica logo abaixo do nome do duelista para nunca mais sumir!
           row.innerHTML = `
             <td><strong>${index + 1}º</strong></td>
-            <td class="col-name" style="${eMeuPerfil?'color:#ff8c00; font-weight:bold;':''}">${player.nome}</td>
-            <td class="col-name" style="color: #aaa;">${player.deck || 'Nenhum'} <span style="color: #666; font-size: 11px;">(${winrateExibir})</span></td>
+            <td class="col-name">
+              <span style="${eMeuPerfil?'color:#ff8c00; font-weight:bold;':''}">${player.nome}</span><br>
+              <span style="color: #666; font-size: 10px; font-weight: bold;">WR: ${winrateExibir}</span>
+            </td>
+            <td class="col-name" style="color: #aaa;">${player.deck || 'Nenhum'}</td>
             <td style="color: #ffd700; font-weight: bold;">${player.estrelas || 0}</td>
             <td><span style="color:#55ff55;">${vitorias}</span>/<span style="color:#ff5555;">${derrotas}</span>/<span style="color:#ffff55;">${empates}</span> <span style="color:#888; font-size:11px;">(${totalDuelos})</span></td>
             <td>${inputApostaHtml}</td>
