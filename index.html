@@ -36,21 +36,21 @@
     .podium-deck { color: #aaa; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .podium-stars { color: #ffd700; font-weight: bold; font-size: 11px; }
 
-    /* RANKING & BOTOES DESAFIAR */
+    /* RANKING & TABELA */
     .table-container { width: 100%; overflow-x: auto; background: #1e1e1e; }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
     th, td { padding: 8px 6px; border-bottom: 1px solid #2a2a2a; white-space: nowrap; vertical-align: middle; }
     th { background: #252525; color: #ff8c00; font-weight: bold; }
     tr:hover { background: #252525; }
     .col-name { max-width: 75px; overflow: hidden; text-overflow: ellipsis; }
-    .btn-duel { padding: 4px 8px; font-size: 11px; background: #ff8c00; border-radius: 4px; margin: 0; width: auto; display: inline-block; }
+    .btn-duel { padding: 4px 8px; font-size: 11px; background: #ff8c00; border-radius: 4px; margin: 0; width: auto; display: inline-block; color: #fff; border: none; cursor: pointer; }
 
     /* POPUP DE CONVITE */
     .popup-box { background: #292929; border: 2px solid #ff8c00; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 15px; }
     .btn-accept { background: #22c55e; margin-right: 5px; width: 45%; display: inline-block; }
     .btn-deny { background: #ef4444; width: 45%; display: inline-block; }
 
-    /* TELA VERSUS FACE A FACE */
+    /* ARENA VERSUS */
     .versus-arena { text-align: center; padding: 20px; background: radial-gradient(circle, #2a1f10 0%, #1a1a1a 100%); border: 2px solid #ff8c00; border-radius: 12px; }
     .versus-title { font-size: 28px; font-weight: bold; color: #ff8c00; margin: 10px 0; text-shadow: 0 0 10px rgba(255,140,0,0.5); }
     .duel-btn-vitoria { background: #22c55e; margin-top: 15px; }
@@ -82,7 +82,7 @@
       <div class="toggle-link" onclick="alternarTelas(true)">Já tem conta? Fazer Login</div>
     </div>
 
-     <!-- TELA POPUP DE CONVITE RECEBIDO (ATUALIZADA) -->
+    <!-- TELA POPUP DE CONVITE RECEBIDO -->
     <div id="convitePopup" class="popup-box hidden">
       <h3 style="margin-bottom: 5px;">⚠️ Desafio Recebido!</h3>
       <p id="conviteTexto" style="margin: 5px 0 5px 0; font-size: 15px;"></p>
@@ -91,34 +91,24 @@
       <button class="btn-deny" id="btnRecusar">Recusar</button>
     </div>
 
-    <!-- TELA DE DUELO ATIVO (VERSUS) -->
+    <!-- TELA DE DUELO ATIVO -->
     <div id="versusSection" class="versus-arena hidden">
       <div class="versus-title">💥 DUELO ATIVO 💥</div>
       <h3 id="versusJogadores" style="color: #fff; margin: 15px 0;">Você VS Oponente</h3>
-      <p id="versusModo" style="color: #ffd700; font-weight: bold; font-size: 14px; margin-bottom: 15px;"></p>
+      <p style="color: #aaa; font-size: 14px;">Selecione o seu resultado honesto:</p>
       <button class="duel-btn-vitoria" onclick="votarDuelo('Vitoria')">Ganhei</button>
       <button class="duel-btn-empate" onclick="votarDuelo('Empate')">Empate</button>
       <button class="duel-btn-derrota" onclick="votarDuelo('Derrota')">Perdi</button>
     </div>
 
-    <!-- TELA DE DUELO ATIVO (VERSUS) -->
-    <div id="versusSection" class="versus-arena hidden">
-      <div class="versus-title">💥 DUELO ATIVO 💥</div>
-      <h3 id="versusJogadores" style="color: #fff; margin: 15px 0;">Você VS Oponente</h3>
-      <p style="color: #aaa; font-size: 14px;">Selecione o seu resultado honesto:</p>
-      <button class="duel-btn-vitoria" onclick="votarDuelo('Vitoria')">Ganhei (+3 ⭐)</button>
-      <button class="duel-btn-empate" onclick="votarDuelo('Empate')">Empate (+1 ⭐)</button>
-      <button class="duel-btn-derrota" onclick="votarDuelo('Derrota')">Perdi (+1 ⭐)</button>
-    </div>
-
-    <!-- APP PRINCIPAL (SÓ APARECE PÓS-LOGIN E SE NÃO ESTIVER EM VERSUS) -->
+    <!-- APP PRINCIPAL -->
     <div id="appSection" class="hidden">
       <div class="tabs">
         <button class="tab-btn active" id="btnTabPerfil" onclick="mudarAba('perfil')">Meu Perfil</button>
         <button class="tab-btn" id="btnTabRanking" onclick="mudarAba('ranking')">Ranking Geral</button>
       </div>
 
-      <!-- ABA PERFIL / EDIÇÃO -->
+      <!-- ABA PERFIL -->
       <div id="tabPerfil">
         <div class="profile-card">
           <h3 id="userNome" style="margin: 0; font-size: 22px; color: #ff8c00;"></h3>
@@ -135,35 +125,34 @@
         <button style="background: #cc2222; margin-top: 15px;" onclick="fazerLogout()">Sair da Conta</button>
       </div>
 
-      <!-- ABA RANKING GERAL -->
+      <!-- ABA RANKING -->
       <div id="tabRanking" class="hidden">
         <div class="podium">
           <div class="podium-spot" id="podium2" style="order: 1;"><div class="podium-crown">🥈</div><div class="podium-name">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
           <div class="podium-spot" id="podium1" style="order: 2; margin-bottom: 10px;"><div class="podium-crown">👑</div><div class="podium-name" style="color:#ffd700;">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
           <div class="podium-spot" id="podium3" style="order: 3;"><div class="podium-crown">🥉</div><div class="podium-name">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
         </div>
-            <!-- ABA RANKING GERAL -->
-      <div id="tabRanking" class="hidden">
-        <div class="podium">
-          <div class="podium-spot" id="podium2" style="order: 1;"><div class="podium-crown">🥈</div><div class="podium-name">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
-          <div class="podium-spot" id="podium1" style="order: 2; margin-bottom: 10px;"><div class="podium-crown">👑</div><div class="podium-name" style="color:#ffd700;">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
-          <div class="podium-spot" id="podium3" style="order: 3;"><div class="podium-crown">🥉</div><div class="podium-name">-</div><div class="podium-deck">-</div><div class="podium-stars">-</div></div>
-        </div>
-        
         <div class="table-container">
           <table>
-            <thead><tr><th>#</th><th>Nome</th><th>Deck</th><th>⭐</th><th>V/D/E</th><th>Apostar ⭐</th><th>Ação</th></tr></thead>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Deck</th>
+                <th>⭐</th>
+                <th>V/D/E</th>
+                <th>Apostar ⭐</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
             <tbody id="rankingBody"></tbody>
           </table>
         </div>
       </div>
-    </div> <!-- FIM DO appSection -->
+    </div>
 
-    <!-- === ESTA É A LINHA QUE ESTAVA FALTANDO OU COM NOME ERRADO === -->
     <div id="statusMsg" class="status-msg"></div>
-
-  </div> <!-- FIM DO container -->
-
+  </div>
   <script>
     // IMPORTANTE: Insira aqui a URL gerada na Nova Implantação do seu Google Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbxlUcOZZe4Ecznrg-cuQPrdN4om4aEDr4mQ33A6aZe5yzA0oJFTBBQT5UxLfaee6jM0/exec";
@@ -184,8 +173,10 @@
 
     function exibirMensagem(txt, erro = true) {
       const msg = document.getElementById('statusMsg');
-      msg.innerText = txt;
-      msg.style.color = erro ? "#ff5555" : "#55ff55";
+      if (msg) {
+        msg.innerText = txt;
+        msg.style.color = erro ? "#ff5555" : "#55ff55";
+      }
     }
 
     async function consumirAPI(dados) {
@@ -231,7 +222,6 @@
         exibirMensagem(res.message);
       }
     }
-
     async function verificarSessaoSalva() {
       const tokenSalvo = localStorage.getItem('ygo_token');
       if(!tokenSalvo) return;
@@ -258,7 +248,7 @@
         localStorage.removeItem('ygo_token');
       }
     }
-    
+
     async function salvarPerfil() {
       const tokenSalvo = localStorage.getItem('ygo_token');
       const novoNome = document.getElementById('editNome').value.trim();
@@ -286,13 +276,13 @@
       if(aba === 'ranking') carregarRanking();
     }
 
-        async function carregarRanking() {
+    async function carregarRanking() {
       const res = await consumirAPI({ action: "obterRanking" });
       if(res.status === "sucesso") {
         const ranking = res.ranking;
-        atualizarCardPodium("podium1", ranking[0], "👑 Rei dos Jogos");
-        atualizarCardPodium("podium2", ranking[1], "🥈 2º Lugar");
-        atualizarCardPodium("podium3", ranking[2], "🥉 3º Lugar");
+        atualizarCardPodium("podium1", ranking, "👑 Rei dos Jogos");
+        atualizarCardPodium("podium2", ranking, "🥈 2º Lugar");
+        atualizarCardPodium("podium3", ranking, "🥉 3º Lugar");
 
         const tbody = document.getElementById('rankingBody');
         tbody.innerHTML = "";
@@ -300,9 +290,12 @@
           const row = document.createElement('tr');
           const eMeuPerfil = player.nome === MEU_NOME;
           
-          // Se for o próprio perfil, desabilita a aposta. Se for oponente, mostra o seletor.
+          const vitorias = player.vitorias !== undefined ? player.vitorias : 0;
+          const derrotas = player.derrotas !== undefined ? player.derrotas : 0;
+          const empates = player.empates !== undefined ? player.empates : 0;
+          
           const inputApostaHtml = eMeuPerfil ? `<span style="color:#666;">-</span>` : 
-            `<input type="number" id="aposta_${player.nome}" value="0" min="0" style="width:50px; padding:4px; font-size:12px; text-align:center;">`;
+            `<input type="number" id="aposta_${player.nome}" value="0" min="0" aria-label="Aposta para ${player.nome}" style="width:50px; padding:4px; font-size:12px; text-align:center;">`;
           
           const btnHtml = eMeuPerfil ? `<span style="color:#666;">Você</span>` : 
             `<button class="btn-duel" onclick="prepararDesafio('${player.nome}')">Desafiar</button>`;
@@ -310,9 +303,9 @@
           row.innerHTML = `
             <td><strong>${index + 1}º</strong></td>
             <td class="col-name" style="${eMeuPerfil?'color:#ff8c00; font-weight:bold;':''}">${player.nome}</td>
-            <td class="col-name" style="color: #aaa;">${player.deck}</td>
-            <td style="color: #ffd700; font-weight: bold;">${player.estrelas}</td>
-            <td><span style="color:#55ff55;">${player.vitorias}</span>/<span style="color:#ff5555;">${player.derrotas}</span>/<span style="color:#ffff55;">${player.empates}</span></td>
+            <td class="col-name" style="color: #aaa;">${player.deck || 'Nenhum'}</td>
+            <td style="color: #ffd700; font-weight: bold;">${player.estrelas || 0}</td>
+            <td><span style="color:#55ff55;">${vitorias}</span>/<span style="color:#ff5555;">${derrotas}</span>/<span style="color:#ffff55;">${empates}</span></td>
             <td>${inputApostaHtml}</td>
             <td>${btnHtml}</td>
           `;
@@ -321,10 +314,23 @@
       }
     }
 
+    function atualizarCardPodium(id, player, titulo) {
+      const card = document.getElementById(id);
+      if(player) {
+        card.querySelector('.podium-crown').innerText = id === "podium1" ? "👑" : titulo.split(" ");
+        card.querySelector('.podium-name').innerText = player.nome;
+        card.querySelector('.podium-deck').innerText = player.deck || 'Nenhum';
+        card.querySelector('.podium-stars').innerText = "⭐ " + (player.estrelas || 0);
+      } else {
+        card.querySelector('.podium-crown').innerText = "-";
+        card.querySelector('.podium-name').innerText = "Vazio";
+        card.querySelector('.podium-deck').innerText = "-";
+        card.querySelector('.podium-stars').innerText = "-";
+      }
+    }
     async function prepararDesafio(nomeOponente) {
       const input = document.getElementById(`aposta_${nomeOponente}`);
       const valorAposta = parseInt(input.value) || 0;
-      
       if(valorAposta < 0) return exibirMensagem("A aposta não pode ser negativa!");
       
       let msgConfirmacao = valorAposta === 0 ? 
@@ -343,30 +349,23 @@
     }
 
     async function checarEventosTempoReal() {
-      if(!MEU_NOME) return;
+      if(!MEU_NOME || ID_DUELO_ATIVO) return;
       const res = await consumirAPI({ action: "checarDesafios", meuNome: MEU_NOME });
       
       if(res.status === "convite") {
         ID_DUELO_ATIVO = res.dueloId;
         document.getElementById('conviteTexto').innerText = `${res.desafiante} está te desafiando!`;
-        
-        // Distingue visualmente no popup o tipo de duelo recebido
-        if(res.aposta > 0) {
-          document.getElementById('conviteAposta').innerText = `⚔️ MODALIDADE: APOSTA VALENDO ${res.aposta} ESTRELAS!`;
-        } else {
-          document.getElementById('conviteAposta').innerText = `📜 MODALIDADE: Duelo Tradicional (Normal)`;
-        }
+        document.getElementById('conviteAposta').innerText = res.aposta > 0 ? 
+          `⚔️ MODALIDADE: APOSTA VALENDO ${res.aposta} ESTRELAS!` : `📜 MODALIDADE: Duelo Tradicional`;
         
         document.getElementById('convitePopup').classList.remove('hidden');
         document.getElementById('btnAceitar').onclick = () => responderConvite("Aceito");
         document.getElementById('btnRecusar').onclick = () => responderConvite("Recusado");
       }
-      
       if(res.status === "iniciarVersus") {
         ID_DUELO_ATIVO = res.dueloId;
         entrarNaArenaVersus(`Contra: ${res.oponente}`);
       }
-
       if(res.status === "recusado") {
         exibirMensagem(`O duelo foi recusado pelo oponente.`, true);
         ID_DUELO_ATIVO = null;
@@ -376,13 +375,11 @@
     async function responderConvite(resposta) {
       document.getElementById('convitePopup').classList.add('hidden');
       if(!ID_DUELO_ATIVO) return;
-      
-      // Envia o meuNome para o servidor validar o saldo de estrelas caso eu esteja aceitando uma aposta
       const res = await consumirAPI({ action: "responderDesafio", dueloId: ID_DUELO_ATIVO, meuNome: MEU_NOME, resposta: resposta });
       if(res.status === "sucesso" && resposta === "Aceito") {
         entrarNaArenaVersus("Em Combate!");
-      } else if (res.status === "erro") {
-        exibirMensagem(res.message); // Exibe erro se o oponente não tiver estrelas para cobrir a aposta
+      } else if(res.status === "erro") {
+        exibirMensagem(res.message);
         ID_DUELO_ATIVO = null;
       } else {
         ID_DUELO_ATIVO = null;
@@ -400,11 +397,10 @@
       if(!ID_DUELO_ATIVO) return;
       exibirMensagem("Enviando voto...");
       const res = await consumirAPI({ action: "votarResultado", dueloId: ID_DUELO_ATIVO, meuNome: MEU_NOME, voto: meuVoto });
-      
       if(res.status === "sucesso") {
         exibirMensagem("Voto registrado! Aguardando oponente...", false);
       } else if (res.status === "conflito") {
-        exibirMensagem("🚨 Conflito de relatórios! Enviado para análise dos ADMs.");
+        exibirMensagem("🚨 Conflito de relatórios! Enviado para os ADMs.");
         finalizarArenaVersus();
       } else if (res.status === "finalizado") {
         exibirMensagem("🎉 Duelo concluído com consenso!", false);
@@ -416,22 +412,7 @@
       ID_DUELO_ATIVO = null;
       document.getElementById('versusSection').classList.add('hidden');
       document.getElementById('appSection').classList.remove('hidden');
-      verificarSessaoSalva(); // Atualiza as estrelas atuais na tela do perfil
-    }
-
-    function atualizarCardPodium(id, player, titulo) {
-      const card = document.getElementById(id);
-      if(player) {
-        card.querySelector('.podium-crown').innerText = id === "podium1" ? "👑" : titulo.split(" ")[0];
-        card.querySelector('.podium-name').innerText = player.nome;
-        card.querySelector('.podium-deck').innerText = player.deck;
-        card.querySelector('.podium-stars').innerText = "⭐ " + player.estrelas;
-      } else {
-        card.querySelector('.podium-crown').innerText = "-";
-        card.querySelector('.podium-name').innerText = "Vazio";
-        card.querySelector('.podium-deck').innerText = "-";
-        card.querySelector('.podium-stars').innerText = "-";
-      }
+      verificarSessaoSalva();
     }
 
     function fazerLogout() {
