@@ -111,7 +111,7 @@
   </div>
 
   <script>
-    // IMPORTANTE: Insira aqui a MESMA URL que você usa no seu index.html
+       // IMPORTANTE: Insira aqui a MESMA URL que você usa no seu index.html
     const API_URL = "https://script.google.com/macros/s/AKfycbxPaYR8rHhwmgd7gGhEY6QYejImtDwAG71lQAKtHB7IPWVhhPmsrhwXBbHe3xB9-dwM/exec";
     
     // DEFINA AQUI SUA SENHA MASTER DO ADMINISTRADOR
@@ -120,14 +120,13 @@
     function verificarSenhaMaster() {
       const senhaDigitada = document.getElementById('passInput').value;
       const erro = document.getElementById('lockError');
-      
       if(senhaDigitada === SENHA_MASTER) {
         document.getElementById('lockScreen').classList.add('hidden');
         document.getElementById('mainAdmin').classList.remove('hidden');
-        exibirMensagemAdm("Acesso concedido. Bem-vindo, ADM!", false);
+        exibirMensagemAdm("Acesso concedido!", false);
         carregarDisputasDoTorneio();
       } else {
-        erro.innerText = "Senha incorreta! Acesso negado.";
+        erro.innerText = "Senha incorreta!";
       }
     }
 
@@ -135,25 +134,17 @@
       document.getElementById('secAvisos').classList.toggle('hidden', aba !== 'avisos');
       document.getElementById('secDisputas').classList.toggle('hidden', aba !== 'disputas');
       document.getElementById('secMataMata').classList.toggle('hidden', aba !== 'matamata');
-      
       document.getElementById('btnAvisos').classList.toggle('active', aba === 'avisos');
       document.getElementById('btnDisputas').classList.toggle('active', aba === 'disputas');
       document.getElementById('btnMataMata').classList.toggle('active', aba === 'matamata');
       exibirMensagemAdm("");
-      
-    // Altere o final da sua função mudarAbaAdm(aba) antiga para carregar os novos elementos:
-    if(aba === 'disputas') carregarDisputasDoTorneio();
-    if(aba === 'matamata') {
-      loopMonitorarInscritos(); // Puxa lista de check-in na hora
-      carregarChavesNoPainelADM(); // Puxa os brackets na hora
+      if(aba === 'disputas') carregarDisputasDoTorneio();
+      if(aba === 'matamata') { loopMonitorarInscritos(); carregarChavesNoPainelADM(); }
     }
 
     function exibirMensagemAdm(txt, erro = true) {
       const msg = document.getElementById('adminStatus');
-      if (msg) {
-        msg.innerText = txt;
-        msg.style.color = erro ? "#ff5555" : "#55ff55";
-      }
+      if (msg) { msg.innerText = txt; msg.style.color = erro ? "#ff5555" : "#55ff55"; }
     }
 
     async function consumirAPIAdmin(dados) {
@@ -165,55 +156,45 @@
         });
         return await resposta.json();
       } catch (err) {
-        return { status: "erro", message: "Falha na conexão com o servidor." };
+        return { status: "erro", message: "Falha na conexão." };
       }
     }
+
     async function enviarAvisoGeral() {
       const texto = document.getElementById('avisoTexto').value.trim();
-      if(!texto) return exibirMensagemAdm("Digite algum texto para o aviso!");
-      exibirMensagemAdm("Publicando aviso...");
+      if(!texto) return exibirMensagemAdm("Digite o aviso!");
       const res = await consumirAPIAdmin({ action: "postarAviso", texto: texto });
-      if(res.status === "sucesso") {
-        exibirMensagemAdm(res.message, false);
-      }
+      if(res.status === "sucesso") exibirMensagemAdm(res.message, false);
     }
 
     async function comandarResetTorneio() {
-      if(confirm("🚨 ALERTA MÁXIMO:\n\nTem certeza absoluta que deseja RESETAR todos os pontos, duelos e estrelas do campeonato de pontos corridos? Esta ação não pode ser desfeita!")) {
-        exibirMensagemAdm("Resetando campeonato geral...");
+      if(confirm("Deseja resetar o campeonato de pontos corridos?")) {
         const res = await consumirAPIAdmin({ action: "resetarTorneio" });
-        if(res.status === "sucesso") {
-          exibirMensagemAdm(res.message, false);
-        }
+        if(res.status === "sucesso") exibirMensagemAdm(res.message, false);
       }
     }
-
     async function carregarDisputasDoTorneio() {
       const container = document.getElementById('listaDisputas');
       container.innerHTML = "<p style='text-align:center;color:#aaa;'>Carregando conflitos...</p>";
-      
       const res = await consumirAPIAdmin({ action: "obterDisputas" });
       if(res.status === "sucesso") {
-        const disputas = res.disputas;
-        container.innerHTML = "";
-        
+        const disputas = res.disputas; container.innerHTML = "";
         if(disputas.length === 0) {
-          container.innerHTML = "<p style='text-align:center;color:#55ff55;'>✅ Nenhuma disputa pendente no momento!</p>";
+          container.innerHTML = "<p style='text-align:center;color:#55ff55;'>✅ Nenhuma disputa pendente!</p>";
           return;
         }
-        
         disputas.forEach(disp => {
           const card = document.createElement('div');
           card.className = "disputa-card";
           card.innerHTML = `
-            <p><strong>Mesa / ID:</strong> ${disp.id}</p>
-            <p><span style="color:#ff8c00;">${disp.p1}</span> votou: <span style="color:#ef4444;">${disp.voto1}</span></p>
-            <p><span style="color:#ff8c00;">${disp.p2}</span> votou: <span style="color:#ef4444;">${disp.voto2}</span></p>
-            <p style="color:#ffd700;"><strong>Estrelas em Jogo (Aposta):</strong> ${disp.aposta}</p>
+            <p><strong>Mesa:</strong> ${disp.id}</p>
+            <p><span style="color:#ff8c00;">${disp.p1}</span>: ${disp.voto1}</p>
+            <p><span style="color:#ff8c00;">${disp.p2}</span>: ${disp.voto2}</p>
+            <p style="color:#ffd700;"><strong>Aposta:</strong> ${disp.aposta}</p>
             <div style="margin-top:10px; text-align:center;">
               <button class="btn-resolve" style="background:#22c55e;" onclick="arbitrarPartida('${disp.id}', '${disp.p1}')">Vitória ${disp.p1}</button>
               <button class="btn-resolve" style="background:#22c55e;" onclick="arbitrarPartida('${disp.id}', '${disp.p2}')">Vitória ${disp.p2}</button>
-              <button class="btn-resolve" style="background:#eab308;" onclick="arbitrarPartida('${disp.id}', 'Empate')">Declarar Empate</button>
+              <button class="btn-resolve" style="background:#eab308;" onclick="arbitrarPartida('${disp.id}', 'Empate')">Empate</button>
             </div>
           `;
           container.appendChild(card);
@@ -222,85 +203,51 @@
     }
 
     async function arbitrarPartida(dueloId, vencedorDefinido) {
-      if(confirm(`Confirmar decisão de vitória para: ${vencedorDefinido}?`)) {
-        exibirMensagemAdm("Aplicando veredito de arbitragem...");
+      if(confirm(`Confirmar vitória para: ${vencedorDefinido}?`)) {
         const res = await consumirAPIAdmin({ action: "resolverDisputa", dueloId: dueloId, vencedor: vencedorDefinido });
-        if(res.status === "sucesso") {
-          exibirMensagemAdm(res.message, false);
-          carregarDisputasDoTorneio();
-        }
+        if(res.status === "sucesso") { carregarDisputasDoTorneio(); }
       }
     }
-
-    async function comandarGerarMataMata() {
-      if(confirm("Deseja gerar chaves eliminatórias (Mata-Mata) com base nos duelistas atuais? Isso embaralhará os confrontos automaticamente.")) {
-        exibirMensagemAdm("Gerando brackets eliminatórios...");
-        const res = await consumirAPIAdmin({ action: "gerarMataMata" });
-        if(res.status === "sucesso") {
-          exibirMensagemAdm(res.message, false);
-          exibirMensagemAdm("Chaves criadas com sucesso na planilha!", false);
-        }
-      }
-    }
-
-    function comandarResetMataMata() {
-      if(confirm("Deseja limpar as chaves de Mata-Mata atuais? Os pontos corridos não serão afetados.")) {
-        exibirMensagemAdm("Limpando chaves eliminatórias...");
-        // Adicione aqui ações futuras de limpeza se necessário
-        exibirMensagemAdm("Mata-mata limpo com sucesso!", false);
-      }
-    }
-        // === NOVAS FUNÇÕES EXCLUSIVAS DO MATA-MATA (ACRÉSCIMO ADM) ===
 
     async function admAbrirInscricoesMM() {
       const nomeTorneio = document.getElementById('mmNomeTorneioInput').value.trim();
-      if(!nomeTorneio) return exibirMensagemAdm("Digite um nome para o Torneio!");
-      
-      exibirMensagemAdm("Abrindo inscrições no servidor...");
+      if(!nomeTorneio) return exibirMensagemAdm("Digite o nome do Torneio!");
       const res = await consumirAPIAdmin({ action: "abrirTorneioMM", nomeTorneio: nomeTorneio });
       if(res.status === "sucesso") {
-        exibirMensagemAdm(res.message, false);
         document.getElementById('mmNomeTorneioInput').value = "";
-        loopMonitorarInscritos(); // Ativa a checagem da lista de presença
-      } else {
-        exibirMensagemAdm(res.message);
+        loopMonitorarInscritos();
       }
     }
 
     async function loopMonitorarInscritos() {
-      // Puxa do servidor os jogadores que já clicaram em Confirmar Presença
       const res = await consumirAPIAdmin({ action: "obterInscritosMM" });
       if(res.status === "sucesso") {
         const inscritos = res.inscritos;
         document.getElementById('mmContadorInscritos').innerText = inscritos.length;
-        
         const listaDiv = document.getElementById('mmListaInscritosNomes');
-        if(inscritos.length === 0) {
-          listaDiv.innerHTML = "Aguardando duelistas fazerem check-in...";
-        } else {
-          listaDiv.innerHTML = inscritos.map(p => `• <strong>${p.nome}</strong> (${p.deck})`).join("<br>");
-        }
+        if(inscritos.length === 0) { listaDiv.innerHTML = "Aguardando check-in..."; }
+        else { listaDiv.innerHTML = inscritos.map(p => `• <strong>${p.nome}</strong> (${p.deck})`).join("<br>"); }
+      }
+    }
+
+    async function comandarGerarMataMata() {
+      if(confirm("Deseja fechar as inscrições e gerar as chaves?")) {
+        const res = await consumirAPIAdmin({ action: "gerarMataMata" });
+        if(res.status === "sucesso") { carregarChavesNoPainelADM(); }
+        else { exibirMensagemAdm(res.message); }
       }
     }
 
     async function carregarChavesNoPainelADM() {
       const container = document.getElementById('listaMataMata');
       container.innerHTML = "<p style='text-align:center;color:#aaa;'>Carregando chaves...</p>";
-      
       const res = await consumirAPIAdmin({ action: "obterPartidasMM" });
       if(res.status === "sucesso") {
-        const partidas = res.partidas;
-        container.innerHTML = "";
-        
-        if(partidas.length === 0) {
-          container.innerHTML = "<p style='text-align:center;color:#aaa;'>Nenhum confronto ativo. Abra inscrições ou gere as chaves!</p>";
-          return;
-        }
-        
+        const partidas = res.partidas; container.innerHTML = "";
+        if(partidas.length === 0) { container.innerHTML = "<p style='text-align:center;color:#aaa;'>Nenhum confronto ativo.</p>"; return; }
         partidas.forEach(partida => {
           const card = document.createElement('div');
           card.style.cssText = "background:#1a1a1a; border:1px solid #333; padding:10px; margin-bottom:8px; border-radius:6px;";
-          
           let botoesHtml = "";
           if(partida.status === "Pendente") {
             botoesHtml = `
@@ -309,15 +256,12 @@
                 <button style="background:#22c55e; padding:4px 8px; font-size:11px; width:45%; margin:0;" onclick="definirVencedorMM('${partida.id}', '${partida.p2}')">Vitória ${partida.p2}</button>
               </div>
             `;
-          } else {
-            botoesHtml = `<p style="margin:5px 0 0 0; color:#22c55e; font-size:12px; font-weight:bold; text-align:center;">🏆 Vencedor: ${partida.vencedor}</p>`;
-          }
-
+          } else { botoesHtml = `<p style="margin:5px 0 0 0; color:#22c55e; font-size:12px; font-weight:bold; text-align:center;">🏆 Vencedor: ${partida.vencedor}</p>`; }
           card.innerHTML = `
             <div style="display:flex; justify-content:space-between; font-size:13px;">
-              <span style="${partida.vencedor===partida.p1?'color:#22c55e;font-weight:bold;':''}">${partida.p1}</span>
+              <span style="${partida.status==='Finalizado'&&partida.vencedor===partida.p1?'color:#22c55e;font-weight:bold;':''}">${partida.p1}</span>
               <span style="color:#666;font-weight:bold;">VS</span>
-              <span style="${partida.vencedor===partida.p2?'color:#22c55e;font-weight:bold;':''}">${partida.p2}</span>
+              <span style="${partida.status==='Finalizado'&&partida.vencedor===partida.p2?'color:#22c55e;font-weight:bold;':''}">${partida.p2}</span>
             </div>
             ${botoesHtml}
           `;
@@ -327,29 +271,22 @@
     }
 
     async function definirVencedorMM(partidaId, nomeVencedor) {
-      if(confirm(`Confirmar vitória de ${nomeVencedor} nesta partida eliminatória?`)) {
-        exibirMensagemAdm("Salvando veredito...");
+      if(confirm(`Confirmar vitória de ${nomeVencedor}?`)) {
         const res = await consumirAPIAdmin({ action: "arbitrarMM", partidaId: partidaId, vencedor: nomeVencedor });
-        if(res.status === "sucesso") {
-          exibirMensagemAdm(res.message, false);
-          carregarChavesNoPainelADM(); // Atualiza a árvore na tela do ADM
-        }
+        if(res.status === "sucesso") { carregarChavesNoPainelADM(); }
       }
     }
 
     async function comandarResetMataMata() {
-      if(confirm("🚨 ATENÇÃO:\n\nDeseja fechar, limpar e encerrar o Torneio Mata-Mata atual? Isso apagará as chaves da tela dos jogadores para o dia de hoje. Os pontos corridos não serão afetados!")) {
-        exibirMensagemAdm("Encerrando mata-mata...");
+      if(confirm("Deseja encerrar e limpar o Torneio Mata-Mata atual?")) {
         const res = await consumirAPIAdmin({ action: "resetarMM" });
         if(res.status === "sucesso") {
-          exibirMensagemAdm(res.message, false);
           document.getElementById('mmContadorInscritos').innerText = "0";
           document.getElementById('mmListaInscritosNomes').innerHTML = "Nenhum jogador na lista.";
           carregarChavesNoPainelADM();
         }
       }
     }
-
   </script>
 </body>
 </html>
