@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Administrador - YGO</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #fff; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; }
+    .container { width: 100%; max-width: 500px; background: #1e1e1e; padding: 15px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); border: 1px solid #2a2a2a; align-self: flex-start; }
+    h2, h3, h4 { text-align: center; color: #ff8c00; margin-top: 0; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; margin-bottom: 4px; color: #b3b3b3; font-size: 13px; }
+    input, textarea { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 6px; color: #fff; box-sizing: border-box; font-size: 15px; }
+    input:focus, textarea:focus { border-color: #ff8c00; outline: none; }
+    button { width: 100%; padding: 11px; background: #ff8c00; color: #fff; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+    button:hover { background: #e07b00; }
+    .hidden { display: none !important; }
+    
+    /* SEGURANÇA TRAVA */
+    #lockScreen { position: fixed; top:0; left:0; width:100vw; height:100vh; background:#121212; z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+    
+    /* ABAS ADM */
+    .tabs { display: flex; margin-bottom: 15px; background: #252525; border-radius: 6px; padding: 3px; }
+    .tab-btn { flex: 1; padding: 8px; text-align: center; background: none; border: none; color: #aaa; cursor: pointer; font-size: 13px; font-weight: bold; border-radius: 4px; }
+    .tab-btn.active { background: #ff8c00; color: #fff; }
+
+    /* CARDS DISPUTAS */
+    .disputa-card { background: #252525; border: 1px solid #ef4444; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    .btn-resolve { width: 31%; display: inline-block; font-size: 12px; padding: 6px; margin-right: 2%; }
+
+    /* MATA MATA CHAVES */
+    .bracket-list { background: #252525; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-top: 10px; }
+    .match-box { border-bottom: 1px solid #3a3a3a; padding: 8px 0; font-size: 13px; display: flex; justify-content: space-between; }
+
+    .status-msg { text-align: center; color: #ff5555; margin-top: 10px; font-size: 13px; min-height: 18px; }
+  </style>
+</head>
+<body>
+
+  <!-- TELA DE PROTEÇÃO POR SENHA -->
+  <div id="lockScreen">
+    <div style="width:90%; max-width:320px; text-align:center;">
+      <h2>🔑 Acesso Restrito</h2>
+      <input type="password" id="passInput" placeholder="Senha do Administrador">
+      <button onclick="verificarSenhaMaster()">Autenticar ADM</button>
+      <button style="background:#444; margin-top:10px;" onclick="window.location.href='index.html'">Voltar ao App</button>
+      <p id="lockError" style="color:#ff5555; font-size:13px; margin-top:10px;"></p>
+    </div>
+  </div>
+
+  <div class="container hidden" id="mainAdmin">
+    <h2>👑 Trono do Administrador</h2>
+    
+    <div class="tabs">
+      <button class="tab-btn active" id="btnAvisos" onclick="mudarAbaAdm('avisos')">Geral/Avisos</button>
+      <button class="tab-btn" id="btnDisputas" onclick="mudarAbaAdm('disputas')">Disputas</button>
+      <button class="tab-btn" id="btnMataMata" onclick="mudarAbaAdm('matamata')">Mata-Mata</button>
+    </div>
+
+    <!-- SEÇÃO GERAL E AVISOS -->
+    <div id="secAvisos">
+      <div class="form-group">
+        <label>Mensagem ou Aviso Geral aos Jogadores</label>
+        <textarea id="avisoTexto" rows="3" placeholder="Digite as regras ou avisos aqui..."></textarea>
+      </div>
+      <button onclick="enviarAvisoGeral()">Publicar Aviso</button>
+      <hr style="border-color:#333; margin: 20px 0;">
+      <h3>⚠️ Zona de Perigo</h3>
+      <p style="color:#aaa; font-size:12px; text-align:center;">Esta ação vai zerar os pontos e excluir o histórico de duelos corridos!</p>
+      <button style="background:#ef4444;" onclick="comandarResetTorneio()">Resetar Campeonato Corridos</button>
+      <button style="background:#555; margin-top:15px;" onclick="window.location.href='index.html'">Voltar ao Torneio</button>
+    </div>
+
+    <!-- SEÇÃO DE DISPUTAS -->
+    <div id="secDisputas" class="hidden">
+      <h3>⚔️ Duelos em Conflito</h3>
+      <p style="color:#aaa; font-size:12px; text-align:center; margin-bottom:15px;">Partidas travadas onde os jogadores divergiram nos relatórios.</p>
+      <div id="listaDisputas"></div>
+    </div>
+    <!-- SEÇÃO DO MATA-MATA (CHAVEAMENTO) -->
+    <div id="secMataMata" class="hidden">
+      <h3>🏆 Arena Kaiba Corp (Mata-Mata)</h3>
+      <p style="color:#aaa; font-size:12px; text-align:center;">Gere chaves eliminatórias automáticas com todos os duelistas da planilha.</p>
+      <button style="background:#22c55e;" onclick="comandarGerarMataMata()">Gerar Novas Chaves Mata-Mata</button>
+      
+      <div class="bracket-list">
+        <h4 style="margin:0 0 10px 0; border-bottom:1px solid #ff8c00; padding-bottom:5px;">Chaveamento Atual (Rodada 1)</h4>
+        <div id="listaMataMata"></div>
+      </div>
+      
+      <button style="background:#444; margin-top:15px;" onclick="comandarResetMataMata()">Resetar Apenas Mata-Mata</button>
+    </div>
+
+    <div id="adminStatus" class="status-msg"></div>
+  </div>
+
+  <script>
+    // IMPORTANTE: Insira aqui a MESMA URL que você usa no seu index.html
+    const API_URL = "https://script.google.com/macros/s/AKfycbzFm5JZM7UWN4-dcf3ysS5nc_oB4xnQ2tSCrwPhlX9FM3N_gpEN40wIJcHkXLFRoX3E/exec";
+    
+    // DEFINA AQUI SUA SENHA MASTER DO ADMINISTRADOR
+    const SENHA_MASTER = "1234"; 
+
+    function verificarSenhaMaster() {
+      const senhaDigitada = document.getElementById('passInput').value;
+      const erro = document.getElementById('lockError');
+      
+      if(senhaDigitada === SENHA_MASTER) {
+        document.getElementById('lockScreen').classList.add('hidden');
+        document.getElementById('mainAdmin').classList.remove('hidden');
+        exibirMensagemAdm("Acesso concedido. Bem-vindo, ADM!", false);
+        carregarDisputasDoTorneio();
+      } else {
+        erro.innerText = "Senha incorreta! Acesso negado.";
+      }
+    }
+
+    function mudarAbaAdm(aba) {
+      document.getElementById('secAvisos').classList.toggle('hidden', aba !== 'avisos');
+      document.getElementById('secDisputas').classList.toggle('hidden', aba !== 'disputas');
+      document.getElementById('secMataMata').classList.toggle('hidden', aba !== 'matamata');
+      
+      document.getElementById('btnAvisos').classList.toggle('active', aba === 'avisos');
+      document.getElementById('btnDisputas').classList.toggle('active', aba === 'disputas');
+      document.getElementById('btnMataMata').classList.toggle('active', aba === 'matamata');
+      exibirMensagemAdm("");
+      
+      if(aba === 'disputas') carregarDisputasDoTorneio();
+    }
+
+    function exibirMensagemAdm(txt, erro = true) {
+      const msg = document.getElementById('adminStatus');
+      if (msg) {
+        msg.innerText = txt;
+        msg.style.color = erro ? "#ff5555" : "#55ff55";
+      }
+    }
+
+    async function consumirAPIAdmin(dados) {
+      try {
+        const resposta = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(dados)
+        });
+        return await resposta.json();
+      } catch (err) {
+        return { status: "erro", message: "Falha na conexão com o servidor." };
+      }
+    }
+    async function enviarAvisoGeral() {
+      const texto = document.getElementById('avisoTexto').value.trim();
+      if(!texto) return exibirMensagemAdm("Digite algum texto para o aviso!");
+      exibirMensagemAdm("Publicando aviso...");
+      const res = await consumirAPIAdmin({ action: "postarAviso", texto: texto });
+      if(res.status === "sucesso") {
+        exibirMensagemAdm(res.message, false);
+      }
+    }
+
+    async function comandarResetTorneio() {
+      if(confirm("🚨 ALERTA MÁXIMO:\n\nTem certeza absoluta que deseja RESETAR todos os pontos, duelos e estrelas do campeonato de pontos corridos? Esta ação não pode ser desfeita!")) {
+        exibirMensagemAdm("Resetando campeonato geral...");
+        const res = await consumirAPIAdmin({ action: "resetarTorneio" });
+        if(res.status === "sucesso") {
+          exibirMensagemAdm(res.message, false);
+        }
+      }
+    }
+
+    async function carregarDisputasDoTorneio() {
+      const container = document.getElementById('listaDisputas');
+      container.innerHTML = "<p style='text-align:center;color:#aaa;'>Carregando conflitos...</p>";
+      
+      const res = await consumirAPIAdmin({ action: "obterDisputas" });
+      if(res.status === "sucesso") {
+        const disputas = res.disputas;
+        container.innerHTML = "";
+        
+        if(disputas.length === 0) {
+          container.innerHTML = "<p style='text-align:center;color:#55ff55;'>✅ Nenhuma disputa pendente no momento!</p>";
+          return;
+        }
+        
+        disputas.forEach(disp => {
+          const card = document.createElement('div');
+          card.className = "disputa-card";
+          card.innerHTML = `
+            <p><strong>Mesa / ID:</strong> ${disp.id}</p>
+            <p><span style="color:#ff8c00;">${disp.p1}</span> votou: <span style="color:#ef4444;">${disp.voto1}</span></p>
+            <p><span style="color:#ff8c00;">${disp.p2}</span> votou: <span style="color:#ef4444;">${disp.voto2}</span></p>
+            <p style="color:#ffd700;"><strong>Estrelas em Jogo (Aposta):</strong> ${disp.aposta}</p>
+            <div style="margin-top:10px; text-align:center;">
+              <button class="btn-resolve" style="background:#22c55e;" onclick="arbitrarPartida('${disp.id}', '${disp.p1}')">Vitória ${disp.p1}</button>
+              <button class="btn-resolve" style="background:#22c55e;" onclick="arbitrarPartida('${disp.id}', '${disp.p2}')">Vitória ${disp.p2}</button>
+              <button class="btn-resolve" style="background:#eab308;" onclick="arbitrarPartida('${disp.id}', 'Empate')">Declarar Empate</button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+    }
+
+    async function arbitrarPartida(dueloId, vencedorDefinido) {
+      if(confirm(`Confirmar decisão de vitória para: ${vencedorDefinido}?`)) {
+        exibirMensagemAdm("Aplicando veredito de arbitragem...");
+        const res = await consumirAPIAdmin({ action: "resolverDisputa", dueloId: dueloId, vencedor: vencedorDefinido });
+        if(res.status === "sucesso") {
+          exibirMensagemAdm(res.message, false);
+          carregarDisputasDoTorneio();
+        }
+      }
+    }
+
+    async function comandarGerarMataMata() {
+      if(confirm("Deseja gerar chaves eliminatórias (Mata-Mata) com base nos duelistas atuais? Isso embaralhará os confrontos automaticamente.")) {
+        exibirMensagemAdm("Gerando brackets eliminatórios...");
+        const res = await consumirAPIAdmin({ action: "gerarMataMata" });
+        if(res.status === "sucesso") {
+          exibirMensagemAdm(res.message, false);
+          exibirMensagemAdm("Chaves criadas com sucesso na planilha!", false);
+        }
+      }
+    }
+
+    function comandarResetMataMata() {
+      if(confirm("Deseja limpar as chaves de Mata-Mata atuais? Os pontos corridos não serão afetados.")) {
+        exibirMensagemAdm("Limpando chaves eliminatórias...");
+        // Adicione aqui ações futuras de limpeza se necessário
+        exibirMensagemAdm("Mata-mata limpo com sucesso!", false);
+      }
+    }
+  </script>
+</body>
+</html>
