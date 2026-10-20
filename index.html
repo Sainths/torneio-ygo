@@ -106,6 +106,7 @@
       <div class="tabs">
         <button class="tab-btn active" id="btnTabPerfil" onclick="mudarAba('perfil')">Meu Perfil</button>
         <button class="tab-btn" id="btnTabRanking" onclick="mudarAba('ranking')">Ranking Geral</button>
+        <button class="tab-btn" id="btnTabMataMata" onclick="mudarAba('matamata')">Mata-Mata</button>
       </div>
 
       <!-- ABA PERFIL -->
@@ -158,12 +159,30 @@
         </div>
       </div>
     </div>
+    
+      <!-- ABA MATA-MATA (ACRÉSCIMO) -->
+      <div id="tabMataMata" class="hidden">
+        <h3 id="mmTituloNome">🏆 Torneio Eliminatório</h3>
+        
+        <!-- Bloco Dinâmico de Inscrição / Check-In -->
+        <div id="mmBoxInscricao" class="hidden" style="background: #2a1f10; border: 2px solid #ff8c00; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px;">
+          <h4 style="margin:0 0 5px 0; color:#ff8c00;">📝 Inscrições Abertas!</h4>
+          <p id="mmTextoInscricao" style="font-size:14px; color:#ddd; margin:5px 0 15px 0;"></p>
+          <button id="mmBtnCheckIn" style="background:#22c55e;" onclick="inscreverNoMataMata()">Confirmar Minha Presença</button>
+        </div>
+
+        <!-- Árvore de Confrontos (Brackets) -->
+        <div style="background: #252525; padding: 12px; border-radius: 8px; border: 1px solid #333;">
+          <h4 style="margin: 0 0 10px 0; color: #ff8c00; border-bottom: 1px solid #333; padding-bottom: 5px; text-align: center;">Confrontos Recentes</h4>
+          <div id="bracketsBody" style="font-size: 14px;"></div>
+        </div>
+      </div>
 
     <div id="statusMsg" class="status-msg"></div>
   </div>
   <script>
     // IMPORTANTE: Insira aqui a URL gerada na Nova Implantação do seu Google Apps Script
-    const API_URL = "https://script.google.com/macros/s/AKfycbyJC005AAkvoHW7y1B_R-QoSmSSTQadfyA2L8ir3bIfqWlWQBTqllMt7XTiG9yK-_ST/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxPaYR8rHhwmgd7gGhEY6QYejImtDwAG71lQAKtHB7IPWVhhPmsrhwXBbHe3xB9-dwM/exec";
 
     let MEU_NOME = "";
     let ID_DUELO_ATIVO = null;
@@ -260,8 +279,12 @@
         exibirMensagem("");
 
         if(!LOOP_DESAFIOS) {
-          LOOP_DESAFIOS = setInterval(checarEventosTempoReal, 4000);
+          LOOP_DESAFIOS = setInterval(() => {
+            checarEventosTempoReal();
+            checarStatusMataMataLoop(); // LINHA ADICIONADA: Checa torneios a cada 4 segundos
+          }, 4000);
         }
+
       } else {
         localStorage.removeItem('ygo_token');
       }
@@ -286,13 +309,18 @@
       }
     }
 
-    function mudarAba(aba) {
+        function mudarAba(aba) {
       document.getElementById('tabPerfil').classList.toggle('hidden', aba !== 'perfil');
       document.getElementById('tabRanking').classList.toggle('hidden', aba !== 'ranking');
+      document.getElementById('tabMataMata').classList.toggle('hidden', aba !== 'matamata');
+      
       document.getElementById('btnTabPerfil').classList.toggle('active', aba === 'perfil');
       document.getElementById('btnTabRanking').classList.toggle('active', aba === 'ranking');
+      document.getElementById('btnTabMataMata').classList.toggle('active', aba === 'matamata');
+      
       exibirMensagem("");
       if(aba === 'ranking') carregarRanking();
+      if(aba === 'matamata') carregarChavesMataMata(); // Carrega os brackets eliminatórios
     }
 
       async function carregarRanking() {
@@ -462,6 +490,92 @@
       document.getElementById('loginSection').classList.remove('hidden');
       exibirMensagem("Sessão encerrada.", false);
     }
+        // === NOVAS FUNÇÕES PARA O MATA-MATA (ACRÉSCIMO) ===
+
+    async function checarStatusMataMataLoop() {
+      if (!MEU_NOME || ID_DUELO_ATIVO) return;
+      const res = await consumirAPI({ action: "checarStatusTorneioMM", meuNome: MEU_NOME });
+      if (res.status === "sucesso") {
+        const box = document.getElementById('mmBoxInscricao');
+        const titulo = document.getElementById('mmTituloNome');
+        const txt = document.getElementById('mmTextoInscricao');
+        const btn = document.getElementById('mmBtnCheckIn');
+
+        if (res.torneioStatus === "InscricoesAbertas") {
+          titulo.innerText = "🏆 " + res.torneioNome;
+          txt.innerText = `O torneio "${res.torneioNome}" está aceitando duelistas. Confirme sua vaga abaixo!`;
+          box.classList.remove('hidden');
+          
+          if (res.inscrito) {
+            btn.innerText = "✅ Presença Confirmada!";
+            btn.style.background = "#555";
+            btn.disabled = true;
+          } else {
+            btn.innerText = "Confirmar Minha Presença";
+            btn.style.background = "#22c55e";
+            btn.disabled = false;
+          }
+        } else if (res.torneioStatus === "EmAndamento") {
+          titulo.innerText = "🏆 " + res.torneioNome;
+          box.classList.add('hidden'); // Esconde o check-in pois o torneio já começou
+        } else {
+          titulo.innerText = "🏆 Torneio Eliminatório";
+          box.classList.add('hidden');
+        }
+      }
+    }
+
+    async function inscreverNoMataMata() {
+      if (!MEU_NOME) return;
+      
+      // Puxa o deck atual que está salvo na caixinha de edição do perfil do usuário
+      const meuDeckAtual = document.getElementById('editDeck').value.trim() || "Não Informado";
+      
+      exibirMensagem("Efetuando inscrição...");
+      const res = await consumirAPI({ action: "inscreverJogadorMM", meuNome: MEU_NOME, meuDeck: meuDeckAtual });
+      if (res.status === "sucesso") {
+        exibirMensagem(res.message, false);
+        checarStatusMataMataLoop(); // Atualiza o botão para "Confirmado" imediatamente
+      } else {
+        exibirMensagem(res.message);
+      }
+    }
+
+    async function carregarChavesMataMata() {
+      const container = document.getElementById('bracketsBody');
+      container.innerHTML = "<p style='text-align:center;color:#aaa;'>Carregando chaveamento...</p>";
+      
+      const res = await consumirAPI({ action: "obterPartidasMM" });
+      if (res.status === "sucesso") {
+        const partidas = res.partidas;
+        container.innerHTML = "";
+        
+        if (partidas.length === 0) {
+          container.innerHTML = "<p style='text-align:center;color:#aaa;'>Nenhum confronto ativo. Aguardando o ADM iniciar!</p>";
+          return;
+        }
+        
+        partidas.forEach(partida => {
+          const box = document.createElement('div');
+          box.style.cssText = "display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #333; align-items:center;";
+          
+          let statusHtml = partida.status === "Finalizado" ? 
+            `<span style="color:#22c55e; font-weight:bold; font-size:12px;">👑 Ganhou: ${partida.vencedor}</span>` : 
+            `<span style="color:#eab308; font-size:12px;">⚔️ Em Combate</span>`;
+            
+          box.innerHTML = `
+            <div style="text-align:left;">
+              <span style="${partida.status==='Finalizado'&&partida.vencedor===partida.p1?'color:#22c55e;font-weight:bold;':''}">${partida.p1}</span> 
+              <br><span style="color:#555;font-size:11px;">VS</span><br>
+              <span style="${partida.status==='Finalizado'&&partida.vencedor===partida.p2?'color:#22c55e;font-weight:bold;':''}">${partida.p2}</span>
+            </div>
+            <div>${statusHtml}</div>
+          `;
+          container.appendChild(box);
+        });
+      }
+    }
+
   </script>
 </body>
 </html>
