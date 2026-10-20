@@ -115,6 +115,12 @@
           <p id="userDeck" style="color: #ccc; margin: 5px 0; font-size: 14px; font-weight: bold;"></p>
           <div class="stars" id="userEstrelas"></div>
         </div>
+                <!-- CAIXA DE AVISOS GERAIS DO TORNEIO -->
+        <div style="background: #2a1f10; border: 1px solid #ff8c00; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+          <h4 style="margin: 0 0 5px 0; color: #ff8c00; text-align: center;">📜 Avisos da Organização</h4>
+          <p id="quadroAvisos" style="margin: 0; font-size: 14px; color: #ddd; text-align: center; font-style: italic;">Nenhum aviso pendente.</p>
+        </div>
+
         <div style="background: #252525; padding: 12px; border-radius: 8px; border: 1px solid #333;">
           <h4>Editar Dados</h4>
           <div class="form-group"><label>Alterar Nome</label><input type="text" id="editNome"></div>
@@ -123,6 +129,8 @@
           <button onclick="salvarPerfil()">Atualizar Perfil</button>
         </div>
         <button style="background: #cc2222; margin-top: 15px;" onclick="fazerLogout()">Sair da Conta</button>
+                <!-- BOTÃO DISCRETO PARA IR AO PAINEL ADM -->
+        <button onclick="window.location.href='admin.html'" style="background: #444; font-size: 13px; margin-top: 25px;">⚙️ Acessar Painel ADM</button>
       </div>
 
       <!-- ABA RANKING -->
@@ -155,7 +163,7 @@
   </div>
   <script>
     // IMPORTANTE: Insira aqui a URL gerada na Nova Implantação do seu Google Apps Script
-    const API_URL = "https://script.google.com/macros/s/AKfycbwYGWSfwkJ9H2zWgy0eSw3RDsi6CmR5Gds-ZvlaT3Arg_bsn6BytH-FBmDUddRJuY6s/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzFm5JZM7UWN4-dcf3ysS5nc_oB4xnQ2tSCrwPhlX9FM3N_gpEN40wIJcHkXLFRoX3E/exec";
 
     let MEU_NOME = "";
     let ID_DUELO_ATIVO = null;
@@ -223,7 +231,7 @@
       }
     }
     
-      async function verificarSessaoSalva() {
+        async function verificarSessaoSalva() {
       const tokenSalvo = localStorage.getItem('ygo_token');
       if(!tokenSalvo) return;
       const res = await consumirAPI({ action: "autologin", token: tokenSalvo });
@@ -236,9 +244,15 @@
         document.getElementById('userNome').innerText = res.nome;
         document.getElementById('userDeck').innerText = "Deck: " + res.deck;
         
-        // APENAS ESTA LINHA FOI ALTERADA: Exibe a estrela uma vez seguida do multiplicador
         const qtdEstrelas = res.estrelas || 0;
         document.getElementById('userEstrelas').innerHTML = `⭐ <span style="font-size: 24px; font-weight: bold; vertical-align: middle;">x${qtdEstrelas}</span>`;
+        
+        // NOVO: Puxa o aviso postado pelo administrador se ele existir
+        if(res.aviso) {
+          document.getElementById('quadroAvisos').innerText = res.aviso;
+        } else {
+          document.getElementById('quadroAvisos').innerText = "Nenhum aviso importante no momento. Bons duelos!";
+        }
         
         document.getElementById('editNome').value = res.nome;
         document.getElementById('editDeck').value = res.deck;
@@ -252,6 +266,7 @@
         localStorage.removeItem('ygo_token');
       }
     }
+
 
     async function salvarPerfil() {
       const tokenSalvo = localStorage.getItem('ygo_token');
