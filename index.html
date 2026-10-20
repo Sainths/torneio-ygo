@@ -295,7 +295,7 @@
       if(aba === 'ranking') carregarRanking();
     }
 
-           async function carregarRanking() {
+      async function carregarRanking() {
       const res = await consumirAPI({ action: "obterRanking" });
       if(res.status === "sucesso") {
         const ranking = res.ranking;
@@ -315,17 +315,20 @@
           
           const totalDuelos = vitorias + derrotas + empates;
           
+          // Garante que o Winrate seja exibido corretamente (puxa o dado já calculado do banco)
+          const winrateExibir = player.winrate || "0%";
+          
           const inputApostaHtml = eMeuPerfil ? `<span style="color:#666;">-</span>` : 
             `<input type="number" id="aposta_${player.nome}" value="0" min="0" aria-label="Aposta para ${player.nome}" style="width:50px; padding:4px; font-size:12px; text-align:center;">`;
           
           const btnHtml = eMeuPerfil ? `<span style="color:#666;">Você</span>` : 
             `<button class="btn-duel" onclick="prepararDesafio('${player.nome}')">Desafiar</button>`;
 
-          // LINHA CORRIGIDA: Exibe o total de duelos de forma limpa como (3)
+          // LINHA ATUALIZADA: Agora o Winrate aparece junto com o nome do Deck para economizar espaço
           row.innerHTML = `
             <td><strong>${index + 1}º</strong></td>
             <td class="col-name" style="${eMeuPerfil?'color:#ff8c00; font-weight:bold;':''}">${player.nome}</td>
-            <td class="col-name" style="color: #aaa;">${player.deck || 'Nenhum'}</td>
+            <td class="col-name" style="color: #aaa;">${player.deck || 'Nenhum'} <span style="color: #666; font-size: 11px;">(${winrateExibir})</span></td>
             <td style="color: #ffd700; font-weight: bold;">${player.estrelas || 0}</td>
             <td><span style="color:#55ff55;">${vitorias}</span>/<span style="color:#ff5555;">${derrotas}</span>/<span style="color:#ffff55;">${empates}</span> <span style="color:#888; font-size:11px;">(${totalDuelos})</span></td>
             <td>${inputApostaHtml}</td>
