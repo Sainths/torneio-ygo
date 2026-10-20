@@ -78,17 +78,33 @@
       <div id="listaDisputas"></div>
     </div>
     <!-- SEÇÃO DO MATA-MATA (CHAVEAMENTO) -->
+        <!-- SEÇÃO DO MATA-MATA ATUALIZADA (SUBSTITUIÇÃO DA DIV SECMATAMATA) -->
     <div id="secMataMata" class="hidden">
-      <h3>🏆 Arena Kaiba Corp (Mata-Mata)</h3>
-      <p style="color:#aaa; font-size:12px; text-align:center;">Gere chaves eliminatórias automáticas com todos os duelistas da planilha.</p>
-      <button style="background:#22c55e;" onclick="comandarGerarMataMata()">Gerar Novas Chaves Mata-Mata</button>
+      <h3>🏆 Gerenciador de Copas Eliminatórias</h3>
       
+      <!-- Controles de Abertura do Torneio -->
+      <div style="background: #252525; padding: 12px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px;">
+        <div class="form-group">
+          <label>Nome do Torneio Mata-Mata</label>
+          <input type="text" id="mmNomeTorneioInput" placeholder="Ex: I Copa Kaiba Corp">
+        </div>
+        <button style="background:#22c55e;" onclick="admAbrirInscricoesMM()">1. Abrir Inscrições (Check-In)</button>
+        <button style="background:#ff8c00; margin-top: 10px;" onclick="comandarGerarMataMata()">2. Fechar Inscrições e Gerar Chaves</button>
+      </div>
+
+      <!-- Relatório de Duelistas Confirmados (Check-In) -->
+      <div style="background: #252525; padding: 12px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px;">
+        <h4 style="margin:0 0 5px 0; color:#ff8c00; text-align:center;">👥 Duelistas Confirmados (<span id="mmContadorInscritos">0</span>)</h4>
+        <div id="mmListaInscritosNomes" style="font-size:13px; color:#aaa; max-height:100px; overflow-y:auto; padding:5px;">Nenhum jogador na lista.</div>
+      </div>
+      
+      <!-- Chaveamento e Arbitragem de Partidas -->
       <div class="bracket-list">
-        <h4 style="margin:0 0 10px 0; border-bottom:1px solid #ff8c00; padding-bottom:5px;">Chaveamento Atual (Rodada 1)</h4>
+        <h4 style="margin:0 0 10px 0; border-bottom:1px solid #ff8c00; padding-bottom:5px; text-align:center;">Árvore de Confrontos (Rodada Ativa)</h4>
         <div id="listaMataMata"></div>
       </div>
       
-      <button style="background:#444; margin-top:15px;" onclick="comandarResetMataMata()">Resetar Apenas Mata-Mata</button>
+      <button style="background:#ef4444; margin-top:15px;" onclick="comandarResetMataMata()">Encerrar e Limpar Torneio Mata-Mata</button>
     </div>
 
     <div id="adminStatus" class="status-msg"></div>
@@ -125,7 +141,11 @@
       document.getElementById('btnMataMata').classList.toggle('active', aba === 'matamata');
       exibirMensagemAdm("");
       
-      if(aba === 'disputas') carregarDisputasDoTorneio();
+    // Altere o final da sua função mudarAbaAdm(aba) antiga para carregar os novos elementos:
+    if(aba === 'disputas') carregarDisputasDoTorneio();
+    if(aba === 'matamata') {
+      loopMonitorarInscritos(); // Puxa lista de check-in na hora
+      carregarChavesNoPainelADM(); // Puxa os brackets na hora
     }
 
     function exibirMensagemAdm(txt, erro = true) {
@@ -230,6 +250,106 @@
         exibirMensagemAdm("Mata-mata limpo com sucesso!", false);
       }
     }
+        // === NOVAS FUNÇÕES EXCLUSIVAS DO MATA-MATA (ACRÉSCIMO ADM) ===
+
+    async function admAbrirInscricoesMM() {
+      const nomeTorneio = document.getElementById('mmNomeTorneioInput').value.trim();
+      if(!nomeTorneio) return exibirMensagemAdm("Digite um nome para o Torneio!");
+      
+      exibirMensagemAdm("Abrindo inscrições no servidor...");
+      const res = await consumirAPIAdmin({ action: "abrirTorneioMM", nomeTorneio: nomeTorneio });
+      if(res.status === "sucesso") {
+        exibirMensagemAdm(res.message, false);
+        document.getElementById('mmNomeTorneioInput').value = "";
+        loopMonitorarInscritos(); // Ativa a checagem da lista de presença
+      } else {
+        exibirMensagemAdm(res.message);
+      }
+    }
+
+    async function loopMonitorarInscritos() {
+      // Puxa do servidor os jogadores que já clicaram em Confirmar Presença
+      const res = await consumirAPIAdmin({ action: "obterInscritosMM" });
+      if(res.status === "sucesso") {
+        const inscritos = res.inscritos;
+        document.getElementById('mmContadorInscritos').innerText = inscritos.length;
+        
+        const listaDiv = document.getElementById('mmListaInscritosNomes');
+        if(inscritos.length === 0) {
+          listaDiv.innerHTML = "Aguardando duelistas fazerem check-in...";
+        } else {
+          listaDiv.innerHTML = inscritos.map(p => `• <strong>${p.nome}</strong> (${p.deck})`).join("<br>");
+        }
+      }
+    }
+
+    async function carregarChavesNoPainelADM() {
+      const container = document.getElementById('listaMataMata');
+      container.innerHTML = "<p style='text-align:center;color:#aaa;'>Carregando chaves...</p>";
+      
+      const res = await consumirAPIAdmin({ action: "obterPartidasMM" });
+      if(res.status === "sucesso") {
+        const partidas = res.partidas;
+        container.innerHTML = "";
+        
+        if(partidas.length === 0) {
+          container.innerHTML = "<p style='text-align:center;color:#aaa;'>Nenhum confronto ativo. Abra inscrições ou gere as chaves!</p>";
+          return;
+        }
+        
+        partidas.forEach(partida => {
+          const card = document.createElement('div');
+          card.style.cssText = "background:#1a1a1a; border:1px solid #333; padding:10px; margin-bottom:8px; border-radius:6px;";
+          
+          let botoesHtml = "";
+          if(partida.status === "Pendente") {
+            botoesHtml = `
+              <div style="margin-top:8px; display:flex; justify-content:space-around;">
+                <button style="background:#22c55e; padding:4px 8px; font-size:11px; width:45%; margin:0;" onclick="definirVencedorMM('${partida.id}', '${partida.p1}')">Vitória ${partida.p1}</button>
+                <button style="background:#22c55e; padding:4px 8px; font-size:11px; width:45%; margin:0;" onclick="definirVencedorMM('${partida.id}', '${partida.p2}')">Vitória ${partida.p2}</button>
+              </div>
+            `;
+          } else {
+            botoesHtml = `<p style="margin:5px 0 0 0; color:#22c55e; font-size:12px; font-weight:bold; text-align:center;">🏆 Vencedor: ${partida.vencedor}</p>`;
+          }
+
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; font-size:13px;">
+              <span style="${partida.vencedor===partida.p1?'color:#22c55e;font-weight:bold;':''}">${partida.p1}</span>
+              <span style="color:#666;font-weight:bold;">VS</span>
+              <span style="${partida.vencedor===partida.p2?'color:#22c55e;font-weight:bold;':''}">${partida.p2}</span>
+            </div>
+            ${botoesHtml}
+          `;
+          container.appendChild(card);
+        });
+      }
+    }
+
+    async function definirVencedorMM(partidaId, nomeVencedor) {
+      if(confirm(`Confirmar vitória de ${nomeVencedor} nesta partida eliminatória?`)) {
+        exibirMensagemAdm("Salvando veredito...");
+        const res = await consumirAPIAdmin({ action: "arbitrarMM", partidaId: partidaId, vencedor: nomeVencedor });
+        if(res.status === "sucesso") {
+          exibirMensagemAdm(res.message, false);
+          carregarChavesNoPainelADM(); // Atualiza a árvore na tela do ADM
+        }
+      }
+    }
+
+    async function comandarResetMataMata() {
+      if(confirm("🚨 ATENÇÃO:\n\nDeseja fechar, limpar e encerrar o Torneio Mata-Mata atual? Isso apagará as chaves da tela dos jogadores para o dia de hoje. Os pontos corridos não serão afetados!")) {
+        exibirMensagemAdm("Encerrando mata-mata...");
+        const res = await consumirAPIAdmin({ action: "resetarMM" });
+        if(res.status === "sucesso") {
+          exibirMensagemAdm(res.message, false);
+          document.getElementById('mmContadorInscritos').innerText = "0";
+          document.getElementById('mmListaInscritosNomes').innerHTML = "Nenhum jogador na lista.";
+          carregarChavesNoPainelADM();
+        }
+      }
+    }
+
   </script>
 </body>
 </html>
