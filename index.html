@@ -314,13 +314,24 @@
       }
     }
 
-    function atualizarCardPodium(id, player, titulo) {
+        function atualizarCardPodium(id, rankingLista, tituloPadrao) {
       const card = document.getElementById(id);
-      if(player) {
-        card.querySelector('.podium-crown').innerText = id === "podium1" ? "👑" : titulo.split(" ");
-        card.querySelector('.podium-name').innerText = player.nome;
+      if (!card) return;
+
+      // Define qual índice da lista vai para qual lugar do pódio
+      let index = 0;
+      let emojiCoroa = "👑";
+      if (id === "podium1") { index = 0; emojiCoroa = "👑"; }
+      if (id === "podium2") { index = 1; emojiCoroa = "🥈"; }
+      if (id === "podium3") { index = 2; emojiCoroa = "🥉"; }
+
+      const player = rankingLista && rankingLista[index];
+
+      if (player) {
+        card.querySelector('.podium-crown').innerText = emojiCoroa;
+        card.querySelector('.podium-name').innerText = player.nome || 'Vazio';
         card.querySelector('.podium-deck').innerText = player.deck || 'Nenhum';
-        card.querySelector('.podium-stars').innerText = "⭐ " + (player.estrelas || 0);
+        card.querySelector('.podium-stars').innerText = "⭐ " + (player.estrelas !== undefined ? player.estrelas : 0);
       } else {
         card.querySelector('.podium-crown').innerText = "-";
         card.querySelector('.podium-name').innerText = "Vazio";
@@ -328,6 +339,7 @@
         card.querySelector('.podium-stars').innerText = "-";
       }
     }
+
     async function prepararDesafio(nomeOponente) {
       const input = document.getElementById(`aposta_${nomeOponente}`);
       const valorAposta = parseInt(input.value) || 0;
