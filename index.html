@@ -280,7 +280,7 @@
       if(aba === 'ranking') carregarRanking();
     }
 
-        async function carregarRanking() {
+           async function carregarRanking() {
       const res = await consumirAPI({ action: "obterRanking" });
       if(res.status === "sucesso") {
         const ranking = res.ranking;
@@ -298,7 +298,6 @@
           const derrotas = player.derrotas !== undefined ? player.derrotas : 0;
           const empates = player.empates !== undefined ? player.empates : 0;
           
-          // APENAS ESTA LINHA FOI ADICIONADA: Soma o total de partidas jogadas
           const totalDuelos = vitorias + derrotas + empates;
           
           const inputApostaHtml = eMeuPerfil ? `<span style="color:#666;">-</span>` : 
@@ -307,13 +306,13 @@
           const btnHtml = eMeuPerfil ? `<span style="color:#666;">Você</span>` : 
             `<button class="btn-duel" onclick="prepararDesafio('${player.nome}')">Desafiar</button>`;
 
-          // APENAS ESTA LINHA FOI ALTERADA: Exibe o total de duelos acumulados entre parênteses
+          // LINHA CORRIGIDA: Exibe o total de duelos de forma limpa como (3)
           row.innerHTML = `
             <td><strong>${index + 1}º</strong></td>
             <td class="col-name" style="${eMeuPerfil?'color:#ff8c00; font-weight:bold;':''}">${player.nome}</td>
             <td class="col-name" style="color: #aaa;">${player.deck || 'Nenhum'}</td>
             <td style="color: #ffd700; font-weight: bold;">${player.estrelas || 0}</td>
-            <td><span style="color:#55ff55;">${vitorias}</span>/<span style="color:#ff5555;">${derrotas}</span>/<span style="color:#ffff55;">${empates}</span> <span style="color:#888; font-size:11px;">(2026-${totalDuelos})</span></td>
+            <td><span style="color:#55ff55;">${vitorias}</span>/<span style="color:#ff5555;">${derrotas}</span>/<span style="color:#ffff55;">${empates}</span> <span style="color:#888; font-size:11px;">(${totalDuelos})</span></td>
             <td>${inputApostaHtml}</td>
             <td>${btnHtml}</td>
           `;
