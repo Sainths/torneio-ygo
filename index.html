@@ -250,41 +250,50 @@
       }
     }
     
-        async function verificarSessaoSalva() {
+    async function verificarSessaoSalva() {
       const tokenSalvo = localStorage.getItem('ygo_token');
       if(!tokenSalvo) return;
+      
       const res = await consumirAPI({ action: "autologin", token: tokenSalvo });
       if(res.status === "sucesso") {
         MEU_NOME = res.nome;
+        
+        // 1. TRANSIÇÃO DE TELAS (Colocado no topo para garantir a mudança de página de qualquer jeito)
         document.getElementById('loginSection').classList.add('hidden');
         document.getElementById('cadastroSection').classList.add('hidden');
         document.getElementById('appSection').classList.remove('hidden');
         
-        document.getElementById('userNome').innerText = res.nome;
-        document.getElementById('userDeck').innerText = "Deck: " + res.deck;
+        // 2. PREENCHIMENTO DOS DADOS DO PERFIL
+        if(document.getElementById('userNome')) document.getElementById('userNome').innerText = res.nome;
+        if(document.getElementById('userDeck')) document.getElementById('userDeck').innerText = "Deck: " + res.deck;
         
         const qtdEstrelas = res.estrelas || 0;
-        document.getElementById('userEstrelas').innerHTML = `⭐ <span style="font-size: 24px; font-weight: bold; vertical-align: middle;">x${qtdEstrelas}</span>`;
-        
-        // NOVO: Puxa o aviso postado pelo administrador se ele existir
-        if(res.aviso) {
-          document.getElementById('quadroAvisos').innerText = res.aviso;
-        } else {
-          document.getElementById('quadroAvisos').innerText = "Nenhum aviso importante no momento. Bons duelos!";
+        const campoEstrelas = document.getElementById('userEstrelas');
+        if(campoEstrelas) {
+          campoEstrelas.innerHTML = `⭐ <span style="font-size: 24px; font-weight: bold; vertical-align: middle;">x${qtdEstrelas}</span>`;
         }
         
-        document.getElementById('editNome').value = res.nome;
-        document.getElementById('editDeck').value = res.deck;
-        document.getElementById('editSenha').value = "";
+        // 3. BLINDAGEM DO QUADRO DE AVISOS (Se o elemento não existir, o código ignora e não trava mais!)
+        const campoAviso = document.getElementById('quadroAvisos');
+        if(campoAviso) {
+          campoAviso.innerText = res.aviso ? res.aviso : "Nenhum aviso importante no momento. Bons duelos!";
+        }
+        
+        // 4. FORMULÁRIOS DE EDIÇÃO
+        if(document.getElementById('editNome')) document.getElementById('editNome').value = res.nome;
+        if(document.getElementById('editDeck')) document.getElementById('editDeck').value = res.deck;
+        if(document.getElementById('editSenha')) document.getElementById('editSenha').value = "";
+        
         exibirMensagem("");
 
         if(!LOOP_DESAFIOS) {
           LOOP_DESAFIOS = setInterval(() => {
             checarEventosTempoReal();
-            checarStatusMataMataLoop(); // LINHA ADICIONADA: Checa torneios a cada 4 segundos
+            if(typeof checarStatusMataMataLoop === "function") {
+              checarStatusMataMataLoop();
+            }
           }, 4000);
         }
-
       } else {
         localStorage.removeItem('ygo_token');
       }
