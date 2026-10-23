@@ -495,12 +495,12 @@
         finalizarArenaVersus();
       }
     }
-
-    // NOVA FUNÇÃO: VERIFICA SE O ADVERSÁRIO JÁ VOTOU USANDO A SUA API
+    
+    // FUNÇÃO CORRIGIDA PARA USAR A SUA API REAL
     async function verificarSeVotou() {
       if(!ID_DUELO_ATIVO) return;
       
-      // Usa a sua função nativa para ler o Apps Script
+      // Corrigido aqui: mudado de enviarDadosParaAppsScript para consumirAPI
       const res = await consumirAPI({ action: "checarDesafios", meuNome: MEU_NOME });
 
       // Se o status for "nada", significa que o oponente votou e o duelo saiu de pendente (foi finalizado)
@@ -509,45 +509,12 @@
         removerBotaoChecar();
         finalizarArenaVersus();
         
-        // Se a sua função 'finalizarArenaVersus' não carregar o ranking sozinha,
-        // você pode descomentar a linha abaixo removendo as duas barras:
+        // Se a sua tela não mudar de aba sozinha, descomente a linha abaixo tirando as duas barras:
         // mudarAba('ranking'); 
       } else {
         alert("O adversário ainda não votou. Aguarde mais um pouco.");
       }
     }
-
-    // FUNÇÃO AUXILIAR PARA LIMPAR O BOTÃO QUANDO O DUELO ACABAR
-    function removerBotaoChecar() {
-      const btn = document.getElementById("btnChecarVoto");
-      if (btn) btn.remove();
-    }
-
-    async function verificarSeVotou() {
-  const nomeJogador = document.getElementById("userNome").innerText;
-
-  // Substitua 'enviarDadosParaAppsScript' pela sua função real de envio (ex: fazerRequisicao, etc.)
-  const resposta = await enviarDadosParaAppsScript({
-    action: "checarDesafios",
-    meuNome: nomeJogador
-  });
-
-  if (resposta.status === "nada") {
-    alert("O duelo foi finalizado com sucesso!");
-    
-    // Remove o botão e limpa as mensagens
-    const btn = document.getElementById("btnChecarVoto");
-    if (btn) btn.remove();
-    document.querySelector(".status-msg").innerText = "";
-    
-    // Esconde a arena e volta para o app mostrando o ranking
-    document.getElementById("versusSection").classList.add("hidden");
-    document.getElementById("appSection").classList.remove("hidden");
-    mudarAba('ranking'); 
-  } else {
-    alert("O adversário ainda não votou. Aguarde mais um pouco.");
-  }
-}
 
     function finalizarArenaVersus() {
       ID_DUELO_ATIVO = null;
