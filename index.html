@@ -468,20 +468,86 @@
       exibirMensagem("Arena Versus carregada. Reporte ao final!", false);
     }
 
-    async function votarDuelo(meuVoto) {
+        async function votarDuelo(meuVoto) {
       if(!ID_DUELO_ATIVO) return;
       exibirMensagem("Enviando voto...");
       const res = await consumirAPI({ action: "votarResultado", dueloId: ID_DUELO_ATIVO, meuNome: MEU_NOME, voto: meuVoto });
+      
       if(res.status === "sucesso") {
         exibirMensagem("Voto registrado! Aguardando oponente...", false);
+        
+        // CRIA O BOTÃO DE ATUALIZAR DINAMICAMENTE EMBAIXO DA MENSAGEM
+        if (!document.getElementById("btnChecarVoto")) {
+          let btn = document.createElement("button");
+          btn.id = "btnChecarVoto";
+          btn.innerText = "🔄 Verificar se oponente já votou";
+          btn.style.cssText = "padding: 11px; background: #22c55e; color: #fff; margin-top: 15px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; width: 100%; font-size: 15px;";
+          btn.onclick = verificarSeVotou;
+          document.getElementById("versusSection").appendChild(btn);
+        }
       } else if (res.status === "conflito") {
         exibirMensagem("🚨 Conflito de relatórios! Enviado para os ADMs.");
+        removerBotaoChecar();
         finalizarArenaVersus();
       } else if (res.status === "finalizado") {
         exibirMensagem("🎉 Duelo concluído com consenso!", false);
+        removerBotaoChecar();
         finalizarArenaVersus();
       }
     }
+
+    // NOVA FUNÇÃO: VERIFICA SE O ADVERSÁRIO JÁ VOTOU USANDO A SUA API
+    async function verificarSeVotou() {
+      if(!ID_DUELO_ATIVO) return;
+      
+      // Usa a sua função nativa para ler o Apps Script
+      const res = await consumirAPI({ action: "checarDesafios", meuNome: MEU_NOME });
+
+      // Se o status for "nada", significa que o oponente votou e o duelo saiu de pendente (foi finalizado)
+      if (res.status === "nada") {
+        alert("O duelo foi finalizado com sucesso! Atualizando ranking...");
+        removerBotaoChecar();
+        finalizarArenaVersus();
+        
+        // Se a sua função 'finalizarArenaVersus' não carregar o ranking sozinha,
+        // você pode descomentar a linha abaixo removendo as duas barras:
+        // mudarAba('ranking'); 
+      } else {
+        alert("O adversário ainda não votou. Aguarde mais um pouco.");
+      }
+    }
+
+    // FUNÇÃO AUXILIAR PARA LIMPAR O BOTÃO QUANDO O DUELO ACABAR
+    function removerBotaoChecar() {
+      const btn = document.getElementById("btnChecarVoto");
+      if (btn) btn.remove();
+    }
+
+    async function verificarSeVotou() {
+  const nomeJogador = document.getElementById("userNome").innerText;
+
+  // Substitua 'enviarDadosParaAppsScript' pela sua função real de envio (ex: fazerRequisicao, etc.)
+  const resposta = await enviarDadosParaAppsScript({
+    action: "checarDesafios",
+    meuNome: nomeJogador
+  });
+
+  if (resposta.status === "nada") {
+    alert("O duelo foi finalizado com sucesso!");
+    
+    // Remove o botão e limpa as mensagens
+    const btn = document.getElementById("btnChecarVoto");
+    if (btn) btn.remove();
+    document.querySelector(".status-msg").innerText = "";
+    
+    // Esconde a arena e volta para o app mostrando o ranking
+    document.getElementById("versusSection").classList.add("hidden");
+    document.getElementById("appSection").classList.remove("hidden");
+    mudarAba('ranking'); 
+  } else {
+    alert("O adversário ainda não votou. Aguarde mais um pouco.");
+  }
+}
 
     function finalizarArenaVersus() {
       ID_DUELO_ATIVO = null;
