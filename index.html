@@ -468,7 +468,7 @@
       exibirMensagem("Arena Versus carregada. Reporte ao final!", false);
     }
 
-        async function votarDuelo(meuVoto) {
+            async function votarDuelo(meuVoto) {
       if(!ID_DUELO_ATIVO) return;
       exibirMensagem("Enviando voto...");
       const res = await consumirAPI({ action: "votarResultado", dueloId: ID_DUELO_ATIVO, meuNome: MEU_NOME, voto: meuVoto });
@@ -476,7 +476,7 @@
       if(res.status === "sucesso") {
         exibirMensagem("Voto registrado! Aguardando oponente...", false);
         
-        // CRIA O BOTÃO DE ATUALIZAR DINAMICAMENTE EMBAIXO DA MENSAGEM
+        // CRIA O BOTÃO DE ATUALIZAR APENAS PARA O PRIMEIRO JOGADOR
         if (!document.getElementById("btnChecarVoto")) {
           let btn = document.createElement("button");
           btn.id = "btnChecarVoto";
@@ -487,15 +487,23 @@
         }
       } else if (res.status === "conflito") {
         exibirMensagem("🚨 Conflito de relatórios! Enviado para os ADMs.");
-        removerBotaoChecar();
+        const btn = document.getElementById("btnChecarVoto"); if (btn) btn.remove();
         finalizarArenaVersus();
       } else if (res.status === "finalizado") {
         exibirMensagem("🎉 Duelo concluído com consenso!", false);
-        removerBotaoChecar();
+        
+        // CORREÇÃO PARA O SEGUNDO JOGADOR:
+        // Remove o botão (se houver), fecha a arena e força a atualização visual para a aba do ranking
+        const btn = document.getElementById("btnChecarVoto"); if (btn) btn.remove();
+        
         finalizarArenaVersus();
+        
+        if (typeof mudarAba === "function") {
+          mudarAba('ranking'); 
+        }
       }
     }
-    
+
         // FUNÇÃO DE VERIFICAR VOTO ATUALIZADA (FORÇANDO MUDANÇA DE ABA)
     async function verificarSeVotou() {
       if(!ID_DUELO_ATIVO) return;
