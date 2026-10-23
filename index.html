@@ -496,21 +496,26 @@
       }
     }
     
-    // FUNÇÃO CORRIGIDA PARA USAR A SUA API REAL
+        // FUNÇÃO DE VERIFICAR VOTO ATUALIZADA (FORÇANDO MUDANÇA DE ABA)
     async function verificarSeVotou() {
       if(!ID_DUELO_ATIVO) return;
       
-      // Corrigido aqui: mudado de enviarDadosParaAppsScript para consumirAPI
       const res = await consumirAPI({ action: "checarDesafios", meuNome: MEU_NOME });
 
-      // Se o status for "nada", significa que o oponente votou e o duelo saiu de pendente (foi finalizado)
       if (res.status === "nada") {
         alert("O duelo foi finalizado com sucesso! Atualizando ranking...");
-        removerBotaoChecar();
+        
+        // Remove o botão verde da tela de forma direta
+        const btn = document.getElementById("btnChecarVoto");
+        if (btn) btn.remove();
+        
+        // Finaliza a tela do duelo
         finalizarArenaVersus();
         
-        // Se a sua tela não mudar de aba sozinha, descomente a linha abaixo tirando as duas barras:
-        // mudarAba('ranking'); 
+        // FORÇA O JOGO A VOLTAR PARA A ABA DE RANKING GERAL
+        if (typeof mudarAba === "function") {
+          mudarAba('ranking'); 
+        }
       } else {
         alert("O adversário ainda não votou. Aguarde mais um pouco.");
       }
